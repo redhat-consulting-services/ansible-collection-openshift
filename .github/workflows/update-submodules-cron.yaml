@@ -1,0 +1,44 @@
+name: Update Role Submodules
+
+on:
+  schedule:
+    # Every 30 mins, Mon-Fri, 08:00-20:00
+    - cron: '0,30 8-20 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  update-submodules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ steps.generate-token.outputs.token }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+
+      - name: Update submodules under roles/
+        run: |
+          git submodule update --init --recursive --remote
+
+      - name: Commit and push changes if any
+        run: |
+          if git status --porcelain | grep -q '^ M'; then
+            git add .gitmodules roles/*
+            git commit -m "chore: update role submodule references"
+            git push
+          else
+            echo "No submodule updates detected."
+          fi
