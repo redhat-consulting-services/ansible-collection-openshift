@@ -1,0 +1,20 @@
+name: Update References
+
+on:
+  repository_dispatch:
+    types: [trigger-reusable]
+
+jobs:
+  run-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Print Repository Info
+        run: |
+          echo "Running inside: ${{ github.repository }}"
+          echo "Triggered by: ${{ github.event.sender.login }}"
+
+      - name: Example Task
+        run: echo "Hello from the reusable workflow repository!"
