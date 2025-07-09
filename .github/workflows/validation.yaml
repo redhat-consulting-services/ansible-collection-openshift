@@ -1,0 +1,21 @@
+name: Ansible Code Validation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**.ansible-lint'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**.ansible-lint'
+
+jobs:
+  ansible-lint:
+    uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-lint.yaml@main
