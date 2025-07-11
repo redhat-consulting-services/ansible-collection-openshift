@@ -1,0 +1,43 @@
+version: 3
+
+images:
+  base_image:
+    name: quay.io/centos/centos:stream9
+
+dependencies:
+  ansible_core:
+    package_pip: ansible-core==2.15.13
+  ansible_runner:
+    package_pip: ansible-runner
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+# Custom package manager path for the RHEL based images
+options:
+  package_manager_path: /usr/bin/dnf
+
+additional_build_steps:
+  prepend_base: []
+  prepend_galaxy: []
+
+  append_final: |
+    ARG OPENSHIFT_VERSION=4.18.19
+    RUN dnf install -y nmstate
+    RUN mkdir -p /tmp/{ocp-client,ocp-install,ocp-mirror}
+    RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux.tar.gz && \
+      tar -xvzf openshift-install-linux.tar.gz -C /tmp/ocp-install && \
+      chmod +x /tmp/ocp-install/openshift-install && \
+      cp /tmp/ocp-install/openshift-install /usr/local/bin/openshift-install && \
+      rm -f openshift-install-linux.tar.gz
+    RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux.tar.gz && \
+      tar -xvzf openshift-client-linux.tar.gz -C /tmp/ocp-client && \
+      chmod +x /tmp/ocp-client/oc && \
+      cp /tmp/ocp-client/oc /usr/local/bin/oc && \
+      rm -f openshift-client-linux.tar.gz
+    RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/oc-mirror.tar.gz && \
+      tar -xvzf oc-mirror.tar.gz -C /tmp/ocp-mirror && \
+      chmod +x /tmp/ocp-mirror/oc-mirror&& \
+      cp /tmp/ocp-mirror/oc-mirror /usr/local/bin/oc-mirror && \
+      rm -f oc-mirror.tar.gz
+    RUN rm -rf /tmp/ocp-client /tmp/ocp-install /tmp/ocp-mirror

@@ -1,0 +1,4 @@
+gcc-c++ [doc test platform:rpm]  # from collection ansible.utils'
+python3-devel [test platform:rpm]  # from collection ansible.utils'
+python3 [test platform:rpm]  # from collection ansible.utils'
+python3.11-devel  # from collection user'
