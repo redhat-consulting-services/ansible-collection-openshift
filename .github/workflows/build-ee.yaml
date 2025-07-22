@@ -1,0 +1,100 @@
+name: Build Execution Environment
+
+on:
+  push:
+    branches: [main, feat/execution-environment]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      openshift_versions:
+        description: "OpenShift versions to build (comma-separated)"
+        required: false
+        default: "4.17.3,4.18.19,4.19.1"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: redhat-consulting-services/ee-openshift
+
+jobs:
+  generate-timestamp:
+    runs-on: ubuntu-latest
+    outputs:
+      timestamp: ${{ steps.timestamp.outputs.timestamp }}
+    steps:
+      - name: Generate timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
+
+  build:
+    runs-on: ubuntu-latest
+    needs: generate-timestamp
+    permissions:
+      contents: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        openshift_version:
+          - "4.17.36"
+          - "4.18.20"
+          - "4.19.5"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install ansible-builder
+        run: |
+          pip install ansible-builder
+
+      - name: Determine repository tag
+        id: repo_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            # Extract tag name from ref (e.g., refs/tags/v1.0.0 -> v1.0.0)
+            echo "repo_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            # Use 'dev' for non-tag builds
+            echo "repo_tag=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set image tag
+        id: image_tag
+        run: |
+          echo "tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.repo_tag.outputs.repo_tag }}-ocp-${{ matrix.openshift_version }}-${{ needs.generate-timestamp.outputs.timestamp }}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.repo_tag.outputs.repo_tag }}-ocp-${{ matrix.openshift_version }}-latest" >> $GITHUB_OUTPUT
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build execution environment
+        run: |
+          # Build the execution environment with OpenShift version as build arg
+          ansible-builder build \
+            --tag ${{ steps.image_tag.outputs.tag }} \
+            --tag ${{ steps.image_tag.outputs.latest_tag }} \
+            --container-runtime docker \
+            --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_version }} \
+            --context .
+
+      #- name: Push image to registry
+      #  run: |
+      #    docker push ${{ steps.image_tag.outputs.tag }}
+      #    docker push ${{ steps.image_tag.outputs.latest_tag }}
+
+      - name: Output image details
+        run: |
+          echo "Built and pushed image: ${{ steps.image_tag.outputs.tag }}"
+          echo "Latest tag: ${{ steps.image_tag.outputs.latest_tag }}"
+          echo "Repository tag: ${{ steps.repo_tag.outputs.repo_tag }}"
+          echo "Timestamp used: ${{ needs.generate-timestamp.outputs.timestamp }}"
+          docker images | grep ${{ env.IMAGE_NAME }} || true
