@@ -7,3 +7,7 @@ netaddr>=0.10.1  # from collection ansible.utils'
 kubernetes  # from collection user'
 jmespath  # from collection user'
 omsdk  # from collection user'
+
+requests
+PyYAML
+ansible

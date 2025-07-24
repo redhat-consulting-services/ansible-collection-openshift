@@ -2,42 +2,46 @@ version: 3
 
 images:
   base_image:
-    name: quay.io/centos/centos:stream9
+    name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:1.0.0-725
+    platform: linux/amd64
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
 
 dependencies:
-  ansible_core:
-    package_pip: ansible-core==2.15.13
-  ansible_runner:
-    package_pip: ansible-runner
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
 
 # Custom package manager path for the RHEL based images
 options:
-  package_manager_path: /usr/bin/dnf
+  package_manager_path: /usr/bin/microdnf
 
 additional_build_steps:
-  prepend_base: []
-  prepend_galaxy: []
-
-  append_final: |
-    ARG OPENSHIFT_VERSION=4.18.19
-    RUN dnf install -y nmstate
+  prepend_base: |
+    ARG OPENSHIFT_VERSION=4.19.5
+    RUN pip install --upgrade ansible
     RUN mkdir -p /tmp/{ocp-client,ocp-install,ocp-mirror}
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux.tar.gz && \
-      tar -xvzf openshift-install-linux.tar.gz -C /tmp/ocp-install && \
-      chmod +x /tmp/ocp-install/openshift-install && \
-      cp /tmp/ocp-install/openshift-install /usr/local/bin/openshift-install && \
-      rm -f openshift-install-linux.tar.gz
+        tar -xzf openshift-install-linux.tar.gz --strip-components=0 -C /usr/local/bin openshift-install && \
+        chmod +x /usr/local/bin/openshift-install
+
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux.tar.gz && \
-      tar -xvzf openshift-client-linux.tar.gz -C /tmp/ocp-client && \
-      chmod +x /tmp/ocp-client/oc && \
-      cp /tmp/ocp-client/oc /usr/local/bin/oc && \
-      rm -f openshift-client-linux.tar.gz
+        tar -xzf openshift-client-linux.tar.gz --strip-components=0 -C /usr/local/bin oc kubectl && \
+        chmod +x /usr/local/bin/oc /usr/local/bin/kubectl
+
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/oc-mirror.tar.gz && \
-      tar -xvzf oc-mirror.tar.gz -C /tmp/ocp-mirror && \
-      chmod +x /tmp/ocp-mirror/oc-mirror&& \
-      cp /tmp/ocp-mirror/oc-mirror /usr/local/bin/oc-mirror && \
-      rm -f oc-mirror.tar.gz
-    RUN rm -rf /tmp/ocp-client /tmp/ocp-install /tmp/ocp-mirror
+        tar -xzf oc-mirror.tar.gz --strip-components=0 -C /usr/local/bin oc-mirror && \
+        chmod +x /usr/local/bin/oc-mirror
+
+    RUN rm -f *.tar.gz
+
+  prepend_galaxy: |
+    # Copy the local collection
+    COPY . /tmp/ansible-collection-openshift/
+    # Build and install the local collection
+    RUN cd /tmp/ansible-collection-openshift/ && \
+        ansible-galaxy collection build . && \
+        ansible-galaxy collection install redhatconsultingservices-openshift-*.tar.gz --force
+    # Install kubernetes.core manually to bypass bindep dependencies
+    #RUN ansible-galaxy collection install kubernetes.core --force

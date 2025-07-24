@@ -1,4 +1,10 @@
-gcc-c++ [doc test platform:rpm]  # from collection ansible.utils'
-python3-devel [test platform:rpm]  # from collection ansible.utils'
-python3 [test platform:rpm]  # from collection ansible.utils'
-python3.11-devel  # from collection user'
+vim [platform:rpm]
+unzip [platform:rpm]
+jq [platform:rpm]
+python3-cairo [platform:rpm]
+cairo [platform:rpm]
+
+glib2-devel [platform:rpm]
+gobject-introspection [platform:rpm]
+python3-libnmstate [platform:rpm]
+python3-gobject [platform:rpm]
