@@ -93,6 +93,16 @@ jobs:
             --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_version }} \
             --context .
 
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: '${{ steps.image_tag.outputs.tag }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
       #- name: Push image to registry
       #  run: |
       #    docker push ${{ steps.image_tag.outputs.tag }}
