@@ -16,14 +16,14 @@ This collection includes an Ansible Execution Environment (EE) that packages the
 
 The execution environment images are automatically built and published to:
 
-**Quay.io Repository**: <https://quay.io/repository/redhat-consulting-services/ee-openshift>
+**GitHub Container Registry**: <https://ghcr.io/redhat-consulting-services/ee-openshift>
 
 ### Available Image Tags
 
 Images are built for multiple OpenShift versions with the following tag format:
 
-- **Timestamped tags**: `quay.io/redhatconsultingservices/ee-openshift:<repo-tag>-ocp-<openshift-version>-<timestamp>`
-- **Latest tags**: `quay.io/redhatconsultingservices/ee-openshift:<repo-tag>-ocp-<openshift-version>-latest`
+- **Timestamped tags**: `ghcr.io/redhat-consulting-services/ee-openshift:<repo-tag>-ocp-<openshift-version>-<timestamp>`
+- **Latest tags**: `ghcr.io/redhat-consulting-services/ee-openshift:<repo-tag>-ocp-<openshift-version>-latest`
 
 #### Currently Supported OpenShift Versions
 
@@ -34,9 +34,9 @@ Images are built for multiple OpenShift versions with the following tag format:
 #### Example Tags
 
 ```text
-quay.io/redhatconsultingservices/ee-openshift:v1.0.0-ocp-4.18.20-202407221430
-quay.io/redhatconsultingservices/ee-openshift:v1.0.0-ocp-4.18.20-latest
-quay.io/redhatconsultingservices/ee-openshift:dev-ocp-4.17.36-latest
+ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.18.20-202407221430
+ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.18.20-latest
+ghcr.io/redhat-consulting-services/ee-openshift:dev-ocp-4.17.36-latest
 ```
 
 ### Automatic Builds
