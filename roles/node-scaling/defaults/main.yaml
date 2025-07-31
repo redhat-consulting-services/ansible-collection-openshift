@@ -1,0 +1,9 @@
+cpu_architecture: amd64
+generate_iso: false
+iso_output_dir: "./tmp/iso"
+worker:
+  root_device_name: "/dev/sda"
+  bonds: []
+  bridges: []
+  vlans: []
+  hosts: []

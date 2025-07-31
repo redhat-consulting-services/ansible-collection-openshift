@@ -1,0 +1,58 @@
+tenant_name: test-tenant
+cluster_name: ocp4-test
+base_domain: example.com
+
+generate_iso: true
+iso_type: "iso"
+iso_output_dir: ./iso
+
+type: none
+
+pull_secret: |
+   {"auths":{"cloud.openshift.com":{"auth":"...
+ssh_public_key: |
+  ssh-ed25519 AAAA...
+
+networking:
+  cluster_networks:
+    - cidr: "10.128.0.0/14"
+      host_prefix: 23
+  service_networks:
+    - 172.30.0.0/16
+  network_type: "OVNKubernetes"
+  machine_network:
+    - cidr: 10.10.10.0/24
+
+agent_config:
+  master:
+    hostname_prefix: "master-"
+    root_device_name: "/dev/sda"
+    dns_resolvers:
+      - 8.8.8.8
+      - 1.1.1.1
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 10.10.10.254
+        interface: bond0
+        table_id: 254
+    bonds:
+      - name: bond0
+        mode: 802.3ad
+        options:
+          miimon: "100"
+    hosts:
+      - hostname: master-1.ocp4-test.example.com
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:aa:aa:aa:aa:01"
+            part_of_bond: "bond0"
+          - name: eth1
+            mac_address: "00:aa:aa:aa:aa:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 10.10.10.10
+                subnet_length: 24

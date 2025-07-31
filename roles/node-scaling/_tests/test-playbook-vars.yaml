@@ -1,0 +1,36 @@
+generate_iso: true
+worker:
+  hostname_prefix: "worker-"
+  root_device_name: "/dev/sda"
+  dns_resolvers:
+    - 172.16.11.5
+    - 8.8.8.8
+    - 1.1.1.1
+  routes:
+    - destination: 0.0.0.0/0
+      gateway: 172.16.11.1
+      interface: bond0
+      table_id: 254
+  bonds:
+    - name: bond0
+      mode: "balance-rr"
+      options:
+        miimon: "140"
+  bridges: []
+  vlans: []
+  hosts:
+    - hostname: worker-1
+      root_device:
+        name: "/dev/sda"
+      interfaces:
+        - name: eth0
+          mac_address: "00:15:5d:02:fa:1e"
+          part_of_bond: "bond0"
+        - name: eth1
+          mac_address: "00:15:5d:02:fa:1f"
+          part_of_bond: "bond0"
+      bonds:
+      - interface: bond0
+        addresses:
+          - ip: 172.16.11.102
+            subnet_length: 24

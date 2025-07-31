@@ -1,0 +1,48 @@
+---
+- name: Create output directory structure
+  ansible.builtin.file:
+    path: "{{ iso_output_dir }}/{{ cluster_name }}/manifests"
+    state: directory
+    mode: '0744'
+
+- name: Generate agent-config.yaml
+  ansible.builtin.template:
+    src: agent-config.yaml.j2
+    dest: "{{ iso_output_dir }}/{{ cluster_name }}/agent-config.yaml"
+    mode: '0644'
+
+- name: Generate install-config.yaml
+  ansible.builtin.template:
+    src: install-config.yaml.j2
+    dest: "{{ iso_output_dir }}/{{ cluster_name }}/install-config.yaml"
+    mode: '0644'
+
+- name: Backup agent-config.yaml manifest file
+  ansible.builtin.copy:
+    src: "{{ iso_output_dir }}/{{ cluster_name }}/agent-config.yaml"
+    dest: "{{ iso_output_dir }}/{{ cluster_name }}/manifests/agent-config.yaml"
+    mode: '0644'
+
+- name: Backup agent-config.yaml manifest file
+  ansible.builtin.copy:
+    src: "{{ iso_output_dir }}/{{ cluster_name }}/install-config.yaml"
+    dest: "{{ iso_output_dir }}/{{ cluster_name }}/manifests/install-config.yaml"
+    mode: '0644'
+
+- name: Create the bootable ISO or PXE files
+  when: generate_iso | bool
+  register: result
+  ansible.builtin.command: >
+    openshift-install agent create {{ iso_command }} --dir {{ iso_output_dir }}/{{ cluster_name }} --log-level=debug
+  vars:
+    iso_command: "{{ 'image' if iso_type == 'iso' else 'pxe-files' if iso_type == 'pxe' else '' }}"
+  failed_when: iso_command == "" or result.rc != 0
+  args:
+    # usually creates should point to a file that will be created, but in this case
+    # we want to ensure that the iso is re-created every time the task runs
+    creates: |
+      {% if iso_type == 'pxe' %}
+      {{ iso_output_dir }}/{{ cluster_name }}/boot-artifacts/agent.{{ arch }}-*
+      {% else %}
+      {{ iso_output_dir }}/{{ cluster_name }}/agent.{{ arch }}.iso
+      {% endif %}

@@ -1,0 +1,7 @@
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ./homelab.yaml
+    - ./test-playbook-vars-secret.yaml
+  roles:
+    - ../../ansible-role-cluster-bootstrap
