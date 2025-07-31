@@ -1,3 +1,0 @@
-[submodule "roles/ansible-role-argocd-installation"]
-	path = roles/ansible-role-argocd-installation
-	url = git@github.com:redhat-consulting-services/ansible-role-argocd-installation.git

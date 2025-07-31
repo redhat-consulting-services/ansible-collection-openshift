@@ -1,0 +1,14 @@
+---
+apiVersion: pipelines.openshift.io/v1alpha1
+kind: GitopsService
+metadata:
+  name: cluster
+spec:
+  runOnInfra: true
+  tolerations:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/infra
+    value: reserved
+  - effect: NoExecute
+    key: node-role.kubernetes.io/infra
+    value: reserved
