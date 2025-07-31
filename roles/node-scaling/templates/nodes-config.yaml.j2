@@ -77,9 +77,13 @@ hosts:
 {% endif %}
           ipv4:
 {% if hosts.bonds is not defined %}
-            enabled: false
+{# agent_config.<master/worker>.bonds is defined but not agent_config.<master/worker>.hosts.bonds #}
+{# if that is the case, we want want to use DHCP for bond ipv4 assignment #}
+            enabled: true
             dhcp: true
 {% else %}
+{# agent_config.<master/worker>.bonds is defined and agent_config.<master/worker>.hosts.bonds is defined #}
+{# if that is the case, we want to take control over ipv4 assignments (manually configure ip addresses) #}
             enabled: true
             dhcp: false
 {% for hbond in hosts.bonds %}
