@@ -1,0 +1,155 @@
+cpuArchitecture: {{ cpu_architecture | default('amd64') }}
+hosts:
+{% for hosts in worker.hosts %}
+{% set host_index = loop %}
+  - role: "worker"
+{# identify hostname use either the defined hostname or generate it #}
+{% if hosts.hostname is defined %}
+    hostname: {{ hosts.hostname }}
+{% else %}
+    hostname: {{ worker.hostname_prefix }}{{ host_index.index0 }}
+{% endif %}
+
+{#- root device identification #}
+    rootDeviceHints:
+{% if hosts.root_device.name is defined %}
+      deviceName: {{ hosts.root_device.name }}
+{% else %}
+{% if hosts.root_device.serial_number is not defined and hosts.root_device.wwn is not defined %}
+      deviceName: {{ worker.root_device_name }}
+{% endif %}
+{% endif %}
+{% if hosts.root_device.serial_number is defined %}
+      serialNumber: {{ hosts.root_device.serial_number }}
+{% endif %}
+{% if hosts.root_device.wwn is defined %}
+      wwn: {{ hosts.root_device.wwn }}
+{% endif %}
+
+{#- interfaces config #}
+    interfaces:
+{% for interface in hosts.interfaces %}
+      - name: {{ interface.name }}
+        macAddress: {{ interface.mac_address }}
+{% endfor %}
+    networkConfig:
+      dns-resolver:
+        config:
+          server:
+{% for resolver in worker.dns_resolvers %}
+            - {{ resolver }}
+{% endfor %}
+      routes:
+        config:
+{% for route in worker.routes %}
+          - destination: {{ route.destination }}
+            next-hop-address: {{ route.gateway }}
+            next-hop-interface: {{ route.interface }}
+            table-id: {{ route.table_id }}
+{% endfor%}
+      interfaces:
+{# ensure all interfaces are up and running #}
+{% for interface in hosts.interfaces %}
+        - name: {{ interface.name }}
+          type: ethernet
+          state: up
+          ipv4:
+            enabled: false
+{% endfor %}
+{# ------------------------------------ #}
+{#       generate bond interface        #}
+{# ------------------------------------ #}
+{% for bond in worker.bonds %}
+        - name: {{ bond.name }}
+          type: bond
+          state: up
+          link-aggregation:
+            mode: {{ bond.mode }}
+            port:
+{% for interface in hosts.interfaces %}
+{% if interface.part_of_bond == bond.name %}
+              - {{ interface.name }}
+{% endif %}
+{% endfor %}
+{% if bond.options is defined %}
+            options:
+              {{ bond.options | to_nice_yaml(indent=14) | indent(14) -}}
+{% endif %}
+          ipv4:
+{% if hosts.bonds is not defined %}
+{# agent_config.<master/worker>.bonds is defined but not agent_config.<master/worker>.hosts.bonds #}
+{# if that is the case, we want want to use DHCP for bond ipv4 assignment #}
+            enabled: true
+            dhcp: true
+{% else %}
+{# agent_config.<master/worker>.bonds is defined and agent_config.<master/worker>.hosts.bonds is defined #}
+{# if that is the case, we want to take control over ipv4 assignments (manually configure ip addresses) #}
+            enabled: true
+            dhcp: false
+{% for hbond in hosts.bonds %}
+{% if bond.name == hbond.interface %}
+            address:
+{% for address in hbond.addresses %}
+              - ip: {{ address.ip }}
+                prefix-length: {{ address.subnet_length }}
+{# endfor for address in hbond.addresses #}
+{% endfor %}
+{# endif for bond.name == hbond.name #}
+{% endif %}
+{# endfor for hbond in hosts.bond #}
+{% endfor %}
+{# endif for hosts.bond is not defined #}
+{% endif %}
+{# endfor for bond in worker.bonds #}
+{% endfor %}
+{# ------------------------------------ #}
+{#      generate bridge interface       #}
+{# ------------------------------------ #}
+{% for bridge in worker.bridges %}
+        - name: {{ bridge.name }}
+          state: up
+          type: {{ bridge.type }}
+          port:
+{% for interface in bridge.interfaces %}
+            - name: {{ interface.name }}
+{% endfor %}
+          bridge:
+            allow-extra-patch-ports: true
+{% if bridge.options is defined %}
+            options:
+              {{ bridge.options | to_nice_yaml(indent=14) | indent(14) }}
+{% endif %}
+{% endfor %}
+{# ------------------------------------ #}
+{#       generate vlan interface        #}
+{# ------------------------------------ #}
+{% for vlan in worker.vlans %}
+        - name: {{ vlan.name }}
+          type: vlan
+          state: up
+          vlan:
+            base-iface: {{ vlan.base_interface }}
+            id: {{ vlan.id }}
+{% if hosts.vlans is defined %}
+          ipv4:
+            enabled: true
+            dhcp: false
+{% for hvlan in hosts.vlans %}
+{% if vlan.name == hvlan.interface %}
+            address:
+{% for address in hvlan.addresses %}
+              - ip: {{ address.ip }}
+                prefix-length: {{ address.subnet_length }}
+{# endfor for address in hvlan.addresses #}
+{% endfor %}
+{# endif for vlan.name == hvlan.name #}
+{% endif %}
+{# endfor for hvlan in hosts.vlan #}
+{% endfor %}
+{# endif hosts.vlans is defined #}
+{% endif %}
+{# endfor vlan in worker.vlans #}
+{% endfor %}
+
+{# endfor for worker.hosts #}
+{% endfor %}

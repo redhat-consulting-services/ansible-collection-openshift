@@ -1,0 +1,147 @@
+tenant_name: test-tenant
+cluster_name: ocp4-test
+base_domain: ocp4.example.com
+api_vip: 192.168.50.10
+generate_iso: false
+iso_output_dir: ./tmp/iso
+image_digest_sources:
+  - source: "quay.io/openshift-release-dev/ocp-release"
+    mirrors:
+      - "registry.example.com/ocp4/openshift-release"
+  - source: "quay.io/openshift-release-dev/ocp-v4.0-art-dev"
+    mirrors:
+      - "registry.example.com/ocp4/openshift-release"
+agent_config:
+  master:
+    hostname_prefix: "master-"
+    root_device_name: "/dev/sda"
+    dns_resolvers: &dns_resolvers
+      - 172.16.11.1
+      - 8.8.8.8
+      - 1.1.1.1
+    routes: &routes
+      - destination: 0.0.0.0/0
+        gateway: 172.16.11.1
+        interface: bond0.100
+        table_id: 254
+    bonds:
+      - name: bond0
+        mode: "802.3ad"
+        options:
+          miimon: "100"
+          lacp_rate: "fast"
+    bridges:
+      - name: br0
+        type: ovs-bridge
+        interfaces:
+          - name: bond0
+    vlans:
+      - name: vlan0
+        id: 100
+        base_interface: bond0
+        addresses:
+          - start_ip: 192.168.255.10
+            subnet_length: 24
+    hosts:
+      - hostname: master-abcd-0
+        root_device:
+          name: "/dev/sda"
+          serial_number: "1234567890"
+          wwn: "1234567890abcdef"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:00"
+            part_of_bond: "bond0"
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:01"
+            part_of_bond: "bond0"
+        vlans:
+        - interface: vlan0
+          addresses:
+            - ip: 192.168.10.222
+              subnet_length: 24
+
+      - hostname: master-abcd-1
+        root_device:
+          name: "/dev/sda"
+          serial_number: "1234567890"
+          wwn: "1234567890abcdef"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:01:00"
+            part_of_bond: "bond0"
+          - name: enp0s1
+            mac_address: "00:00:00:00:01:01"
+            part_of_bond: "bond0"
+      - hostname: master-abcd-2
+        root_device:
+          name: "/dev/sda"
+          serial_number: "1234567890"
+          wwn: "1234567890abcdef"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:02:00"
+            part_of_bond: "bond0"
+          - name: enp0s1
+            mac_address: "00:00:00:00:02:01"
+            part_of_bond: "bond0"
+  worker:
+    hostname_prefix: "worker-"
+    root_device_name: "/dev/sda"
+    dns_resolvers: *dns_resolvers
+    routes: *routes
+    bonds:
+      - name: bond0
+        mode: "802.3ad"
+        options:
+          miimon: "100"
+          lacp_rate: "fast"
+    bridges:
+      - name: br0
+        type: ovs-bridge
+        interfaces:
+          - name: bond0
+    vlans:
+      - name: vlan0
+        id: 100
+        base_interface: bond0
+        addresses:
+          - start_ip: 192.168.255.100
+            subnet_length: 24
+    hosts:
+      - hostname: worker-abcd-0
+        root_device:
+          name: "/dev/sda"
+          serial_number: "1234567890"
+          wwn: "1234567890abcdef"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:aa:00:00"
+            part_of_bond: "bond0"
+          - name: enp0s1
+            mac_address: "00:00:00:aa:00:01"
+            part_of_bond: "bond0"
+      - hostname: worker-abcd-1
+        root_device:
+          name: "/dev/sda"
+          serial_number: "1234567890"
+          wwn: "1234567890abcdef"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:aa:01:00"
+            part_of_bond: "bond0"
+          - name: enp0s1
+            mac_address: "00:00:00:aa:01:01"
+            part_of_bond: "bond0"
+      - hostname: worker-abcd-2
+        root_device:
+          name: "/dev/sda"
+          serial_number: "1234567890"
+          wwn: "1234567890abcdef"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:aa:02:00"
+            part_of_bond: "bond0"
+          - name: enp0s1
+            mac_address: "00:00:00:aa:02:01"
+            part_of_bond: "bond0"

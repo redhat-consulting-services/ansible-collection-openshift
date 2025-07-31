@@ -1,0 +1,154 @@
+tenant_name: test-tenant
+cluster_name: ocp4-test
+base_domain: example.com
+
+api_vip: 10.10.10.4
+ingress_vip: 10.10.10.5
+
+generate_iso: true
+iso_type: "iso"
+iso_output_dir: ./iso
+
+pull_secret: |
+   {"auths":{"cloud.openshift.com":{"auth":"...
+ssh_public_key: |
+  ssh-ed25519 AAAA...
+
+additional_trust_bundle: |
+  -----BEGIN CERTIFICATE-----
+  MIID...
+  -----END CERTIFICATE-----
+
+image_digest_sources:
+  - mirrors:
+      - registry.example.com:8443/openshift/release
+    source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+  - mirrors:
+      - registry.example.com:8443/openshift/release-images
+    source: quay.io/openshift-release-dev/ocp-release
+
+networking:
+  cluster_networks:
+    - cidr: "10.128.0.0/14"
+      host_prefix: 23
+  service_networks:
+    - 172.30.0.0/16
+  network_type: "OVNKubernetes"
+  machine_network:
+    - cidr: 10.10.10.0/24
+
+agent_config:
+  master:
+    hostname_prefix: "master-"
+    root_device_name: "/dev/sda"
+    dns_resolvers: &dns_resolvers
+      - 8.8.8.8
+      - 1.1.1.1
+    routes: &routes
+      - destination: 0.0.0.0/0
+        gateway: 10.10.10.254
+        interface: bond0
+        table_id: 254
+    bonds: &bonds
+      - name: bond0
+        mode: 802.3ad
+        options:
+          miimon: "100"
+    hosts:
+      - hostname: master-1.ocp4-test.example.com
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:aa:aa:aa:aa:01"
+            part_of_bond: "bond0"
+          - name: eth1
+            mac_address: "00:aa:aa:aa:aa:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 10.10.10.10
+                subnet_length: 24
+      - hostname: master-2.ocp4-test.example.com
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:aa:aa:aa:bb:01"
+            part_of_bond: "bond0"
+          - name: eth1
+            mac_address: "00:aa:aa:aa:bb:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 10.10.10.11
+                subnet_length: 24
+      - hostname: master-3.ocp4-test.example.com
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:aa:aa:aa:cc:01"
+            part_of_bond: "bond0"
+          - name: eth1
+            mac_address: "00:aa:aa:aa:cc:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 10.10.10.12
+                subnet_length: 24
+  worker:
+    hostname_prefix: "worker-"
+    root_device_name: "/dev/sda"
+    dns_resolvers: *dns_resolvers
+    routes: *routes
+    bonds: *bonds
+    hosts:
+      - hostname: worker-1.ocp4-test.example.com
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:aa:aa:bb:aa:01"
+            part_of_bond: "bond0"
+          - name: eth1
+            mac_address: "00:aa:aa:bb:aa:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 10.10.10.20
+                subnet_length: 24
+      - hostname: worker-2.ocp4-test.example.com
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:aa:aa:bb:bb:01"
+            part_of_bond: "bond0"
+          - name: eth1
+            mac_address: "00:aa:aa:bb:bb:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 10.10.10.21
+                subnet_length: 24
+      - hostname: worker-3.ocp4-test.example.com
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:aa:aa:bb:cc:01"
+            part_of_bond: "bond0"
+          - name: eth1
+            mac_address: "00:aa:aa:bb:cc:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 10.10.10.22
+                subnet_length: 24

@@ -1,0 +1,25 @@
+---
+- name: Create output directory structure
+  ansible.builtin.file:
+    path: "{{ iso_output_dir }}/manifests"
+    state: directory
+    mode: '0744'
+
+- name: Generate nodes-config.yaml
+  ansible.builtin.template:
+    src: nodes-config.yaml.j2
+    dest: "{{ iso_output_dir }}/nodes-config.yaml"
+    mode: '0644'
+
+- name: Backup nodes-config.yaml manifest file
+  ansible.builtin.copy:
+    src: "{{ iso_output_dir }}/nodes-config.yaml"
+    dest: "{{ iso_output_dir }}/manifests/nodes-config.yaml"
+    mode: '0644'
+
+- name: Create the bootable ISO
+  when: generate_iso | bool
+  ansible.builtin.command: >
+    oc adm node-image create --dir {{ iso_output_dir }}/
+  args:
+    creates: "{{ iso_output_dir }}/agent.iso"

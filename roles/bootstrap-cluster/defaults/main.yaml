@@ -1,0 +1,63 @@
+# iso_type determines whether the ISO is a bootable image or a PXE boot image.
+# Valid values are "iso" or "pxe".
+iso_type: "iso"
+
+# Default values for agent-based OpenShift install
+generate_iso: false
+
+type: baremetal
+
+# arch defines the architecture of the OpenShift cluster.
+# Only "x86_64" is currently supported.
+arch: "x86_64"
+
+# boot_artifacts_base_url is optional, if not provided, it will not be included in the agent-config.yaml
+# boot_artifacts_base_url: "http://example.com/boot-artifacts"
+
+# additional_ntp_sources is optional, if not provided, it will not be included in the agent-config.yaml
+# additional_ntp_sources:
+#   - "0.pool.ntp.org"
+#   - "1.pool.ntp.org"
+
+additional_trust_bundle: null
+
+enable_fips: false
+
+networking:
+  cluster_networks:
+    - cidr: "10.128.0.0/14"
+      host_prefix: 23
+  service_networks:
+    - 172.30.0.0/16
+  network_type: "OVNKubernetes"
+  machine_network:
+    - cidr: 192.168.255.0/24
+
+image_digest_sources: []
+
+iso_output_dir: "/opt/openshift/iso"
+
+proxy:
+  http: null
+  https: null
+  no_proxy: null
+
+agent_config:
+  master:
+    hostname_prefix: "master-"
+    root_device_name: "/dev/sda"
+    dns_resolvers: []
+    routes: []
+    bonds: []
+    bridges: []
+    vlans: []
+    hosts: []
+  worker:
+    hostname_prefix: "worker-"
+    root_device_name: "/dev/sda"
+    dns_resolvers: []
+    routes: []
+    bonds: []
+    bridges: []
+    vlans: []
+    hosts: []

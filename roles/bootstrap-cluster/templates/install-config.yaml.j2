@@ -1,0 +1,68 @@
+apiVersion: v1
+metadata:
+  name: {{ cluster_name }}
+  namespace: {{ tenant_name }}
+baseDomain: {{ base_domain }}
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: {{ agent_config.worker.hosts | length }}
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: {{ agent_config.master.hosts | length }}
+networking:
+  clusterNetwork:
+{% for cluster_network in networking.cluster_networks %}
+  - cidr: {{ cluster_network.cidr }}
+    hostPrefix: {{ cluster_network.host_prefix }}
+{% endfor %}
+  networkType: {{ networking.network_type }}
+  serviceNetwork:
+{% for network in networking.service_networks %}
+  - {{ network }}
+{% endfor %}
+  machineNetwork:
+{% for network in networking.machine_network %}
+  - cidr: {{ network.cidr }}
+{% endfor %}
+fips: {{ enable_fips }}
+pullSecret: |
+  {{ pull_secret }}
+sshKey: |
+  {{ ssh_public_key }}
+platform:
+{% if type == "baremetal" %}
+  baremetal:
+    apiVIP: {{ api_vip }}
+    ingressVIP: {{ ingress_vip }}
+{% else %}
+  none: {}
+{% endif %}
+{% if image_digest_sources is defined %}
+imageDigestSources:
+{% for ids in image_digest_sources %}
+  - source: {{ ids.source }}
+    mirrors:
+{% for mirror in ids.mirrors %}
+      - {{ mirror }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+{% if proxy.http or proxy.https or proxy.no_proxy %}
+proxy:
+{% if proxy.http %}
+  httpProxy: {{ proxy.http }}
+{% endif %}
+{% if proxy.https %}
+  httpsProxy: {{ proxy.https }}
+{% endif %}
+{% if proxy.no_proxy %}
+  noProxy: {{ proxy.no_proxy }}
+{% endif %}
+{% endif %}
+{% if additional_trust_bundle %}
+additionalTrustBundle: |
+  {{ additional_trust_bundle | indent(2) }}
+{% endif %}
