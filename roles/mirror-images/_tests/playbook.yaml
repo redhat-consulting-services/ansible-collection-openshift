@@ -1,0 +1,8 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+
+- hosts: localhost
+  gather_facts: false
+  roles:
+    - ../../mirror-images

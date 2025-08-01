@@ -1,0 +1,50 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+oc_mirror_base_path: /tmp/oc-mirror
+
+image_sets: []
+  # - name: openshift-additional
+  #   additional_images:
+  #     - name: registry.redhat.io/ubi9/ubi:latest
+  #     - name: registry.redhat.io/openshift4/ose-cli:latest
+
+  # - name: ocp4
+  #   platform:
+  #     channels:
+  #       - name: stable-4.18
+  #         minVersion: 4.18.9
+  #         maxVersion: 4.18.20
+  #         shortestPath: true
+  #         type: ocp
+
+  # - name: openshift-operators
+  #   platform:
+  #     architectures:
+  #       - amd64
+  #     channels:
+  #       - name: stable-4.18
+  #         minVersion: 4.18.9
+  #         maxVersion: 4.18.20
+  #         shortestPath: true
+  #         type: ocp
+  #   operators:
+  #     - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
+  #       packages:
+  #         - name: advanced-cluster-management
+  #         - name: multicluster-engine
+  #         - name: rhacs-operator
+  #         - name: compliance-operator
+  #         - name: openshift-gitops-operator
+  #         - name: cluster-logging
+
+  # - name: community-operators
+  #   operators:
+  #     - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
+  #       packages:
+  #         - name: advanced-cluster-management
+  #         - name: multicluster-engine
+  #         - name: rhacs-operator
+  #         - name: compliance-operator
+  #         - name: openshift-gitops-operator
+  #         - name: cluster-logging

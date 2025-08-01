@@ -1,0 +1,68 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+
+{% for image_set in image_sets %}
+---
+# image set name: {{ image_set.name }}
+apiVersion: mirror.openshift.io/v2alpha1
+kind: ImageSetConfiguration
+mirror:
+{% if image_set.platform is defined %}
+  platform:
+{% if image_set.platform.architectures is defined %}
+    architectures:
+{% for architecture in image_set.platform.architectures %}
+      - {{ architecture }}
+{% endfor %}
+{% endif %}
+    graph: true
+{% if image_set.platform.channels is defined %}
+    channels:
+{% for channel in image_set.platform.channels %}
+      - name: {{ channel.name }}
+{% if channel.minVersion is defined %}
+        minVersion: {{ channel.minVersion }}
+{% endif %}
+{% if channel.maxVersion is defined %}
+        maxVersion: {{ channel.maxVersion }}
+{% endif %}
+        shortestPath: {{ channel.shortestPath | default(false) }}
+        type: {{ channel.type | default('ocp') }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{# Additional Images #}
+{% if image_set.additional_images is defined %}
+  additionalImages:
+{% for image in image_set.additional_images %}
+    - name: {{ image.name }}
+{% endfor %}
+{% endif %}
+
+{% if image_set.operators is defined %}
+  operators:
+{% for operator in image_set.operators %}
+    - catalog: {{ operator.catalog }}
+
+      packages:
+{% for package in operator.packages %}
+        - name: {{ package.name }}
+{% if package.channels is defined %}
+          channels:
+{% for channel in package.channels %}
+            - name: {{ channel.name }}
+{% if channel.min_version is defined %}
+              minVersion: {{ channel.min_version }}
+{% endif %}
+{% if channel.max_version is defined %}
+              maxVersion: {{ channel.max_version }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
+{# endfor for image_sets loop #}
+{% endfor %}
