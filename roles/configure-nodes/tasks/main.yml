@@ -1,0 +1,31 @@
+---
+- name: Get all nodes
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig_path }}"
+    kind: Node
+  register: node_info
+
+- name: Label and taint nodes
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    kind: Node
+    name: "{{ item.metadata.name }}"
+    merge_type: strategic-merge
+    definition:
+      metadata:
+        labels: "{{ node_labels | default({}) }}"
+      spec:
+        taints: "{{ node_taints | default([]) }}"
+  loop: "{{ node_info.resources | selectattr('metadata.name', node_filter_type | default('search'), node_filter_pattern | default('.*')) | list }}"
+  loop_control:
+    label: "{{ item.metadata.name }}"
+  register: taint_result
+  when: (node_labels is defined and node_labels | length > 0) or (node_taints is defined and node_taints | length > 0)
+
+- name: Display nodes that were modified
+  debug:
+    msg: "Modified node: {{ item.result.metadata.name }}"
+  loop: "{{ taint_result.results }}"
+  when: item.changed
+  loop_control:
+    label: "{{ item.result.metadata.name }}"

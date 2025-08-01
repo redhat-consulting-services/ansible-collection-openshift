@@ -1,0 +1,40 @@
+---
+# Node selection configuration
+node_filter_type: "search"  # Type of filtering to apply to nodes
+node_filter_pattern: ""  # Pattern to match against node names
+
+# Labels to apply to selected nodes
+# Set to empty dict to skip labeling
+node_labels: {}
+
+# Taints to apply to selected nodes
+# Set to empty list to skip tainting
+node_taints: []
+
+# Kubeconfig path (can be overridden)
+kubeconfig_path: "~/.kube/config"
+
+# Example configurations
+
+## Infrastructure nodes
+# node_filter_pattern: "infra"
+# node_labels:
+#   node-role.kubernetes.io/infra: ""
+#   node-role.kubernetes.io/worker: null
+# node_taints:
+#   - effect: NoSchedule
+#     key: node-role.kubernetes.io/infra
+#     value: reserved
+#   - effect: NoExecute
+#     key: node-role.kubernetes.io/infra
+#     value: reserved
+
+## GPU nodes
+# node_filter_pattern: "gpu"
+# node_labels:
+#   node-role.kubernetes.io/gpu: ""
+#   hardware.nvidia.com/gpu: "true"
+# node_taints:
+#   - effect: NoSchedule
+#     key: nvidia.com/gpu
+#     value: ""
