@@ -9,7 +9,9 @@ mirror:
   enabled: true
   # source registry configuration
   source:
-    # define the source registry authentication configuration (docker config.json)
+    # type determines if the source is a remote registry or disk
+    type: registry
+    # define the source registry authentication configuration (docker config.json). Only required if the source is a remote registry
     auth_config: |
       {
         "auths": {
@@ -21,9 +23,11 @@ mirror:
 
   # destination registry configuration
   destination:
-    # define the destination registry url (e.g., registry.example.com)
+    # type determines if the destination is a remote registry (registry-to-registry) or disk (registry-to-disk)
+    type: registry
+    # define the destination registry url (e.g., registry.example.com). Only required if the destination is a remote registry
     registry: registry.redhat.io
-    # define the destination registry authentication configuration (docker config.json)
+    # define the destination registry authentication configuration (docker config.json). Only required if the destination is a remote registry
     auth_config: |
       {
         "auths": {

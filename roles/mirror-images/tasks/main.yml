@@ -20,7 +20,7 @@
     mode: '0644'
 
 - name: Generate source registry authentication file
-  when: mirror.enabled | bool
+  when: mirror.enabled | bool and mirror.source.type == 'registry'
   ansible.builtin.template:
     src: plain.txt.j2
     dest: "{{ oc_mirror_base_path }}/credentials/source-config.json"
@@ -29,7 +29,7 @@
     config: "{{ mirror.source.auth_config }}"
 
 - name: Generate destination registry authentication file
-  when: mirror.enabled | bool
+  when: mirror.enabled | bool and mirror.destination.type == 'registry'
   ansible.builtin.template:
     src: plain.txt.j2
     dest: "{{ oc_mirror_base_path }}/credentials/destination-config.json"
