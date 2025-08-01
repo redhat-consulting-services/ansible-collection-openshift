@@ -2,7 +2,7 @@ version: 3
 
 images:
   base_image:
-    name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:1.0.0-725
+    name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
     platform: linux/amd64
 
 build_arg_defaults:
