@@ -1,3 +1,5 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
 ---
 - name: Get all nodes
   kubernetes.core.k8s_info:

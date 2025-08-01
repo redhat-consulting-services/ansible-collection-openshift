@@ -1,3 +1,6 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
 # Infrastructure nodes
 node_filter_pattern: "ip-10-0-(21|47)-.*"
 node_labels:

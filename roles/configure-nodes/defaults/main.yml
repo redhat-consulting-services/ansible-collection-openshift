@@ -1,3 +1,5 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
 ---
 # Node selection configuration
 # Type of filtering to apply to nodes
