@@ -3,4 +3,4 @@
   vars_files:
     - ./test-playbook-vars.yaml
   roles:
-    - ../../ansible-role-cluster-node
+    - ../../add-nodes
