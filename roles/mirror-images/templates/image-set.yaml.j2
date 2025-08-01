@@ -19,11 +19,11 @@ mirror:
     channels:
 {% for channel in item.platform.channels %}
       - name: {{ channel.name }}
-{% if channel.minVersion is defined %}
-        minVersion: {{ channel.minVersion }}
+{% if channel.min_version is defined %}
+        minVersion: {{ channel.min_version }}
 {% endif %}
-{% if channel.maxVersion is defined %}
-        maxVersion: {{ channel.maxVersion }}
+{% if channel.max_version is defined %}
+        maxVersion: {{ channel.max_version }}
 {% endif %}
         shortestPath: {{ channel.shortestPath | default(false) }}
         type: {{ channel.type | default('ocp') }}

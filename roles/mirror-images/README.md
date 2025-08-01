@@ -1,38 +1,79 @@
-Role Name
-=========
+# Mirror Images
 
-A brief description of the role goes here.
+An ansible role to mirror container images from one registry to another or to a local directory.
 
-Requirements
-------------
+## Role Variables
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+```yaml
+# oc_mirror_base_path is the base path where the workspace, cache, mirror, credentials and image-sets directories will be created.
+oc_mirror_base_path: /path/to/mirror
 
-Role Variables
---------------
+mirror:
+  # enabled: Set to true to enable the mirroring process. When set to false, the role will not perform any actions.
+  enabled: false
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+  source:
+    # type: The type of source for the images. Can be 'registry' or 'disk'.
+    type: registry
+    # auth_config: The authentication configuration for the source registry.
+    auth_config: |
+      {
+        "auths": {
+          "source-registry.example.com": {
+            "auth": "base64-encoded-auth"
+          }
+        }
+      }
 
-Dependencies
-------------
+  destination:
+    # type: The type of destination for the images. Can be 'registry' or 'disk'.
+    type: disk
+    # registry: The destination registry URL if the type is 'registry'.
+    registry: destination-registry.example.com
+    # auth_config: The authentication configuration for the destination registry.
+    auth_config: |
+      {
+        "auths": {
+          "destination-registry.example.com": {
+            "auth": "base64-encoded-auth"
+          }
+        }
+      }
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
-
-Example Playbook
-----------------
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+image_sets:
+  - # name: The name of the image set.
+    name: openshift-additional
+    # enabled: Set to true to include this image set in the mirroring process.
+    enabled: true
+    # destination: The destination path in the mirror registry or directory.
+    destination: platform
+    # additional_images: A list of additional images to include in the mirroring process (optional).
+    additional_images:
+      - # name: The name of the additional image.
+        name: registry.redhat.io/ubi9/ubi:latest
+    # platform: The ocp platform information for the image set (optional).
+    platform:
+      # architectures: A list of architectures for the image set (optional).
+      architectures:
+        - amd64
+      # channels: A list of channels for the image set (optional).
+      channels:
+        - # name: The name of the channel.
+          name: stable
+          # min_version: The minimum version for the channel (optional).
+          min_version: 4.11
+          # max_version: The maximum version for the channel (optional).
+          max_version: 4.11
+    # operators: A list of operators to include in the image set (optional).
+    operators:
+      - # catalog: The catalog image for the operator.
+        catalog: registry.redhat.io/redhat/redhat-operator-index:v4.10
+        # packages: A list of packages for the operator.
+        packages:
+          - # name: The name of the package.
+            name: advanced-cluster-management
+            # min_version: The minimum version for the channel (optional).
+            min_version: 4.11
+            # max_version: The maximum version for the channel (optional).
+            max_version: 4.11
+```
