@@ -5,10 +5,7 @@ metadata:
   name: cluster
 spec:
   runOnInfra: true
+{% if argocd.placement.tolerations is defined %}
   tolerations:
-  - effect: NoSchedule
-    key: node-role.kubernetes.io/infra
-    value: reserved
-  - effect: NoExecute
-    key: node-role.kubernetes.io/infra
-    value: reserved
+    {{ argocd.placement.tolerations | to_nice_yaml | indent(6) }}
+{% endif %}
