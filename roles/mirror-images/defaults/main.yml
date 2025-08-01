@@ -1,30 +1,63 @@
 # Copyright redhat-consulting-services Authors
 # SPDX-License-Identifier: Apache-2.0
 ---
+# the base path for oc-mirror artifacts and to-disk mirror
 oc_mirror_base_path: /tmp/oc-mirror
+
+mirror:
+  # determine if the mirror should be executed
+  enabled: true
+  # source registry configuration
+  source:
+    # define the source registry authentication configuration (docker config.json)
+    auth_config: |
+      {
+        "auths": {
+          "registry.redhat.io": {
+            "auth": "username:password"
+          }
+        }
+      }
+
+  # destination registry configuration
+  destination:
+    # define the destination registry url (e.g., registry.example.com)
+    registry: registry.redhat.io
+    # define the destination registry authentication configuration (docker config.json)
+    auth_config: |
+      {
+        "auths": {
+          "registry.redhat.io": {
+            "auth": "username:password"
+          }
+        }
+      }
 
 image_sets: []
   # - name: openshift-additional
+  #   destination: platform
   #   additional_images:
   #     - name: registry.redhat.io/ubi9/ubi:latest
   #     - name: registry.redhat.io/openshift4/ose-cli:latest
 
   # - name: ocp4
+  #   destination: platform
   #   platform:
   #     channels:
   #       - name: stable-4.18
-  #         minVersion: 4.18.9
+  #         minVersion: 4.18.20
   #         maxVersion: 4.18.20
   #         shortestPath: true
   #         type: ocp
 
   # - name: openshift-operators
+  #   destination: operators
   #   platform:
   #     architectures:
   #       - amd64
   #     channels:
   #       - name: stable-4.18
-  #         minVersion: 4.18.9
+  #         minVersion: 4.18.20
   #         maxVersion: 4.18.20
   #         shortestPath: true
   #         type: ocp
