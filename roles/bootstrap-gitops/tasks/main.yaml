@@ -1,0 +1,84 @@
+---
+- name: Create ArgoCD namespace
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ argocd.instance.namespace }}"
+        labels:
+          openshift.io/cluster-monitoring: "true"
+
+- name: Create GitOps operator namespace
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ argocd.operator.metadata.namespace }}"
+        labels:
+          openshift.io/cluster-monitoring: "true"
+
+- name: Apply ArgoCD operator group
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'argocd-operator-group.yaml.j2') | from_yaml }}"
+
+- name: Apply ArgoCD subscription
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'argocd-subscription.yaml.j2') | from_yaml }}"
+
+- name: Wait for ArgoCD CRDs to be established
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig_path }}"
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: argocds.argoproj.io
+  register: argocd_crd
+  until: argocd_crd.resources | length > 0
+  retries: 12
+  delay: 10
+
+- name: Deploy ArgoCD instance
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'argocd-instance.yaml.j2') | from_yaml }}"
+
+- name: Wait for ArgoCD instance to be ready
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig_path }}"
+    api_version: argoproj.io/v1alpha1
+    kind: ArgoCD
+    name: "{{ argocd.instance.name }}"
+    namespace: "{{ argocd.instance.namespace }}"
+  register: argocd_instance
+  until: argocd_instance.resources | length > 0 and argocd_instance.resources[0].status is defined and argocd_instance.resources[0].status.phase == 'Available'
+  retries: 15
+  delay: 20
+
+- name: Set up the repo secret
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'repo-secret.yaml.j2') | from_yaml }}"
+
+- name: Set up App of Apps pattern
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'appofapps.yaml.j2') | from_yaml }}"
+
+- name: Set up cluster resource to move pods to specific nodes
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'argocd-gitops-service.yaml.j2') | from_yaml }}"
+  when: argocd.placement.node_selector is defined and argocd.placement.tolerations is defined

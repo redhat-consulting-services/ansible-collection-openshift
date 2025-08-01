@@ -1,0 +1,18 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: appofapps
+  namespace: "{{ argocd.instance.namespace }}"
+spec:
+  destination:
+    namespace: "{{ argocd.instance.namespace }}"
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: "{{ argocd.git.path }}"
+    repoURL: "{{ argocd.git.repo }}"
+    targetRevision: "{{ argocd.git.branch }}"
+  syncPolicy:
+    syncOptions:
+    - Validate=true

@@ -1,0 +1,26 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: "{{ argocd.operator.subscription.name }}"
+  namespace: "{{ argocd.operator.metadata.namespace }}"
+spec:
+  channel: "{{ argocd.operator.channel }}"
+  installPlanApproval: "{{ argocd.operator.install_plan_approval }}"
+  name: "{{ argocd.operator.subscription.name }}"
+  source: "{{ argocd.operator.subscription.source }}"
+  sourceNamespace: "{{ argocd.operator.subscription.source_namespace }}"
+{% if argocd.operator.subscription.starting_csv is defined %}
+  startingCSV: "{{ argocd.operator.subscription.starting_csv }}"
+{% endif %}
+{% if argocd.placement is defined %}
+  config:
+{% if argocd.placement.node_selector is defined %}
+    nodeSelector:
+      {{ argocd.placement.node_selector | to_nice_yaml | indent(6) }}
+{% endif %}
+{% if argocd.placement.tolerations is defined %}
+    tolerations:
+      {{ argocd.placement.tolerations | to_nice_yaml | indent(6) }}
+{% endif %}
+{% endif %}
