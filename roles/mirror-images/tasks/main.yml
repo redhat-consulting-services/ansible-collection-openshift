@@ -12,12 +12,12 @@
     - "{{ oc_mirror_base_path }}/credentials"
     - "{{ oc_mirror_base_path }}/image-sets"
 
-# TODO generate for each array entry a dedicated file
 - name: Generate image set configuration files
   ansible.builtin.template:
-    src: image-set-configuration.yaml.j2
-    dest: "{{ oc_mirror_base_path }}/image-sets/image-sets.yaml"
+    src: image-set.yaml.j2
+    dest: "{{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml"
     mode: '0644'
+  loop: "{{ image_sets }}"
 
 - name: Generate source registry authentication file
   when: mirror.enabled | bool and mirror.source.type == 'registry'

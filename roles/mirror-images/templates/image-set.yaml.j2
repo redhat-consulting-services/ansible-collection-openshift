@@ -1,24 +1,23 @@
 # Copyright redhat-consulting-services Authors
 # SPDX-License-Identifier: Apache-2.0
 
-{% for image_set in image_sets %}
 ---
-# image set name: {{ image_set.name }}
+# image set name: {{ item.name }}
 apiVersion: mirror.openshift.io/v2alpha1
 kind: ImageSetConfiguration
 mirror:
-{% if image_set.platform is defined %}
+{% if item.platform is defined %}
   platform:
-{% if image_set.platform.architectures is defined %}
+{% if item.platform.architectures is defined %}
     architectures:
-{% for architecture in image_set.platform.architectures %}
+{% for architecture in item.platform.architectures %}
       - {{ architecture }}
 {% endfor %}
 {% endif %}
     graph: true
-{% if image_set.platform.channels is defined %}
+{% if item.platform.channels is defined %}
     channels:
-{% for channel in image_set.platform.channels %}
+{% for channel in item.platform.channels %}
       - name: {{ channel.name }}
 {% if channel.minVersion is defined %}
         minVersion: {{ channel.minVersion }}
@@ -33,16 +32,16 @@ mirror:
 {% endif %}
 
 {# Additional Images #}
-{% if image_set.additional_images is defined %}
+{% if item.additional_images is defined %}
   additionalImages:
-{% for image in image_set.additional_images %}
+{% for image in item.additional_images %}
     - name: {{ image.name }}
 {% endfor %}
 {% endif %}
 
-{% if image_set.operators is defined %}
+{% if item.operators is defined %}
   operators:
-{% for operator in image_set.operators %}
+{% for operator in item.operators %}
     - catalog: {{ operator.catalog }}
 
       packages:
@@ -63,6 +62,3 @@ mirror:
 {% endfor %}
 {% endfor %}
 {% endif %}
-
-{# endfor for image_sets loop #}
-{% endfor %}
