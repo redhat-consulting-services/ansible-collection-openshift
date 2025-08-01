@@ -1,0 +1,15 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+# Infrastructure nodes
+node_filter_pattern: "ip-10-0-(21|47)-.*"
+node_labels:
+  node-role.kubernetes.io/infra: ""
+  node-role.kubernetes.io/worker: null
+node_taints:
+  - effect: NoSchedule
+    key: node-role.kubernetes.io/infra
+    value: reserved
+  - effect: NoExecute
+    key: node-role.kubernetes.io/infra
+    value: reserved

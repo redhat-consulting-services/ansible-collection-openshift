@@ -1,0 +1,12 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+# GPU nodes
+node_filter_pattern: "gpu"
+node_labels:
+  node-role.kubernetes.io/gpu: ""
+  hardware.nvidia.com/gpu: "true"
+node_taints:
+  - effect: NoSchedule
+    key: nvidia.com/gpu
+    value: ""

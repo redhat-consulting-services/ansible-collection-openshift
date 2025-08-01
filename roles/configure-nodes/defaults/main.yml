@@ -1,0 +1,19 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+# Node selection configuration
+# Type of filtering to apply to nodes
+node_filter_type: "search"
+# Pattern to match against node names
+node_filter_pattern: ""
+
+# Labels to apply to selected nodes
+# Set to empty dict to skip labeling
+node_labels: {}
+
+# Taints to apply to selected nodes
+# Set to empty list to skip tainting
+node_taints: []
+
+# Kubeconfig path (can be overridden)
+kubeconfig_path: "~/.kube/config"
