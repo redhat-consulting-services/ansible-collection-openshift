@@ -1,4 +1,6 @@
-#SPDX-License-Identifier: Apache-2.0
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
 namespace: redhatconsultingservices
 
 # The name of the collection. Has the same character restrictions as 'namespace'
@@ -14,6 +16,7 @@ readme: README.md
 # @nicks:irc/im.site#channel'
 authors:
 - Leon Steinhäuser <lsteinha@redhat.com> (https://github.com/leonsteinhaeuser/)
+- Oscar Lindholm <olindhol@redhat.com> (https://github.com/oscarlind/)
 - Suresh Vishnoi <svishnoi@redhat.com> (https://github.com/vishnoisuresh)
 
 description: Bootstrapping and manage OpenShift clusters on Red Hat OpenShift Container Platform (OCP) 4.x.
