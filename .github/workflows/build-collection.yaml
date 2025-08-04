@@ -1,0 +1,23 @@
+name: Build Ansible Collection
+
+on:
+  push:
+    branches: [feat/execution-environment]
+    tags: [v*]
+
+jobs:
+  build-collection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build Ansible Collection
+        run: |
+          echo "Building Ansible Collection..."
+
+      - name: Push Collection
+        run: |
+          echo "Pushing Ansible Collection..."
+
+      # TODO: after collection is built and pushed, trigger the build of the execution environment
