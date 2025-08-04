@@ -42,10 +42,8 @@
 - name: Execute oc-mirror to mirror images
   when: mirror.enabled | bool and item.enabled | default(false) | bool
   ansible.builtin.command: >
-    echo "Source type: {{ mirror.source.type }}, Destination type: {{ mirror.destination.type }}"
-
     {% if mirror.source.type == 'registry' and mirror.destination.type == 'disk' %}
-    {{# registry-to-disk #}}
+    {# registry-to-disk #}
     oc-mirror \
       --v2 \
       --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
@@ -57,7 +55,7 @@
     {% endif %}
 
     {% if mirror.source.type == 'disk' and mirror.destination.type == 'registry' %}
-    {{# disk-to-registry #}}
+    {# disk-to-registry #}
     oc-mirror \
       --v2 \
       --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
@@ -70,7 +68,7 @@
     {% endif %}
 
     {% if mirror.source.type == 'registry' and mirror.destination.type == 'registry' %}
-    {{# registry-to-registry #}}
+    {# registry-to-registry #}
     oc-mirror \
       --v2 \
       --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
