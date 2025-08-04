@@ -4,5 +4,7 @@
 
 - hosts: localhost
   gather_facts: false
+  vars_files:
+    - vars.yaml
   roles:
     - ../../mirror-images
