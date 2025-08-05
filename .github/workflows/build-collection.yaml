@@ -31,4 +31,4 @@ jobs:
 
   build-execution-environment:
     needs: ansible-build-collection
-    uses: ./.github/workflows/build-ee.yaml@main
+    uses: ./.github/workflows/build-ee.yaml
