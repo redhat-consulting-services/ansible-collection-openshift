@@ -18,12 +18,16 @@ jobs:
 
   ansible-build-collection:
     uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-galaxy.yaml@main
+    permissions:
+      contents: write
+      packages: write
     with:
       path: .
       push: false
-      galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
       # TODO: change this to the git tag version
       version: "0.1.0"
+    secrets:
+      galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
 
   build-execution-environment:
     needs: ansible-build-collection
