@@ -5,19 +5,19 @@ on:
     branches: [feat/execution-environment]
     tags: [v*]
 
+env:
+  ANSIBLE_COLLECTION_VERSION: ${{ github.ref_name }}
+
 jobs:
-  build-collection:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  ansible-build-collection:
+    uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-galaxy.yaml@main
+    with:
+      path: .
+      push: false
+      galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
+      # TODO: change this to the git tag version
+      version: "0.1.0"
 
-      - name: Build Ansible Collection
-        run: |
-          echo "Building Ansible Collection..."
-
-      - name: Push Collection
-        run: |
-          echo "Pushing Ansible Collection..."
-
-      # TODO: after collection is built and pushed, trigger the build of the execution environment
+  build-execution-environment:
+    needs: ansible-build-collection
+    uses: ./.github/workflows/build-ee.yaml@main
