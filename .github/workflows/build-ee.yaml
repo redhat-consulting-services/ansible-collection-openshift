@@ -11,10 +11,31 @@ on:
         description: "Version of the collection. The galaxy.yml will be updated with this version. A commit is not created."
         required: true
         type: string
+      ee_registry_url:
+        description: "URL for the execution environment registry"
+        required: true
+        type: string
+      ee_image_repo:
+        description: "Repository for the execution environment image"
+        required: true
+        default: "redhat-consulting-services/ee-openshift"
+        type: string
+    secrets:
+      registry_redhat_io_username:
+        description: "Username for registry.redhat.io"
+        required: true
+      registry_redhat_io_password:
+        description: "Password for registry.redhat.io"
+        required: true
+      ee_registry_username:
+        description: "Username for the execution environment registry"
+        required: true
+      ee_registry_password:
+        description: "Password for the execution environment registry"
+        required: true
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: redhat-consulting-services/ee-openshift
+  IMAGE_NAME: ${{ inputs.ee_image_repo }}
 
 jobs:
   generate-timestamp:
@@ -43,28 +64,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Determine repository tag
-        if: github.event_name != 'workflow_call'
-        id: repo_tag
-        run: |
-          if [[ "${{ github.event_name }}" == 'workflow_call' ]]; then
-            echo "repo_tag=$(git tag --sort=-v:refname | head -n 1)" >> $GITHUB_OUTPUT
-          else
-            if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-              # Extract tag name from ref (e.g., refs/tags/v1.0.0 -> v1.0.0)
-              echo "repo_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-            else
-              # Use 'dev' for non-tag builds
-              echo "repo_tag=dev" >> $GITHUB_OUTPUT
-            fi
-          fi
-
       - name: Login to registry.redhat.io
         uses: docker/login-action@v3
         with:
           registry: registry.redhat.io
-          username: ${{ secrets.REGISTRY_REDHAT_IO_USERNAME }}
-          password: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}
+          username: ${{ secrets.registry_redhat_io_username }}
+          password: ${{ secrets.registry_redhat_io_password }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -84,9 +89,9 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ inputs.ee_registry_url }}
+          username: ${{ secrets.ee_registry_username }}
+          password: ${{ secrets.ee_registry_password }}
 
       - name: Build execution environment
         run: |
