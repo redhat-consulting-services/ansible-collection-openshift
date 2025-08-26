@@ -11,6 +11,10 @@ on:
         description: "Version of the collection. The galaxy.yml will be updated with this version. A commit is not created."
         required: true
         type: string
+      download_artifact:
+        description: "Download the artifact from the previous job"
+        required: true
+        type: boolean
       ee_registry_url:
         description: "URL for the execution environment registry"
         required: true
@@ -91,6 +95,12 @@ jobs:
           registry: ${{ inputs.ee_registry_url }}
           username: ${{ secrets.ee_registry_username }}
           password: ${{ secrets.ee_registry_password }}
+
+      - uses: actions/download-artifact@v5
+        if: ${{ inputs.download_artifact == true }}
+        with:
+          name: ansible-collection
+          path: ${{ github.workspace }}/
 
       - name: Build execution environment
         run: |

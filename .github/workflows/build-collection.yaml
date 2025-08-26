@@ -75,6 +75,7 @@ jobs:
     with:
       push: false
       version: ${{ needs.tag-lookup.outputs.repo_tag }}
+      download_artifact: ${{ needs.tag-lookup.outputs.repo_tag == 'dev' }}
       ee_registry_url: ghcr.io
       ee_image_repo: "redhat-consulting-services/ee-openshift"
     secrets:
