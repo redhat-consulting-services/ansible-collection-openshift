@@ -5,8 +5,7 @@ on:
     inputs:
       push:
         description: "Push the built image to the registry"
-        required: false
-        default: "false"
+        required: true
         type: boolean
 
 env:
