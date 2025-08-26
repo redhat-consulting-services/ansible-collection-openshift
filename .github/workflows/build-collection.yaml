@@ -30,6 +30,9 @@ jobs:
       galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
 
   build-execution-environment:
+    permissions:
+      contents: write
+      packages: write
     needs: ansible-build-collection
     uses: ./.github/workflows/build-ee.yaml
     with:
