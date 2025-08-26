@@ -18,7 +18,6 @@ on:
       ee_image_repo:
         description: "Repository for the execution environment image"
         required: true
-        default: "redhat-consulting-services/ee-openshift"
         type: string
     secrets:
       registry_redhat_io_username:
