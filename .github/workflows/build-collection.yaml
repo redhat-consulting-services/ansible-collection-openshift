@@ -16,16 +16,39 @@ jobs:
       - name: Echo collection version
         run: echo "Collection version is ${{ env.ANSIBLE_COLLECTION_VERSION }}"
 
+  tag-lookup:
+    runs-on: ubuntu-latest
+    outputs:
+      repo_tag: ${{ steps.repo_tag.outputs.repo_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine repository tag
+        id: repo_tag
+        run: |
+          if [[ "${{ github.event_name }}" == 'push' ]] || [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+            echo "repo_tag=$(git tag --sort=-v:refname | head -n 1)" >> $GITHUB_OUTPUT
+          else
+            if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+              # Extract tag name from ref (e.g., refs/tags/v1.0.0 -> v1.0.0)
+              echo "repo_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            else
+              # Use 'dev' for non-tag builds
+              echo "repo_tag=dev" >> $GITHUB_OUTPUT
+            fi
+          fi
+
   ansible-build-collection:
     uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-galaxy.yaml@main
     permissions:
       contents: write
       packages: write
+    needs: tag-lookup
     with:
       path: .
       push: false
-      # TODO: change this to the git tag version
-      version: "0.1.0"
+      version: ${{ needs.tag-lookup.outputs.repo_tag }}
     secrets:
       galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
 
@@ -37,3 +60,4 @@ jobs:
     uses: ./.github/workflows/build-ee.yaml
     with:
       push: false
+      version: ${{ needs.tag-lookup.outputs.repo_tag }}
