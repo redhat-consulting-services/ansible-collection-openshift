@@ -35,3 +35,6 @@ additional_build_steps:
         chmod +x /usr/local/bin/oc-mirror
 
     RUN rm -f *.tar.gz
+
+  prepend_galaxy: |
+    COPY ./collections /tmp/collections/

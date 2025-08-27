@@ -100,7 +100,12 @@ jobs:
         if: ${{ inputs.download_artifact == true }}
         with:
           name: ansible-collection
-          path: ${{ github.workspace }}/
+          path: ./collections
+
+      - name: Determine requirements yaml file
+        if: ${{ inputs.download_artifact == true }}
+        run: |
+          cp requirements.dev.yml requirements.yml
 
       - name: Build execution environment
         run: |
@@ -110,6 +115,7 @@ jobs:
             --tag ${{ steps.image_tag.outputs.latest_tag }} \
             --container-runtime docker \
             --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_version }} \
+            --build-arg COLLECTION_VERSION=${{ inputs.version }} \
             --context .
 
       # - name: Run Trivy vulnerability scanner

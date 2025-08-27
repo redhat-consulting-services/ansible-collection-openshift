@@ -1,0 +1,5 @@
+collections:
+  - name: community.general
+  - name: kubernetes.core
+  - name: /tmp/collections/redhat_consulting_services-openshift-dev.tar.gz
+    type: file
