@@ -7,6 +7,10 @@ on:
         description: "Push the built image to the registry"
         required: true
         type: boolean
+      upload_execution_environment:
+        description: "Upload the ansible execution environment as an artifact to GitHub actions artifacts"
+        required: true
+        type: boolean
       version:
         description: "Version of the collection. The galaxy.yml will be updated with this version. A commit is not created."
         required: true
@@ -67,6 +71,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install yq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yq
+
       - name: Login to registry.redhat.io
         uses: docker/login-action@v3
         with:
@@ -102,10 +111,16 @@ jobs:
           name: ansible-collection
           path: ./collections
 
+      - name: List collection files
+        if: ${{ inputs.download_artifact == true }}
+        run: |
+          ls -l ./collections
+
       - name: Determine requirements yaml file
         if: ${{ inputs.download_artifact == true }}
         run: |
           cp requirements.dev.yml requirements.yml
+          cp execution-environment.dev.yml execution-environment.yml
 
       - name: Build execution environment
         run: |
@@ -115,8 +130,22 @@ jobs:
             --tag ${{ steps.image_tag.outputs.latest_tag }} \
             --container-runtime docker \
             --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_version }} \
-            --build-arg COLLECTION_VERSION=${{ inputs.version }} \
             --context .
+
+      - name: Dump execution environment image
+        if: ${{ inputs.upload_execution_environment == true }}
+        run: |
+          mkdir container-images
+          docker save -o container-images/container-images.tar ${{ steps.image_tag.outputs.tag }} ${{ steps.image_tag.outputs.latest_tag }}
+
+      - name: Upload Ansible Execution Environment to GitHub actions artifact
+        if: ${{ inputs.upload_execution_environment == true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ansible-execution-environment-${{ inputs.version }}-ocp-${{ matrix.openshift_version }}
+          path: container-images/
+          retention-days: 1
+          overwrite: true
 
       # - name: Run Trivy vulnerability scanner
       #   uses: aquasecurity/trivy-action@0.28.0
