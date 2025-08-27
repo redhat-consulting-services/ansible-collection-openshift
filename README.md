@@ -66,7 +66,7 @@ strategy:
 
 Each execution environment includes:
 
-- **Ansible Collection**: `redhatconsultingservices.openshift`
+- **Ansible Collection**: `redhat_consulting_services.openshift`
 - **OpenShift CLI Tools**:
   - `oc` - OpenShift command-line interface
   - `openshift-install` - Cluster installation tool
@@ -88,4 +88,42 @@ Use the execution environment with ansible-runner or in your automation platform
 
 ```bash
 podman run -it quay.io/redhatconsultingservices/ee-openshift:dev-ocp-4.18.20-latest ansible-playbook my-playbook.yml
+```
+
+## CI Flow
+
+```mermaid
+flowchart LR
+    A[Commit]
+    B[Push to branch]
+
+    C[CI: Linting and Testing]
+    C1{Linting and Testing successful?}
+
+    D[Build Ansible collection]
+    D1{Collection Build successful?}
+    D2{Has been tagged and is main branch?}
+    D3[Push to Galaxy]
+
+    E[Merge to main branch]
+
+    F[Run Execution Environment Build]
+    F1{Execution Environment Build successful?}
+    F2[Push to ghcr.io/quay.io/redhat-consultingservices/ee-openshift]
+
+    G[Inform developers]
+
+    A --> B --> C --> C1
+    C1 -- Yes --> D --> D1
+    D1 -- Yes --> D2
+    D1 -- No --> A
+
+    C1 -- No --> A
+
+    D2 -- Yes --> D3
+    D2 -- No --> E --> B
+
+    D3 --> F --> F1
+    F1 -- Yes --> F2
+    F1 -- No --> G
 ```
