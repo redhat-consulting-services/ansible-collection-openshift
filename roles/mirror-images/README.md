@@ -46,7 +46,7 @@ image_sets:
     # enabled: Set to true to include this image set in the mirroring process.
     enabled: true
     # destination: The destination path in the mirror registry or directory.
-    destination: platform
+    destination: ocp-additional
     # additional_images: A list of additional images to include in the mirroring process (optional).
     additional_images:
       - # name: The name of the additional image.
