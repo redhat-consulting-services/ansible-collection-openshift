@@ -1,0 +1,90 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+
+- name: Create output directory structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0775'
+  loop:
+    - "{{ oc_mirror_base_path }}/workspace"
+    - "{{ oc_mirror_base_path }}/mirror"
+    - "{{ oc_mirror_base_path }}/cache"
+    - "{{ oc_mirror_base_path }}/credentials"
+    - "{{ oc_mirror_base_path }}/image-sets"
+
+- name: Generate image set configuration files
+  ansible.builtin.template:
+    src: image-set.yaml.j2
+    dest: "{{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml"
+    mode: '0644'
+  loop: "{{ image_sets }}"
+
+- name: Generate source registry authentication file
+  when: mirror.enabled | bool and mirror.source.type == 'registry'
+  ansible.builtin.template:
+    src: plain.txt.j2
+    dest: "{{ oc_mirror_base_path }}/credentials/source-config.json"
+    mode: '0644'
+  vars:
+    config: "{{ mirror.source.auth_config }}"
+
+- name: Generate destination registry authentication file
+  when: mirror.enabled | bool and mirror.destination.type == 'registry'
+  ansible.builtin.template:
+    src: plain.txt.j2
+    dest: "{{ oc_mirror_base_path }}/credentials/destination-config.json"
+    mode: '0644'
+  vars:
+    config: "{{ mirror.destination.auth_config }}"
+
+- name: Execute oc-mirror to mirror images
+  when: mirror.enabled | bool and item.enabled | default(false) | bool
+  ansible.builtin.command: >
+    {% if mirror.source.type == 'registry' and mirror.destination.type == 'disk' %}
+    {# registry-to-disk #}
+    oc-mirror \
+      --v2 \
+      --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
+      --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json \
+      --log-level debug \
+      --workspace {{ oc_mirror_base_path }}/workspace \
+      --cache-dir {{ oc_mirror_base_path }}/cache \
+      file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }}
+    {% endif %}
+
+    {% if mirror.source.type == 'disk' and mirror.destination.type == 'registry' %}
+    {# disk-to-registry #}
+    oc-mirror \
+      --v2 \
+      --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
+      --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json \
+      --from file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }} \
+      --log-level debug \
+      --workspace {{ oc_mirror_base_path }}/workspace \
+      --cache-dir {{ oc_mirror_base_path }}/cache \
+      {{ mirror.destination.registry }}/{{ item.destination }}
+    {% endif %}
+
+    {% if mirror.source.type == 'registry' and mirror.destination.type == 'registry' %}
+    {# registry-to-registry #}
+    oc-mirror \
+      --v2 \
+      --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
+      --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json \
+      --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json \
+      --log-level debug \
+      --workspace {{ oc_mirror_base_path }}/workspace \
+      --cache-dir {{ oc_mirror_base_path }}/cache \
+      {{ mirror.destination.registry }}/{{ item.destination }}
+    {% endif %}
+  loop: "{{ image_sets }}"
+  register: oc_mirror_results
+
+- name: Show output
+  debug:
+    msg: "{{ item.stdout }}"
+  loop: "{{ oc_mirror_results.results | selectattr('stdout', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.item.name }}"
