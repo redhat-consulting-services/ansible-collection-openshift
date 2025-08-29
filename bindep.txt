@@ -6,5 +6,4 @@ cairo [platform:rpm]
 
 glib2-devel [platform:rpm]
 gobject-introspection [platform:rpm]
-python3-libnmstate [platform:rpm]
 python3-gobject [platform:rpm]

@@ -21,7 +21,7 @@ additional_build_steps:
   prepend_base: |
     ARG OPENSHIFT_VERSION=4.19.5
     RUN pip install --upgrade ansible
-    RUN mkdir -p /tmp/{ocp-client,ocp-install,ocp-mirror}
+
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux.tar.gz && \
         tar -xzf openshift-install-linux.tar.gz --strip-components=0 -C /usr/local/bin openshift-install && \
         chmod +x /usr/local/bin/openshift-install
@@ -33,6 +33,10 @@ additional_build_steps:
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/oc-mirror.tar.gz && \
         tar -xzf oc-mirror.tar.gz --strip-components=0 -C /usr/local/bin oc-mirror && \
         chmod +x /usr/local/bin/oc-mirror
+
+    RUN curl -LO https://github.com/nmstate/nmstate/releases/download/v2.2.50/nmstatectl-linux-x64.zip && \
+        unzip nmstatectl-linux-x64.zip -d /usr/local/bin nmstatectl && \
+        chmod +x /usr/local/bin/nmstatectl
 
     RUN rm -f *.tar.gz
 
