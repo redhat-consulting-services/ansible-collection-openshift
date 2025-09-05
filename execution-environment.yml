@@ -2,7 +2,7 @@ version: 3
 
 images:
   base_image:
-    name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+    name: registry.redhat.io/ubi9:latest
     platform: linux/amd64
 
 build_arg_defaults:
@@ -15,7 +15,7 @@ dependencies:
 
 # Custom package manager path for the RHEL based images
 options:
-  package_manager_path: /usr/bin/microdnf
+  package_manager_path: /usr/bin/dnf
 
 additional_build_steps:
   prepend_base: |
@@ -33,9 +33,5 @@ additional_build_steps:
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/oc-mirror.tar.gz && \
         tar -xzf oc-mirror.tar.gz --strip-components=0 -C /usr/local/bin oc-mirror && \
         chmod +x /usr/local/bin/oc-mirror
-
-    RUN curl -LO https://github.com/nmstate/nmstate/releases/download/v2.2.50/nmstatectl-linux-x64.zip && \
-        unzip nmstatectl-linux-x64.zip -d /usr/local/bin nmstatectl && \
-        chmod +x /usr/local/bin/nmstatectl
 
     RUN rm -f *.tar.gz
