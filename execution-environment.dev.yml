@@ -2,7 +2,7 @@ version: 3
 
 images:
   base_image:
-    name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+    name: registry.redhat.io/ubi9:latest
     platform: linux/amd64
 
 build_arg_defaults:
@@ -20,7 +20,7 @@ options:
 additional_build_steps:
   prepend_base: |
     ARG OPENSHIFT_VERSION=4.19.5
-    RUN pip install --upgrade ansible
+    #RUN pip install --upgrade ansible
 
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux.tar.gz && \
         tar -xzf openshift-install-linux.tar.gz --strip-components=0 -C /usr/local/bin openshift-install && \

@@ -8,7 +8,6 @@ glib2-devel [platform:rpm]
 gobject-introspection [platform:rpm]
 python3-gobject [platform:rpm]
 
-nmstate [platform:rpm]
 python3-libnmstate [platform:rpm]
 python3-nispor [platform:rpm]
 python3-pyyaml [platform:rpm]
