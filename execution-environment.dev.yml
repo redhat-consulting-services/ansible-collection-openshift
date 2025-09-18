@@ -15,7 +15,7 @@ dependencies:
 
 # Custom package manager path for the RHEL based images
 options:
-  package_manager_path: /usr/bin/microdnf
+  package_manager_path: /usr/bin/dnf
 
 additional_build_steps:
   prepend_base: |
@@ -38,7 +38,7 @@ additional_build_steps:
         unzip nmstatectl-linux-x64.zip -d /usr/local/bin nmstatectl && \
         chmod +x /usr/local/bin/nmstatectl
 
-    RUN rm -f *.tar.gz
+    RUN rm -f *.tar.gz *.zip
 
   prepend_galaxy: |
     COPY ./collections /tmp/collections
