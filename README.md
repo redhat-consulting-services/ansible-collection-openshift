@@ -79,7 +79,7 @@ Each execution environment includes:
 To build the execution environment locally:
 
 ```bash
-ansible-builder build -t my-ee:latest --build-arg OPENSHIFT_VERSION=4.18.20
+ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=4.18.20
 ```
 
 ### Usage
