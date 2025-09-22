@@ -39,10 +39,6 @@ additional_build_steps:
         tar -xzf oc-mirror.tar.gz --strip-components=0 -C /usr/local/bin oc-mirror && \
         chmod +x /usr/local/bin/oc-mirror
 
-    RUN curl -LO https://github.com/nmstate/nmstate/releases/download/v2.2.50/nmstatectl-linux-x64.zip
-    RUN unzip nmstatectl-linux-x64.zip -d /usr/local/bin nmstatectl
-    RUN chmod +x /usr/local/bin/nmstatectl
-
     RUN rm -f *.tar.gz *.zip
 
   prepend_galaxy: |
