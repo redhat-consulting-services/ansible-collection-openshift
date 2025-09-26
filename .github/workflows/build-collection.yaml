@@ -11,12 +11,6 @@ env:
   dev_tag: "0.0.0-rc.0"
 
 jobs:
-  echo:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Echo collection version
-        run: echo "Collection version is ${{ env.ANSIBLE_COLLECTION_VERSION }}"
-
   tag-lookup:
     runs-on: ubuntu-latest
     outputs:
@@ -54,8 +48,7 @@ jobs:
           fi
 
   ansible-build-collection:
-    # uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-galaxy.yaml@main
-    uses: ./.github/workflows/ansible-galaxy.yaml
+    uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-galaxy.yaml@main
     permissions:
       contents: write
       packages: write
