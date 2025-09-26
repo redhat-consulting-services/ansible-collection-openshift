@@ -11,7 +11,6 @@ python3-gobject [platform:rpm]
 python3-libnmstate [platform:rpm]
 python3-nispor [platform:rpm]
 python3-pyyaml [platform:rpm]
-python3-pygobject [platform:rpm]
 python3-setuptools [platform:rpm]
 
 nmstate [platform:rpm]
