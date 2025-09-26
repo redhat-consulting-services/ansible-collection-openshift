@@ -9,9 +9,9 @@ build_arg_defaults:
   ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
 
 dependencies:
-  galaxy: requirements.yml
-  python: requirements.txt
-  system: bindep.txt
+  galaxy: ee-requirements.yml
+  python: ee-requirements.txt
+  system: ee-bindep.txt
 
 # Custom package manager path for the RHEL based images
 options:

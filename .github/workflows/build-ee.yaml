@@ -119,7 +119,7 @@ jobs:
       - name: Determine requirements yaml file
         if: ${{ inputs.download_artifact == true }}
         run: |
-          cp requirements.dev.yml requirements.yml
+          cp ee-requirements.dev.yml ee-requirements.yml
           cp execution-environment.dev.yml execution-environment.yml
 
       - name: Build execution environment

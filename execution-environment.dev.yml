@@ -13,9 +13,9 @@ dependencies:
     package_pip: ansible-core
   ansible_runner:
     package_pip: ansible-runner
-  galaxy: requirements.yml
-  python: requirements.txt
-  system: bindep.txt
+  galaxy: ee-requirements.yml
+  python: ee-requirements.txt
+  system: ee-bindep.txt
 
 # Custom package manager path for the RHEL based images
 options:
