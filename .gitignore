@@ -1,0 +1,4 @@
+context/
+_build/
+Containerfile
+collections/

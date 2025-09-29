@@ -1,0 +1,13 @@
+jsonschema  # from collection ansible.utils
+textfsm  # from collection ansible.utils
+ttp  # from collection ansible.utils
+xmltodict  # from collection ansible.utils'
+netaddr>=0.10.1  # from collection ansible.utils'
+#netaddr>=0.7.19  # from collection dellemc.openmanage'
+kubernetes  # from collection user'
+jmespath  # from collection user'
+omsdk  # from collection user'
+
+requests
+PyYAML
+ansible
