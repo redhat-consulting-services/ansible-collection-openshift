@@ -28,7 +28,7 @@ jobs:
 
           # Precompute latest tag (if any)
           tag_name=$(git tag --sort=-v:refname | head -n 1)
-          echo "push=false" >> $GITHUB_OUTPUT
+          export PUSH=false
 
           if [[ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "pull_request" ]]; then
             if [[ -z "$tag_name" ]]; then
@@ -41,15 +41,21 @@ jobs:
             if [[ "${{ github.ref }}" == refs/tags/* ]]; then
               # Extract tag name from ref (e.g., refs/tags/v1.0.0 -> v1.0.0)
               echo "repo_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-              echo "push=true" >> $GITHUB_OUTPUT
+              export PUSH=true
             elif [[ -z "$tag_name" ]]; then
               echo "No tags found in the repository."
               echo "repo_tag=${{ env.dev_tag }}" >> $GITHUB_OUTPUT
             else
               echo "repo_tag=$tag_name" >> $GITHUB_OUTPUT
-              echo "push=true" >> $GITHUB_OUTPUT
+              export PUSH=true
             fi
           fi
+          echo "push=${PUSH}" >> $GITHUB_OUTPUT
+
+      - name: Output determined tag
+        run: |
+          echo "Determined repository tag: ${{ steps.repo_tag.outputs.repo_tag }}"
+          echo "Push flag: ${{ steps.repo_tag.outputs.push }}"
 
   ansible-build-collection:
     uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-galaxy.yaml@main
@@ -59,7 +65,7 @@ jobs:
     needs: tag-lookup
     with:
       path: .
-      push: ${{ needs.tag-lookup.outputs.push }}
+      push: ${{ needs.tag-lookup.outputs.push == 'true' }}
       version: ${{ needs.tag-lookup.outputs.repo_tag }}
     secrets:
       galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
@@ -73,7 +79,7 @@ jobs:
       - ansible-build-collection
     uses: ./.github/workflows/build-ee.yaml
     with:
-      push: ${{ needs.tag-lookup.outputs.push }}
+      push: ${{ needs.tag-lookup.outputs.push == 'true' }}
       upload_execution_environment: ${{ needs.tag-lookup.outputs.repo_tag == needs.tag-lookup.outputs.dev_tag }}
       version: ${{ needs.tag-lookup.outputs.repo_tag }}
       download_artifact: ${{ needs.tag-lookup.outputs.repo_tag == needs.tag-lookup.outputs.dev_tag }}
