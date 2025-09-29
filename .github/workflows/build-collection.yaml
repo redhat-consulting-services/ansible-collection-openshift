@@ -1,0 +1,82 @@
+name: Build Ansible Collection
+
+on:
+  push:
+    branches:
+      - "**"
+    tags: [v*]
+
+env:
+  ANSIBLE_COLLECTION_VERSION: ${{ github.ref_name }}
+  dev_tag: "0.0.0-rc.0"
+
+jobs:
+  tag-lookup:
+    runs-on: ubuntu-latest
+    outputs:
+      repo_tag: ${{ steps.repo_tag.outputs.repo_tag }}
+      dev_tag: ${{ env.dev_tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine repository tag
+        id: repo_tag
+        run: |
+          echo "GitHub event name: ${{ github.event_name }}"
+
+          # Precompute latest tag (if any)
+          tag_name=$(git tag --sort=-v:refname | head -n 1)
+
+          if [[ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "pull_request" ]]; then
+            if [[ -z "$tag_name" ]]; then
+              echo "No tags found in the repository."
+              echo "repo_tag=${{ env.dev_tag }}" >> $GITHUB_OUTPUT
+            else
+              echo "repo_tag=$tag_name" >> $GITHUB_OUTPUT
+            fi
+          else
+            if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+              # Extract tag name from ref (e.g., refs/tags/v1.0.0 -> v1.0.0)
+              echo "repo_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+            elif [[ -z "$tag_name" ]]; then
+              echo "No tags found in the repository."
+              echo "repo_tag=${{ env.dev_tag }}" >> $GITHUB_OUTPUT
+            else
+              echo "repo_tag=$tag_name" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  ansible-build-collection:
+    uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-galaxy.yaml@main
+    permissions:
+      contents: write
+      packages: write
+    needs: tag-lookup
+    with:
+      path: .
+      push: false
+      version: ${{ needs.tag-lookup.outputs.repo_tag }}
+    secrets:
+      galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
+
+  build-execution-environment:
+    permissions:
+      contents: write
+      packages: write
+    needs:
+      - tag-lookup
+      - ansible-build-collection
+    uses: ./.github/workflows/build-ee.yaml
+    with:
+      push: false
+      upload_execution_environment: ${{ needs.tag-lookup.outputs.repo_tag == needs.tag-lookup.outputs.dev_tag }}
+      version: ${{ needs.tag-lookup.outputs.repo_tag }}
+      download_artifact: ${{ needs.tag-lookup.outputs.repo_tag == needs.tag-lookup.outputs.dev_tag }}
+      ee_registry_url: ghcr.io
+      ee_image_repo: "redhat-consulting-services/ee-openshift"
+    secrets:
+      registry_redhat_io_username: ${{ secrets.REGISTRY_REDHAT_IO_USERNAME }}
+      registry_redhat_io_password: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}
+      ee_registry_username: ${{ github.actor }}
+      ee_registry_password: ${{ secrets.GITHUB_TOKEN }}

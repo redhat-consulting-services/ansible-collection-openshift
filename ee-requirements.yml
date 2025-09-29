@@ -1,0 +1,4 @@
+collections:
+  - name: community.general
+  - name: kubernetes.core
+  - name: redhat_consulting_services.openshift

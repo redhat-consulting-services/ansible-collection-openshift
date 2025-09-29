@@ -1,0 +1,16 @@
+vim [platform:rpm]
+unzip [platform:rpm]
+jq [platform:rpm]
+python3-cairo [platform:rpm]
+cairo [platform:rpm]
+
+glib2-devel [platform:rpm]
+gobject-introspection [platform:rpm]
+python3-gobject [platform:rpm]
+
+python3-libnmstate [platform:rpm]
+python3-nispor [platform:rpm]
+python3-pyyaml [platform:rpm]
+python3-setuptools [platform:rpm]
+
+nmstate [platform:rpm]
