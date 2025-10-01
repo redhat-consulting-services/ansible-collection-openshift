@@ -194,6 +194,8 @@ agent_config:
             mac_address: "00:00:00:00:00:00"
             # part_of_bond is the name of the bond interface that the interface is part of. This setting must match the bond name defined in `bonds[].name`.
             part_of_bond: "bond0"
+            # mtu (optional) is the MTU of the interface. If not set, the default MTU of the hardware will be used.
+            mtu: 1500
         # bonds defines the host specific bond configuration.
         bonds:
           -
