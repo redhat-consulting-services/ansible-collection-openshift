@@ -26,9 +26,11 @@ worker:
         - name: eth0
           mac_address: "00:15:5d:02:fa:1e"
           part_of_bond: "bond0"
+          mtu: 1500
         - name: eth1
           mac_address: "00:15:5d:02:fa:1f"
           part_of_bond: "bond0"
+          mtu: 1500
       bonds:
       - interface: bond0
         addresses:
