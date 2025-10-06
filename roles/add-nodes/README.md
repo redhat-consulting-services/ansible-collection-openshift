@@ -91,6 +91,8 @@ worker:
           mac_address: "00:00:00:aa:00:00"
           # part_of_bond is the name of the bond interface that the interface is part of. It is used to configure the bond interface for the host. This setting must match the bond name defined in `agent_config.worker.bonds[].name`.
           part_of_bond: "bond0"
+          # mtu (optional) is the MTU of the interface. If not set, the default MTU of the hardware will be used.
+          mtu: 1500
         - name: enp0s1
           mac_address: "00:00:00:aa:00:01"
           part_of_bond: "bond0"

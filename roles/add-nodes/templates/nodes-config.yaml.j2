@@ -53,6 +53,9 @@ hosts:
         - name: {{ interface.name }}
           type: ethernet
           state: up
+{% if interface.mtu is defined %}
+          mtu: {{ interface.mtu }}
+{% endif %}
           ipv4:
             enabled: false
 {% endfor %}
