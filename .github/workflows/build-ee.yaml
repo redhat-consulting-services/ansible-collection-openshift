@@ -106,18 +106,18 @@ jobs:
           password: ${{ secrets.ee_registry_password }}
 
       - uses: actions/download-artifact@v5
-        if: ${{ inputs.download_artifact == true }}
+        if: ${{ inputs.download_artifact }}
         with:
           name: ansible-collection
           path: ./collections
 
       - name: List collection files
-        if: ${{ inputs.download_artifact == true }}
+        if: ${{ inputs.download_artifact }}
         run: |
           ls -l ./collections
 
       - name: Determine requirements yaml file
-        if: ${{ inputs.download_artifact == true }}
+        if: ${{ inputs.download_artifact }}
         run: |
           cp ee-requirements.dev.yml ee-requirements.yml
           cp execution-environment.dev.yml execution-environment.yml
@@ -133,13 +133,13 @@ jobs:
             --context .
 
       - name: Dump execution environment image
-        if: ${{ inputs.upload_execution_environment == true }}
+        if: ${{ inputs.upload_execution_environment }}
         run: |
           mkdir container-images
           docker save -o container-images/container-images.tar ${{ steps.image_tag.outputs.tag }} ${{ steps.image_tag.outputs.latest_tag }}
 
       - name: Upload Ansible Execution Environment to GitHub actions artifact
-        if: ${{ inputs.upload_execution_environment == true }}
+        if: ${{ inputs.upload_execution_environment }}
         uses: actions/upload-artifact@v4
         with:
           name: ansible-execution-environment-${{ inputs.version }}-ocp-${{ matrix.openshift_version }}
@@ -159,7 +159,7 @@ jobs:
 
       - name: Push image to registry
         # only push if the ref is a tag, or the workflow_call is set to true
-        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_call' && github.event.inputs.push == 'true')
+        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_call' && github.event.inputs.push)
         run: |
           docker push ${{ steps.image_tag.outputs.tag }}
           docker push ${{ steps.image_tag.outputs.latest_tag }}
