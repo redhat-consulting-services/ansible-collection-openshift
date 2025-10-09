@@ -36,6 +36,7 @@ jobs:
               echo "repo_tag=${{ env.dev_tag }}" >> $GITHUB_OUTPUT
             else
               echo "repo_tag=$tag_name" >> $GITHUB_OUTPUT
+              export PUSH=true
             fi
           else
             if [[ "${{ github.ref }}" == refs/tags/* ]]; then
@@ -80,9 +81,7 @@ jobs:
     uses: ./.github/workflows/build-ee.yaml
     with:
       push: ${{ needs.tag-lookup.outputs.push == 'true' }}
-      upload_execution_environment: ${{ needs.tag-lookup.outputs.push == 'false' }}
       version: ${{ needs.tag-lookup.outputs.repo_tag }}
-      download_artifact: ${{ needs.tag-lookup.outputs.push == 'false' }}
       ee_registry_url: ghcr.io
       ee_image_repo: "redhat-consulting-services/ee-openshift"
     secrets:
