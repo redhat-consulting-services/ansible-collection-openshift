@@ -2,5 +2,6 @@
   gather_facts: false
   vars_files:
     - ./test-playbook-vars.yaml
+    - ./secrets.yaml
   roles:
     - ../../add-nodes

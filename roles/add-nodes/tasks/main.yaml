@@ -1,4 +1,16 @@
 ---
+- name: Create output directory for credentials files
+  ansible.builtin.file:
+    path: "{{ iso_output_dir }}/credentials"
+    state: directory
+    mode: '0744'
+
+- name: Generate auth.json
+  ansible.builtin.template:
+    src: auth.json.j2
+    dest: "{{ iso_output_dir }}/credentials/auth.json"
+    mode: '0644'
+
 - name: Create output directory structure
   ansible.builtin.file:
     path: "{{ iso_output_dir }}/manifests"
@@ -20,6 +32,6 @@
 - name: Create the bootable ISO
   when: generate_iso | bool
   ansible.builtin.command: >
-    oc adm node-image create --dir {{ iso_output_dir }}/
+    oc adm node-image create --registry-config={{ iso_output_dir }}/credentials/auth.json --dir {{ iso_output_dir }}/
   args:
     creates: "{{ iso_output_dir }}/agent.iso"
