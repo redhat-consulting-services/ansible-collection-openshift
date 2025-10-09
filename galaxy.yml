@@ -13,9 +13,9 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-- Leon Steinhäuser <lsteinha@redhat.com> (https://github.com/leonsteinhaeuser/)
-- Oscar Lindholm <olindhol@redhat.com> (https://github.com/oscarlind/)
-- Suresh Vishnoi <svishnoi@redhat.com> (https://github.com/vishnoisuresh)
+- Leon Steinhäuser <lsteinha@redhat.com>
+- Oscar Lindholm <olindhol@redhat.com>
+- Suresh Vishnoi <svishnoi@redhat.com>
 
 description: Bootstrapping and manage OpenShift clusters on Red Hat OpenShift Container Platform (OCP) 4.x.
 
