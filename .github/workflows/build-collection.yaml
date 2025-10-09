@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       repo_tag: ${{ steps.repo_tag.outputs.repo_tag }}
+      repo_tag_sanitized: ${{ steps.repo_tag.outputs.repo_tag_sanitized }}
       push: ${{ steps.repo_tag.outputs.push }}
       dev_tag: ${{ env.dev_tag }}
     steps:
@@ -27,30 +28,30 @@ jobs:
           echo "GitHub event name: ${{ github.event_name }}"
 
           # Precompute latest tag (if any)
-          tag_name=$(git tag --sort=-v:refname | head -n 1)
-          export PUSH=false
+          TAG_NAME=$(git tag --sort=-v:refname | head -n 1)
+          PUSH=false
 
           if [[ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "pull_request" ]]; then
-            if [[ -z "$tag_name" ]]; then
+            if [[ -z "$TAG_NAME" ]]; then
               echo "No tags found in the repository."
-              echo "repo_tag=${{ env.dev_tag }}" >> $GITHUB_OUTPUT
+              TAG_NAME=${{ env.dev_tag }}
             else
-              echo "repo_tag=$tag_name" >> $GITHUB_OUTPUT
-              export PUSH=true
+              PUSH=true
             fi
           else
             if [[ "${{ github.ref }}" == refs/tags/* ]]; then
               # Extract tag name from ref (e.g., refs/tags/v1.0.0 -> v1.0.0)
-              echo "repo_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-              export PUSH=true
-            elif [[ -z "$tag_name" ]]; then
+              TAG_NAME=${GITHUB_REF#refs/tags/}
+              PUSH=true
+            elif [[ -z "$TAG_NAME" ]]; then
               echo "No tags found in the repository."
-              echo "repo_tag=${{ env.dev_tag }}" >> $GITHUB_OUTPUT
+              TAG_NAME=${{ env.dev_tag }}
             else
-              echo "repo_tag=$tag_name" >> $GITHUB_OUTPUT
-              export PUSH=true
+              PUSH=true
             fi
           fi
+          echo "repo_tag=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "repo_tag_sanitized=${TAG_NAME#v}" >> $GITHUB_OUTPUT
           echo "push=${PUSH}" >> $GITHUB_OUTPUT
 
       - name: Output determined tag
@@ -67,7 +68,7 @@ jobs:
     with:
       path: .
       push: ${{ needs.tag-lookup.outputs.push == 'true' }}
-      version: ${{ needs.tag-lookup.outputs.repo_tag }}
+      version: ${{ needs.tag-lookup.outputs.repo_tag_sanitized }}
     secrets:
       galaxy_token: ${{ secrets.ANSIBLE_GALAXY_TOKEN }}
 
