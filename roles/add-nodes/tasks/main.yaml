@@ -33,5 +33,7 @@
   when: generate_iso | bool
   ansible.builtin.command: >
     oc adm node-image create --registry-config={{ iso_output_dir }}/credentials/auth.json --dir {{ iso_output_dir }}/
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
   args:
     creates: "{{ iso_output_dir }}/agent.iso"

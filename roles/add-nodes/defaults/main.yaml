@@ -1,4 +1,5 @@
 cpu_architecture: amd64
+kubeconfig_path: "~/.kube/config"
 generate_iso: false
 iso_output_dir: "./tmp/iso"
 pull_secret: ""

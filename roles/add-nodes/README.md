@@ -12,6 +12,8 @@ A role to add a cluster node to OpenShift.
 # cpu_architecture defines the CPU architecture of the cluster nodes. It is used to determine the correct OpenShift version and image to use for the cluster nodes.
 # Available architectures: amd64, arm64, ppc64le, s390x
 cpu_architecture: amd64
+# kubeconfig_path defines the path to the kubeconfig file used to access the OpenShift cluster. It is required to generate the ISO image if `generate_iso` is set to true.
+kubeconfig_path: ""
 # generate_iso defines whether to generate an ISO image for the cluster nodes. If set to true, the role will generate an ISO image with the OpenShift cluster boot artifacts.
 generate_iso: true
 # iso_output_dir defines the output directory for the generated ISO image. This directory is used to store the generated ISO image and its contents.
