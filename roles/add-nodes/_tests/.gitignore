@@ -1,2 +1,2 @@
 tmp/
-test-playbook-vars-secret.yaml
+secrets.yaml
