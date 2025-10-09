@@ -7,18 +7,10 @@ on:
         description: "Push the built image to the registry"
         required: true
         type: boolean
-      upload_execution_environment:
-        description: "Upload the ansible execution environment as an artifact to GitHub actions artifacts"
-        required: true
-        type: boolean
       version:
         description: "Version of the collection. The galaxy.yml will be updated with this version. A commit is not created."
         required: true
         type: string
-      download_artifact:
-        description: "Download the artifact from the previous job"
-        required: true
-        type: boolean
       ee_registry_url:
         description: "URL for the execution environment registry"
         required: true
@@ -68,6 +60,15 @@ jobs:
           - "4.18.25"
           - "4.19.15"
     steps:
+      - name: Debug output
+        run: |
+          echo "OpenShift version: ${{ matrix.openshift_version }}"
+          echo "Push: ${{ inputs.push }}"
+          echo "Version: ${{ inputs.version }}"
+          echo "EE Registry URL: ${{ inputs.ee_registry_url }}"
+          echo "EE Image Repo: ${{ inputs.ee_image_repo }}"
+          echo "Image Name: ${{ env.IMAGE_NAME }}"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -106,18 +107,18 @@ jobs:
           password: ${{ secrets.ee_registry_password }}
 
       - uses: actions/download-artifact@v5
-        if: ${{ inputs.download_artifact }}
+        if: ${{ !inputs.push }}
         with:
           name: ansible-collection
           path: ./collections
 
       - name: List collection files
-        if: ${{ inputs.download_artifact }}
+        if: ${{ !inputs.push }}
         run: |
           ls -l ./collections
 
       - name: Determine requirements yaml file
-        if: ${{ inputs.download_artifact }}
+        if: ${{ !inputs.push }}
         run: |
           cp ee-requirements.dev.yml ee-requirements.yml
           cp execution-environment.dev.yml execution-environment.yml
@@ -133,13 +134,13 @@ jobs:
             --context .
 
       - name: Dump execution environment image
-        if: ${{ inputs.upload_execution_environment }}
+        if: ${{ !inputs.push }}
         run: |
           mkdir container-images
           docker save -o container-images/container-images.tar ${{ steps.image_tag.outputs.tag }} ${{ steps.image_tag.outputs.latest_tag }}
 
       - name: Upload Ansible Execution Environment to GitHub actions artifact
-        if: ${{ inputs.upload_execution_environment }}
+        if: ${{ !inputs.push }}
         uses: actions/upload-artifact@v4
         with:
           name: ansible-execution-environment-${{ inputs.version }}-ocp-${{ matrix.openshift_version }}
@@ -159,7 +160,7 @@ jobs:
 
       - name: Push image to registry
         # only push if the ref is a tag, or the workflow_call is set to true
-        if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_call' && github.event.inputs.push)
+        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.push
         run: |
           docker push ${{ steps.image_tag.outputs.tag }}
           docker push ${{ steps.image_tag.outputs.latest_tag }}
