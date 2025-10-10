@@ -4,9 +4,11 @@ A collection that bundles roles for the management of OpenShift clusters
 
 ## Roles
 
-- **bootstrap-cluster**: Bootstrap an OpenShift cluster and generate the necessary manifests and ISOs.
-- **node-scaling**: Add additional nodes to an OpenShift cluster.
-- **bootstrap-gitops**: Bootstrap an OpenShift cluster with GitOps enabled.
+- **add_nodes**: A role to add nodes to an OpenShift cluster
+- **bootstrap_cluster**: A role to bootstrap an OpenShift cluster
+- **bootstrap_gitops**: A role to install and configure OpenShift GitOps on an OpenShift cluster
+- **configure_nodes**: A role to label and/or taint nodes in an OpenShift cluster
+- **mirror_images**: A role to mirror OpenShift Operators and container images to a private registry
 
 ## Execution Environment
 
@@ -27,16 +29,16 @@ Images are built for multiple OpenShift versions with the following tag format:
 
 #### Currently Supported OpenShift Versions
 
-- `4.17.36`
-- `4.18.20`
-- `4.19.5`
+- `4.17.41`
+- `4.18.25`
+- `4.19.15`
 
 #### Example Tags
 
 ```text
-ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.18.20-202407221430
-ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.18.20-latest
-ghcr.io/redhat-consulting-services/ee-openshift:dev-ocp-4.17.36-latest
+ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.19.15-202407221430
+ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.18.25-latest
+ghcr.io/redhat-consulting-services/ee-openshift:dev-ocp-4.17.41-latest
 ```
 
 ### Automatic Builds
@@ -56,9 +58,9 @@ strategy:
   fail-fast: false
   matrix:
     openshift_version:
-      - "4.17.36"
-      - "4.18.20"
-      - "4.19.5"
+      - "4.17.41"
+      - "4.18.25"
+      - "4.19.15"
       - "4.20.0"  # Add new versions here
 ```
 
@@ -79,7 +81,7 @@ Each execution environment includes:
 To build the execution environment locally:
 
 ```bash
-ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=4.18.20
+ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=4.19.15
 ```
 
 ### Usage
@@ -87,7 +89,7 @@ ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=
 Use the execution environment with ansible-runner or in your automation platform:
 
 ```bash
-podman run -it quay.io/redhatconsultingservices/ee-openshift:dev-ocp-4.18.20-latest ansible-playbook my-playbook.yml
+podman run -it quay.io/redhatconsultingservices/ee-openshift:dev-ocp-4.19.15-latest ansible-playbook my-playbook.yml
 ```
 
 ## CI Flow
