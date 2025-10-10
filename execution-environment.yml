@@ -9,6 +9,10 @@ build_arg_defaults:
   ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
 
 dependencies:
+  ansible_core:
+    package_pip: ansible-core
+  ansible_runner:
+    package_pip: ansible-runner
   galaxy: ee-requirements.yml
   python: ee-requirements.txt
   system: ee-bindep.txt
@@ -20,7 +24,8 @@ options:
 additional_build_steps:
   prepend_base: |
     ARG OPENSHIFT_VERSION=4.19.5
-    #RUN pip install --upgrade ansible
+    RUN dnf install -y unzip python3 python3-pip
+    RUN pip3 install --upgrade ansible
 
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux.tar.gz && \
         tar -xzf openshift-install-linux.tar.gz --strip-components=0 -C /usr/local/bin openshift-install && \
