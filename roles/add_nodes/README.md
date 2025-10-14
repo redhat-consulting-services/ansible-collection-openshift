@@ -14,6 +14,12 @@ A role to add a cluster node to OpenShift.
 cpu_architecture: amd64
 # kubeconfig_path defines the path to the kubeconfig file used to access the OpenShift cluster. It is required to generate the ISO image if `generate_iso` is set to true.
 kubeconfig_path: ""
+
+# additional_ntp_sources is optional, if not provided, it will not be included in the agent-config.yaml
+# additional_ntp_sources:
+#   - "0.pool.ntp.org"
+#   - "1.pool.ntp.org"
+
 # generate_iso defines whether to generate an ISO image for the cluster nodes. If set to true, the role will generate an ISO image with the OpenShift cluster boot artifacts.
 generate_iso: true
 # iso_output_dir defines the output directory for the generated ISO image. This directory is used to store the generated ISO image and its contents.
