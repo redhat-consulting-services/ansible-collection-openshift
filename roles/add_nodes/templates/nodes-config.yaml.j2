@@ -1,4 +1,9 @@
 cpuArchitecture: {{ cpu_architecture | default('amd64') }}
+{# check if the NTP sources have been defined #}
+{% if additional_ntp_sources is defined %}
+additionalNTPSources: {{ additional_ntp_sources }}
+{% endif %}
+
 hosts:
 {% for hosts in worker.hosts %}
 {% set host_index = loop %}
