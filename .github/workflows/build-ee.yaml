@@ -160,7 +160,7 @@ jobs:
 
       - name: Push image to registry
         # only push if the ref is a tag, or the workflow_call is set to true
-        if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.push
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.push
         run: |
           docker push ${{ steps.image_tag.outputs.tag }}
           docker push ${{ steps.image_tag.outputs.latest_tag }}
