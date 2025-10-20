@@ -38,16 +38,16 @@ As part of this example, we assume the following server and network setup:
 |---------------|----------------------------|----------------|----------------|-----------------------------------------------|-----------------------------------------|
 | master        | master-01.ocp1.example.com | 10.10.9.10     | 10.10.10.10    | eth0=00:01:00:00:00:01 eth1=00:01:00:00:00:02 | sda=240G serial_number=0000000000000001 |
 | master        | master-02.ocp1.example.com | 10.10.9.11     | 10.10.10.11    | eth0=00:01:00:00:01:01 eth1=00:01:00:00:01:02 | sda=240G serial_number=0000000000000002 |
-| master        | master-01.ocp1.example.com | 10.10.9.12     | 10.10.10.12    | eth0=00:01:00:00:02:01 eth1=00:01:00:00:02:02 | sda=240G serial_number=0000000000000003 |
+| master        | master-03.ocp1.example.com | 10.10.9.12     | 10.10.10.12    | eth0=00:01:00:00:02:01 eth1=00:01:00:00:02:02 | sda=240G serial_number=0000000000000003 |
 | worker        | worker-01.ocp1.example.com | 10.10.9.20     | 10.10.10.20    | eth0=00:02:00:00:00:01 eth1=00:02:00:00:00:02 | sda=240G serial_number=0000010000000001 |
 | worker        | worker-02.ocp1.example.com | 10.10.9.21     | 10.10.10.21    | eth0=00:02:00:00:01:01 eth1=00:02:00:00:01:02 | sda=240G serial_number=0000010000000002 |
 | worker        | worker-03.ocp1.example.com | 10.10.9.22     | 10.10.10.22    | eth0=00:02:00:00:02:01 eth1=00:02:00:00:02:02 | sda=240G serial_number=0000010000000003 |
-| worker        | worker-01.ocp1.example.com | 10.10.9.23     | 10.10.10.23    | eth0=00:02:00:00:03:01 eth1=00:02:00:00:03:02 | sda=240G serial_number=0000010000000004 |
-| worker        | worker-02.ocp1.example.com | 10.10.9.24     | 10.10.10.24    | eth0=00:02:00:00:04:01 eth1=00:02:00:00:04:02 | sda=240G serial_number=0000010000000005 |
-| worker        | worker-03.ocp1.example.com | 10.10.9.25     | 10.10.10.25    | eth0=00:02:00:00:05:01 eth1=00:02:00:00:05:02 | sda=240G serial_number=0000010000000006 |
-| worker        | worker-01.ocp1.example.com | 10.10.9.26     | 10.10.10.26    | eth0=00:02:00:00:06:01 eth1=00:02:00:00:06:02 | sda=240G serial_number=0000010000000007 |
-| worker        | worker-02.ocp1.example.com | 10.10.9.27     | 10.10.10.27    | eth0=00:02:00:00:07:01 eth1=00:02:00:00:07:02 | sda=240G serial_number=0000010000000008 |
-| worker        | worker-03.ocp1.example.com | 10.10.9.28     | 10.10.10.28    | eth0=00:02:00:00:08:01 eth1=00:02:00:00:08:02 | sda=240G serial_number=0000010000000009 |
+| worker        | worker-04.ocp1.example.com | 10.10.9.23     | 10.10.10.23    | eth0=00:02:00:00:03:01 eth1=00:02:00:00:03:02 | sda=240G serial_number=0000010000000004 |
+| worker        | worker-05.ocp1.example.com | 10.10.9.24     | 10.10.10.24    | eth0=00:02:00:00:04:01 eth1=00:02:00:00:04:02 | sda=240G serial_number=0000010000000005 |
+| worker        | worker-06.ocp1.example.com | 10.10.9.25     | 10.10.10.25    | eth0=00:02:00:00:05:01 eth1=00:02:00:00:05:02 | sda=240G serial_number=0000010000000006 |
+| worker        | worker-07.ocp1.example.com | 10.10.9.26     | 10.10.10.26    | eth0=00:02:00:00:06:01 eth1=00:02:00:00:06:02 | sda=240G serial_number=0000010000000007 |
+| worker        | worker-08.ocp1.example.com | 10.10.9.27     | 10.10.10.27    | eth0=00:02:00:00:07:01 eth1=00:02:00:00:07:02 | sda=240G serial_number=0000010000000008 |
+| worker        | worker-09.ocp1.example.com | 10.10.9.28     | 10.10.10.28    | eth0=00:02:00:00:08:01 eth1=00:02:00:00:08:02 | sda=240G serial_number=0000010000000009 |
 
 ## Execute the Playbook
 
