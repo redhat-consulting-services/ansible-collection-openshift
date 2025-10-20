@@ -1,0 +1,132 @@
+generate_iso: true
+pull_secret: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+
+additional_ntp_sources:
+  - 192.168.255.100
+  - 192.168.255.101
+
+worker:
+  root_device_name: "/dev/sda"
+  dns_resolvers:
+    - 192.168.254.11
+    - 192.168.254.12
+  routes:
+    - destination: 0.0.0.0/0
+      gateway: 10.10.10.1
+      interface: bond0.1111
+      table_id: 254
+  bonds:
+    - name: bond0
+      # lacp bond
+      mode: "802.3ad"
+      options:
+        miimon: "140"
+  bridges: []
+  vlans:
+    - name: bond0.1111
+      id: 1111
+      base_interface: bond0
+  hosts:
+    - hostname: worker-04.ocp.example.com
+      root_device:
+        serial_number: "0000010000000004"
+      interfaces:
+        - name: eth0
+          mac_address: "00:02:00:00:03:01"
+          part_of_bond: "bond0"
+          mtu: 1500
+        - name: eth1
+          mac_address: "00:02:00:00:03:02"
+          part_of_bond: "bond0"
+          mtu: 1500
+      vlans:
+        - interface: bond0.1111
+          addresses:
+            - ip: 10.10.10.23
+              subnet_length: 24
+    - hostname: worker-05.ocp.example.com
+      root_device:
+        serial_number: "0000010000000005"
+      interfaces:
+        - name: eth0
+          mac_address: "00:02:00:00:04:01"
+          part_of_bond: "bond0"
+          mtu: 1500
+        - name: eth1
+          mac_address: "00:02:00:00:04:02"
+          part_of_bond: "bond0"
+          mtu: 1500
+      vlans:
+        - interface: bond0.1111
+          addresses:
+            - ip: 10.10.10.24
+              subnet_length: 24
+    - hostname: worker-06.ocp.example.com
+      root_device:
+        serial_number: "0000010000000006"
+      interfaces:
+        - name: eth0
+          mac_address: "00:02:00:00:05:01"
+          part_of_bond: "bond0"
+          mtu: 1500
+        - name: eth1
+          mac_address: "00:02:00:00:05:02"
+          part_of_bond: "bond0"
+          mtu: 1500
+      vlans:
+        - interface: bond0.1111
+          addresses:
+            - ip: 10.10.10.25
+              subnet_length: 24
+    - hostname: worker-07.ocp.example.com
+      root_device:
+        serial_number: "0000010000000007"
+      interfaces:
+        - name: eth0
+          mac_address: "00:02:00:00:06:01"
+          part_of_bond: "bond0"
+          mtu: 1500
+        - name: eth1
+          mac_address: "00:02:00:00:06:02"
+          part_of_bond: "bond0"
+          mtu: 1500
+      vlans:
+        - interface: bond0.1111
+          addresses:
+            - ip: 10.10.10.26
+              subnet_length: 24
+    - hostname: worker-08.ocp.example.com
+      root_device:
+        serial_number: "0000010000000008"
+      interfaces:
+        - name: eth0
+          mac_address: "00:02:00:00:07:01"
+          part_of_bond: "bond0"
+          mtu: 1500
+        - name: eth1
+          mac_address: "00:02:00:00:07:02"
+          part_of_bond: "bond0"
+          mtu: 1500
+      vlans:
+        - interface: bond0.1111
+          addresses:
+            - ip: 10.10.10.27
+              subnet_length: 24
+    - hostname: worker-09.ocp.example.com
+      root_device:
+        serial_number: "0000010000000009"
+      interfaces:
+        - name: eth0
+          mac_address: "00:02:00:00:08:01"
+          part_of_bond: "bond0"
+          mtu: 1500
+        - name: eth1
+          mac_address: "00:02:00:00:08:02"
+          part_of_bond: "bond0"
+          mtu: 1500
+      vlans:
+        - interface: bond0.1111
+          addresses:
+            - ip: 10.10.10.28
+              subnet_length: 24

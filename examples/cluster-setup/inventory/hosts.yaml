@@ -1,0 +1,76 @@
+all:
+  vars:
+    ansible_connection: local
+
+  children:
+    masters:
+      hosts:
+        master-01:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.10"
+        master-02:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.11"
+        master-03:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.12"
+
+    workers:
+      hosts:
+        worker-01:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.20"
+        worker-02:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.21"
+        worker-03:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.22"
+        worker-04:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.23"
+        worker-05:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.24"
+        worker-06:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.25"
+        worker-07:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.26"
+        worker-08:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.27"
+        worker-09:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.28"
+
+    initial:
+      hosts:
+        master-01:
+        master-02:
+        master-03:
+        worker-01:
+        worker-02:
+        worker-03:
+
+    scaleout:
+      hosts:
+        worker-04:
+        worker-05:
+        worker-06:
+        worker-07:
+        worker-08:
+        worker-09:
