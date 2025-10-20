@@ -86,11 +86,7 @@ ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=
 
 ### Usage
 
-Use the execution environment with ansible-runner or in your automation platform:
-
-```bash
-podman run -it quay.io/redhatconsultingservices/ee-openshift:dev-ocp-4.19.15-latest ansible-playbook my-playbook.yml
-```
+Instructions on how to use the execution environment and the collection can be found in the [examples/cluster-setup](./examples/cluster-setup/README.md) directory.
 
 ## CI Flow
 
