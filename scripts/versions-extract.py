@@ -2,13 +2,14 @@ import re
 import requests
 from collections import defaultdict
 import yaml
+import argparse
 
 def extract_latest_versions_from_url(url: str, num_majorminor: int = 3, num_patch: int = 5):
     response = requests.get(url)
     response.raise_for_status()
     text = response.text
 
-    # Extract versions, ignore RCs
+    # extract versions from html schema, ignore release candidates
     versions = re.findall(r'\b(\d+\.\d+\.\d+)(?!-rc)\b', text)
     versions = list(set(versions))  # remove duplicates
 
@@ -29,23 +30,30 @@ def extract_latest_versions_from_url(url: str, num_majorminor: int = 3, num_patc
     return result
 
 def update_yaml_with_versions(yaml_file: str, versions: list):
-    # Load existing YAML
+    # load existing YAML
     with open(yaml_file, "r") as f:
         data = yaml.safe_load(f)
 
-    # Navigate to the correct path and update versions
+    # navigate to the correct path and update versions
     data.setdefault("jobs", {}).setdefault("build", {}) \
         .setdefault("strategy", {}).setdefault("matrix", {})["openshift_version"] = versions
 
-    # Write back to the file
+    # write back to the file
     with open(yaml_file, "w") as f:
         yaml.dump(data, f, sort_keys=False)
 
 if __name__ == "__main__":
-    url = "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/"
-    versions = extract_latest_versions_from_url(url)
+    parser = argparse.ArgumentParser(description="Process a URL and file path with version info.")
+    parser.add_argument("url", help="The URL to process. In most cases this should be mirror.openshift.com")
+    parser.add_argument("file_path", help="The path to the file")
+    parser.add_argument("--minor", type=int, default=3, help="Minor version number (default: 3)")
+    parser.add_argument("--patch", type=int, default=5, help="Patch version number (default: 5)")
+    args = parser.parse_args()
 
-    yaml_file = "../.github/workflows/build-ee.yaml"
+    url = f"https://{args.url}/pub/openshift-v4/clients/ocp/"
+    versions = extract_latest_versions_from_url(url, args.minor, args.patch)
+
+    yaml_file = args.file_path
     update_yaml_with_versions(yaml_file, versions)
 
     print(f"Updated {yaml_file} with the following versions:")
