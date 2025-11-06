@@ -1,7 +1,7 @@
 name: Update OpenShift Version Matrix
 on:
-  schedule:
-    - cron: '0 8 * * 1'  # Weekly on Monday at 08:00 UTC
+  #schedule:
+  #  - cron: '0 8 * * 1'  # Weekly on Monday at 08:00 UTC
   workflow_dispatch:
 
 jobs:
@@ -36,19 +36,24 @@ jobs:
         if: steps.pr-exist.outputs.is_defined == 'false'
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
       - name: Set up git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Setup python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install requests
+
       - name: Execute version extraction script
         run: |
-          python3 scripts/versions-extract.py mirror.openshift.com ${{ env.VERSION_MATRIX_FILE }} --minor 3 --patch 5
+          python3 ./scripts/versions-extract.py mirror.openshift.com ${{ env.VERSION_MATRIX_FILE }} --minor 3 --patch 5
 
       - name: Check if changes were made
         id: git-check
