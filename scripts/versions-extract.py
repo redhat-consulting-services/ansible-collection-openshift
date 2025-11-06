@@ -1,7 +1,7 @@
 import re
 import requests
 from collections import defaultdict
-import yaml
+import json
 import argparse
 
 def extract_latest_versions_from_url(url: str, num_majorminor: int = 3, num_patch: int = 5):
@@ -29,23 +29,21 @@ def extract_latest_versions_from_url(url: str, num_majorminor: int = 3, num_patc
 
     return result
 
-def update_yaml_with_versions(yaml_file: str, versions: list):
-    # load existing YAML
-    with open(yaml_file, "r") as f:
-        data = yaml.safe_load(f)
+def update_json_with_versions(json_file: str, versions: list):
+    # create JSON structure
+    data = {
+        "openshift_versions": versions
+    }
 
-    # navigate to the correct path and update versions
-    data.setdefault("jobs", {}).setdefault("build", {}) \
-        .setdefault("strategy", {}).setdefault("matrix", {})["openshift_version"] = versions
-
-    # write back to the file
-    with open(yaml_file, "w") as f:
-        yaml.dump(data, f, sort_keys=False)
+    # write to the file
+    with open(json_file, "w") as f:
+        json.dump(data, f, indent=2)
+        f.write("\n")  # add trailing newline
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process a URL and file path with version info.")
     parser.add_argument("url", help="The URL to process. In most cases this should be mirror.openshift.com")
-    parser.add_argument("file_path", help="The path to the file")
+    parser.add_argument("file_path", help="The path to the JSON file")
     parser.add_argument("--minor", type=int, default=3, help="Minor version number (default: 3)")
     parser.add_argument("--patch", type=int, default=5, help="Patch version number (default: 5)")
     args = parser.parse_args()
@@ -53,8 +51,8 @@ if __name__ == "__main__":
     url = f"https://{args.url}/pub/openshift-v4/clients/ocp/"
     versions = extract_latest_versions_from_url(url, args.minor, args.patch)
 
-    yaml_file = args.file_path
-    update_yaml_with_versions(yaml_file, versions)
+    json_file = args.file_path
+    update_json_with_versions(json_file, versions)
 
-    print(f"Updated {yaml_file} with the following versions:")
+    print(f"Updated {json_file} with the following versions:")
     print("\n".join(f"- {v}" for v in versions))
