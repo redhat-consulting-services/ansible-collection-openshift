@@ -46,19 +46,30 @@ jobs:
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
 
+  version-informations:
+    runs-on: ubuntu-latest
+    outputs:
+      openshift_versions: ${{ steps.get-versions.outputs.openshift_versions }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get OpenShift versions
+        id: get-versions
+        run: |
+          echo "openshift_versions=$(jq -c . .github/openshift-versions.json)" >> $GITHUB_OUTPUT
+
   build:
     runs-on: ubuntu-latest
-    needs: generate-timestamp
+    needs:
+      - generate-timestamp
+      - version-informations
     permissions:
       contents: write
       packages: write
     strategy:
       fail-fast: false
-      matrix:
-        openshift_version:
-          - "4.17.41"
-          - "4.18.25"
-          - "4.19.15"
+      matrix: ${{ fromJson(needs.version-informations.outputs.openshift_versions) }}
     steps:
       - name: Debug output
         run: |
