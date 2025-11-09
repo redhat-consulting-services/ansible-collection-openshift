@@ -1,0 +1,45 @@
+name: Build Execution Environment Weekly
+
+on:
+  schedule:
+    # Weekly on Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  tag-lookup:
+    runs-on: ubuntu-latest
+    outputs:
+      repo_tag: ${{ steps.get_tag.outputs.repo_tag }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Get latest release tag (non prerelease)
+        id: get_tag
+        run: |
+          LATEST_TAG=$(git tag | grep -v -e "v.*-.*" | sort -r | head -n 1)
+          echo "Latest tag is $LATEST_TAG"
+          echo "repo_tag=${LATEST_TAG}" >> $GITHUB_OUTPUT
+
+  external-flow:
+    permissions:
+      contents: write
+      packages: write
+    needs:
+      - tag-lookup
+    uses: ./.github/workflows/build-ee.yaml
+    if: needs.tag-lookup.outputs.repo_tag != ''
+    with:
+      push: true
+      version: ${{ needs.tag-lookup.outputs.repo_tag }}
+      ee_registry_url: ghcr.io
+      ee_image_repo: "redhat-consulting-services/ee-openshift"
+    secrets:
+      registry_redhat_io_username: ${{ secrets.REGISTRY_REDHAT_IO_USERNAME }}
+      registry_redhat_io_password: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}
+      ee_registry_username: ${{ github.actor }}
+      ee_registry_password: ${{ secrets.GITHUB_TOKEN }}
