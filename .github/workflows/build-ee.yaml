@@ -39,6 +39,8 @@ env:
 jobs:
   generate-timestamp:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
     steps:
@@ -48,6 +50,8 @@ jobs:
 
   version-informations:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       openshift_versions: ${{ steps.get-versions.outputs.openshift_versions }}
     steps:

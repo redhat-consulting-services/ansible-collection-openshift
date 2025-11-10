@@ -1,7 +1,8 @@
 name: Update OpenShift Version Matrix
 on:
-  #schedule:
-  #  - cron: '0 8 * * 1'  # Weekly on Monday at 08:00 UTC
+  schedule:
+    # Weekly on Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
   workflow_dispatch:
 
 jobs:
