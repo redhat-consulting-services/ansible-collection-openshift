@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       repo_tag: ${{ steps.get_tag.outputs.repo_tag }}
+    permissions:
+      contents: read
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
