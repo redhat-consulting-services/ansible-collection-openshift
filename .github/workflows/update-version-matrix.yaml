@@ -1,0 +1,105 @@
+name: Update OpenShift Version Matrix
+on:
+  schedule:
+    # Weekly on Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-version-matrix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION_MATRIX_FILE: .github/openshift-versions.json
+    steps:
+      - name: Determine if PR exist
+        id: pr-exist
+        run: |
+          pull_requests=$(gh pr list -s open --head feat/update-openshift-version-matrix --label enhancement --label automation --label dependencies --repo leonsteinhaeuser/github-actions-tests --json number,title,headRefName --limit 1)
+          isDefined=$(echo $pull_requests | jq 'if length > 0 then true else false end')
+          pr_number=$(echo $pull_requests | jq '.[0].number')
+          ref_name=$(echo $pull_requests | jq '.[0].headRefName' | sed -e 's/"//g')
+          echo "is_defined=$isDefined" >> $GITHUB_OUTPUT
+          echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
+          echo "ref_name=$ref_name" >> $GITHUB_OUTPUT
+
+      - name: Checkout repository (PR exist)
+        if: steps.pr-exist.outputs.is_defined == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr-exist.outputs.ref_name }}
+
+      - name: Checkout repository (no PR)
+        if: steps.pr-exist.outputs.is_defined == 'false'
+        uses: actions/checkout@v4
+
+      - name: Set up git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Setup python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install requests
+
+      - name: Execute version extraction script
+        run: |
+          python3 ./scripts/versions-extract.py mirror.openshift.com ${{ env.VERSION_MATRIX_FILE }} --minor 3 --patch 5
+
+      - name: Check if changes were made
+        id: git-check
+        run: |
+          if [ -n "$(git status --porcelain -- ${{ env.VERSION_MATRIX_FILE }})" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Change branch if changes and not in branch
+        if: steps.pr-exist.outputs.is_defined == 'false' && steps.git-check.outputs.changes == 'true'
+        run: |
+          git checkout -b feat/update-openshift-version-matrix
+
+      - name: Commit changes
+        if: steps.git-check.outputs.changes == 'true'
+        run: |
+          git add ${{ env.VERSION_MATRIX_FILE }}
+          git commit -s -m "feat: update OpenShift version matrix"
+
+      - name: Push changes to current PR branch
+        if: steps.git-check.outputs.changes == 'true' && steps.pr-exist.outputs.is_defined == 'true'
+        run: |
+          git push --force
+
+      - name: Generate Pull Request Body
+        if: steps.git-check.outputs.changes == 'true'
+        run: |
+          echo -e "# Description\n\nUpdate version matrix on ***$(date +"%b %d %Y")*** to:\n\`\`\`json\n$(cat ${{ env.VERSION_MATRIX_FILE }})\n\`\`\`" > pr_body.txt
+
+      - name: Update existing PR body
+        if: steps.git-check.outputs.changes == 'true' && steps.pr-exist.outputs.is_defined == 'true'
+        run: |
+          gh pr edit ${{ steps.pr-exist.outputs.pr_number }} --body-file pr_body.txt
+
+      - name: Push changes from current branch to origin and create PR
+        if: steps.git-check.outputs.changes == 'true' && steps.pr-exist.outputs.is_defined == 'false'
+        run: |
+          git push --set-upstream origin feat/update-openshift-version-matrix
+          gh pr create \
+            --base main \
+            --head feat/update-openshift-version-matrix \
+            --label enhancement \
+            --label automation \
+            --label dependencies \
+            --title "feat: update OpenShift version matrix" \
+            --body-file pr_body.txt

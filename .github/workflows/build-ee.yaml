@@ -39,6 +39,8 @@ env:
 jobs:
   generate-timestamp:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       timestamp: ${{ steps.timestamp.outputs.timestamp }}
     steps:
@@ -46,23 +48,36 @@ jobs:
         id: timestamp
         run: echo "timestamp=$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
 
+  version-informations:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      openshift_versions: ${{ steps.get-versions.outputs.openshift_versions }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get OpenShift versions
+        id: get-versions
+        run: |
+          echo "openshift_versions=$(jq -c . .github/openshift-versions.json)" >> $GITHUB_OUTPUT
+
   build:
     runs-on: ubuntu-latest
-    needs: generate-timestamp
+    needs:
+      - generate-timestamp
+      - version-informations
     permissions:
       contents: write
       packages: write
     strategy:
       fail-fast: false
-      matrix:
-        openshift_version:
-          - "4.17.41"
-          - "4.18.25"
-          - "4.19.15"
+      matrix: ${{ fromJson(needs.version-informations.outputs.openshift_versions) }}
     steps:
       - name: Debug output
         run: |
-          echo "OpenShift version: ${{ matrix.openshift_version }}"
+          echo "OpenShift version: ${{ matrix.openshift_versions }}"
           echo "Push: ${{ inputs.push }}"
           echo "Version: ${{ inputs.version }}"
           echo "EE Registry URL: ${{ inputs.ee_registry_url }}"
@@ -96,8 +111,8 @@ jobs:
       - name: Set image tag
         id: image_tag
         run: |
-          echo "tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_version }}-${{ needs.generate-timestamp.outputs.timestamp }}" >> $GITHUB_OUTPUT
-          echo "latest_tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_version }}-latest" >> $GITHUB_OUTPUT
+          echo "tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-${{ needs.generate-timestamp.outputs.timestamp }}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-latest" >> $GITHUB_OUTPUT
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
@@ -130,7 +145,7 @@ jobs:
             --tag ${{ steps.image_tag.outputs.tag }} \
             --tag ${{ steps.image_tag.outputs.latest_tag }} \
             --container-runtime docker \
-            --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_version }} \
+            --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_versions }} \
             --context .
 
       - name: Dump execution environment image
@@ -143,7 +158,7 @@ jobs:
         if: ${{ !inputs.push }}
         uses: actions/upload-artifact@v4
         with:
-          name: ansible-execution-environment-${{ inputs.version }}-ocp-${{ matrix.openshift_version }}
+          name: ansible-execution-environment-${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}
           path: container-images/
           retention-days: 1
           overwrite: true

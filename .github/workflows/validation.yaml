@@ -19,3 +19,6 @@ on:
 jobs:
   ansible-lint:
     uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-lint.yaml@main
+    with:
+      exclude-paths: "examples"
+      collections: "redhat_consulting_services.openshift dellemc.openmanage"

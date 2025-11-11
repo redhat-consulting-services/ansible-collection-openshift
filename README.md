@@ -20,49 +20,33 @@ The execution environment images are automatically built and published to:
 
 **GitHub Container Registry**: <https://ghcr.io/redhat-consulting-services/ee-openshift>
 
-### Available Image Tags
-
-Images are built for multiple OpenShift versions with the following tag format:
-
-- **Timestamped tags**: `ghcr.io/redhat-consulting-services/ee-openshift:<repo-tag>-ocp-<openshift-version>-<timestamp>`
-- **Latest tags**: `ghcr.io/redhat-consulting-services/ee-openshift:<repo-tag>-ocp-<openshift-version>-latest`
-
-#### Currently Supported OpenShift Versions
-
-- `4.17.41`
-- `4.18.25`
-- `4.19.15`
-
-#### Example Tags
-
-```text
-ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.19.15-202407221430
-ghcr.io/redhat-consulting-services/ee-openshift:v1.0.0-ocp-4.18.25-latest
-ghcr.io/redhat-consulting-services/ee-openshift:dev-ocp-4.17.41-latest
-```
-
 ### Automatic Builds
 
-The execution environment is automatically built using GitHub Actions on:
+When a new release is created, we automatically build both the collection and execution environment container images. These builds are based on the OpenShift versions specified in the `.github/openshift-versions.json` file.
 
-- Push to `main` or `feat/execution-environment` branches
-- Pull requests to `main`
-- Manual workflow dispatch
+Once the builds are complete, the execution environment container images are tagged and pushed to the GitHub Container Registry (GHCR). The image tags follow the format:
+
+```txt
+<release-version>-ocp-<openshift-version>-<build-timestamp>
+```
+
+Assuming a release version of `v1.0.0`, OpenShift version `4.19.15`, and a build timestamp of `202407221430`, the resulting image tag would be:
+
+```txt
+v1.0.0-ocp-4.19.15-202407221430
+```
+
+Right now, we build images for the last three minor OpenShift versions, each with the last five patch versions. For the list of supported OpenShift versions, refer to the `.github/openshift-versions.json` file.
+
+When a new release is created, we also create `latest` tags for the most recent patch version of each minor OpenShift version. Continuing the previous example, if `4.19.15` is the latest patch version for the `4.19` minor version, the following `latest` tag would also be created:
+
+```txt
+v1.0.0-ocp-4.19.15-latest
+```
 
 ### Adding New OpenShift Versions
 
-To add support for new OpenShift versions, modify the matrix in `.github/workflows/build-ee.yaml`:
-
-```yaml
-strategy:
-  fail-fast: false
-  matrix:
-    openshift_version:
-      - "4.17.41"
-      - "4.18.25"
-      - "4.19.15"
-      - "4.20.0"  # Add new versions here
-```
+OpenShift versions are managed via the `scripts/versions-extract.py` script, which extracts the latest versions from `mirror.openshift.com` and updates the `.github/openshift-versions.json` file. The GitHub Actions workflow `.github/workflows/update-version-matrix.yaml` runs this script to keep the version matrix up to date (currently once a week). Manual updates to the JSON are not recommended, as they will be overwritten by the script.
 
 ### What's Included
 
