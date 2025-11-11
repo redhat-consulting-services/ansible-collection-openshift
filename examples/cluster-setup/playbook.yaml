@@ -52,7 +52,7 @@
     boot_source_mode: "uefi"
   tasks:
     - name: Force unmount any existing virtual media
-      dellmc.openmanage.idrac_virtual_media:
+      dellemc.openmanage.idrac_virtual_media:
         idrac_ip: "{{ host }}"
         idrac_user: "{{ user }}"
         idrac_password: "{{ password }}"
@@ -64,7 +64,7 @@
       delegate_to: localhost
 
     - name: Insert virtual media ISO
-      dellmc.openmanage.idrac_virtual_media:
+      dellemc.openmanage.idrac_virtual_media:
         idrac_ip: "{{ host }}"
         idrac_user: "{{ user }}"
         idrac_password: "{{ password }}"
@@ -77,7 +77,7 @@
       delegate_to: localhost
 
     - name: One-time boot with virtual media
-      dellmc.openmanage.idrac_virtual_media:
+      dellemc.openmanage.idrac_virtual_media:
         idrac_ip: "{{ host }}"
         idrac_user: "{{ user }}"
         idrac_password: "{{ password }}"
@@ -162,7 +162,7 @@
     boot_source_mode: "uefi"
   tasks:
     - name: Force unmount any existing virtual media
-      dellmc.openmanage.idrac_virtual_media:
+      dellemc.openmanage.idrac_virtual_media:
         idrac_ip: "{{ host }}"
         idrac_user: "{{ user }}"
         idrac_password: "{{ password }}"
@@ -174,7 +174,7 @@
       delegate_to: localhost
 
     - name: Insert virtual media ISO
-      dellmc.openmanage.idrac_virtual_media:
+      dellemc.openmanage.idrac_virtual_media:
         idrac_ip: "{{ host }}"
         idrac_user: "{{ user }}"
         idrac_password: "{{ password }}"
@@ -187,7 +187,7 @@
       delegate_to: localhost
 
     - name: One-time boot with virtual media
-      dellmc.openmanage.idrac_virtual_media:
+      dellemc.openmanage.idrac_virtual_media:
         idrac_ip: "{{ host }}"
         idrac_user: "{{ user }}"
         idrac_password: "{{ password }}"
