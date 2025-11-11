@@ -8,15 +8,15 @@ This script extracts the latest OpenShift versions from a specified URL and upda
 
 Arguments:
 
-- `url`: The URL to process for version extraction. In most cases, this should be set to `mirror.openshift.com`.
 - `file_path`: The path to the YAML file to update.
+- `--url`: (Optional) The URL to process for version extraction (default is `mirror.openshift.com`).`
 - `--minor`: (Optional) The number of minor versions to extract (default is 3).
 - `--patch`: (Optional) The number of patch versions to extract (default is 5).
 
 Example usage:
 
 ```bash
-python3 versions-extract.py mirror.openshift.com .github/workflows/build-ee.yaml
+python3 versions-extract.py .github/workflows/build-ee.yaml
 ```
 
 ### Execution

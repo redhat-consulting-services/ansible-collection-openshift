@@ -25,7 +25,7 @@ def extract_latest_versions_from_url(url: str, num_majorminor: int = 3, num_patc
     result = []
     for mm in last_major_minor:
         patches = sorted(grouped[mm])[-num_patch:]
-        result.extend([f"v{mm}.{p}" for p in patches])
+        result.extend([f"{mm}.{p}" for p in patches])
 
     return result
 
@@ -42,8 +42,8 @@ def update_json_with_versions(json_file: str, versions: list):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process a URL and file path with version info.")
-    parser.add_argument("url", help="The URL to process. In most cases this should be mirror.openshift.com")
     parser.add_argument("file_path", help="The path to the JSON file")
+    parser.add_argument("--url", type=str, default="mirror.openshift.com", help="The URL to process (default: mirror.openshift.com)")
     parser.add_argument("--minor", type=int, default=3, help="Minor version number (default: 3)")
     parser.add_argument("--patch", type=int, default=5, help="Patch version number (default: 5)")
     args = parser.parse_args()
