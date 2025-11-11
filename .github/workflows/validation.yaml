@@ -19,3 +19,5 @@ on:
 jobs:
   ansible-lint:
     uses: redhat-consulting-services/github-actions-collection/.github/workflows/ansible-lint.yaml@main
+    with:
+      exclude-paths: "examples .github docs scripts tests"
