@@ -1,0 +1,37 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+# Kubeconfig configuration
+kubeconfig_path: "~/.kube/config"
+
+# OperatorHub management
+manage_operator_hub: true
+disable_default_operator_sources: true
+
+# Operator marketplace configuration
+operator_marketplace_namespace: "openshift-marketplace"
+restart_operator_pods: false
+wait_for_pod_ready: true
+operator_pod_restart_timeout: 300
+
+# Pod filtering configuration
+operator_pod_filter_type: "match"
+operator_pod_name_pattern: "^cs-redhat-operator-index.*"
+operator_pod_label_selectors:
+  - "olm.catalogSource"
+
+# Template configurations (empty by default)
+operator_catalog_sources: []
+operator_image_digest_mirrorsets: []
+image_tag_mirrorsets: []
+platform_mirrorsets: []
+
+# MachineConfigPool monitoring
+monitor_mcp_updates: false
+wait_for_mcp_completion: true
+validate_mcp_completion: true
+mcp_names:
+  - "master"
+  - "worker"
+mcp_check_timeout: 1800  # 30 minutes
+mcp_check_interval: 30   # 30 seconds
