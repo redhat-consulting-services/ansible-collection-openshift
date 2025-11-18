@@ -51,11 +51,8 @@ As part of this example, we assume the following server and network setup:
 
 ## Execute the Playbook
 
+To run the playbook using ansible-navigator, use the following command:
+
 ```bash
-ansible-navigator run playbook.yml \
-    -m /opt/cluster-config:/tmp/cluster \
-    -m /nfs:/nfs \
-    -m $(pwd):/runner \
-    -eei ghcr.io/redhat-consulting-services/ee-openshift:v0.1.0-ocp-4.19.15-latest \
-    -v
+ansible-navigator run playbook.yml -i inventory/hosts.yaml
 ```
