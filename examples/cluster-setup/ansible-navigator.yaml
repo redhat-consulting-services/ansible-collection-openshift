@@ -1,0 +1,17 @@
+ansible-navigator:
+  mode: stdout
+  playbook-artifact:
+    enable: false
+  execution-environment:
+    enabled: true
+    image: ghcr.io/redhat-consulting-services/ee-openshift:v0.2.0-ocp-4.19.18-latest
+    volume-mounts:
+      - src: ./configs
+        dest: /workdir
+        options: Z
+      - src: ./iso
+        dest: /iso
+        options: Z
+      - src: /nfs/isos
+        dest: /nfs/isos
+        options: Z
