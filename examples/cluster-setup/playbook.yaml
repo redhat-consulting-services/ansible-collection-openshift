@@ -8,7 +8,7 @@
     cluster_name: &cluster_name ocp
     base_domain: example.com
   vars_files:
-    - ./cluster_config.yaml
+    - /workdir/cluster_config.yaml
   roles:
     - redhat_consulting_services.openshift.bootstrap_cluster
 
@@ -18,18 +18,19 @@
   connection: local
   vars:
     iso_output_dir: *isodir
+    cluster_name: *cluster_name
     iso_nfs_share: /nfs/isos
   tasks:
     - name: Find all .iso files in the output directory
       ansible.builtin.find:
-        paths: "{{ iso_output_dir }}"
+        paths: "{{ iso_output_dir }}/{{ cluster_name }}"
         patterns: "*.iso"
       register: found_iso_files
       delegate_to: localhost
 
     - name: Check if any ISO files were found
       ansible.builtin.fail:
-        msg: "No ISO files found in {{ iso_output_dir }}"
+        msg: "No ISO files found in {{ iso_output_dir }}/{{ cluster_name }}"
       when: found_iso_files.matched == 0
       delegate_to: localhost
 
@@ -118,7 +119,7 @@
     kubeconfig_path: &kubeconfig "/tmp/cluster/boostrap/ocp/auth/kubeconfig"
     iso_output_dir: &isodir2 /tmp/cluster/scaling
   vars_files:
-    - &scaling_config ./nodes_config.yaml
+    - &scaling_config /workdir/nodes_config.yaml
   roles:
     - redhat_consulting_services.openshift.add_nodes
 
