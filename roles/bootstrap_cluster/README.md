@@ -235,6 +235,9 @@ When this role is executed, it will set the following facts automatically:
 | kubeconfig_path         | The generated path to the kubeconfig file. |
 | kubeadmin_password_path | The generated path to the kubeadmin password file. |
 | bootfile_path           | The generated path to the bootable ISO file or PXE artifacts. |
+| master_node_count       | The number of master nodes defined in the agent_config. |
+| worker_node_count       | The number of worker nodes defined in the agent_config. |
+| total_node_count        | The total number of nodes (master + worker) defined in the agent_config. |
 
 ## Example Playbook
 

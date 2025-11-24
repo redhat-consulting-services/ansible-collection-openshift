@@ -11,6 +11,9 @@
       {% else %}
       {{ iso_output_dir }}/{{ cluster_name }}/agent.{{ arch }}.iso
       {% endif %}
+    master_node_count: "{{ agent_config.master.hosts | length }}"
+    worker_node_count: "{{ agent_config.worker.hosts | length }}"
+    total_node_count: "{{ agent_config.master.hosts | length + agent_config.worker.hosts | length }}"
 
 - name: Create output directory structure
   ansible.builtin.file:
