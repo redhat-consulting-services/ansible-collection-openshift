@@ -1,2 +1,55 @@
 # ansible-role-argocd-installation
+
 An Ansible role for the installation of OpenShift GitOps on an existing cluster.
+
+## Role Variables
+
+```yaml
+---
+argocd:
+  placement:
+    node_selector:
+      node-role.kubernetes.io/infra: ""
+    tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/infra
+        operator: Exists
+      - effect: NoExecute
+        key: node-role.kubernetes.io/infra
+        operator: Exists
+  operator:
+    channel: gitops-1.16
+    install_plan_approval: Automatic
+    metadata:
+      name: openshift-gitops-operator
+      namespace: openshift-gitops-operator
+    subscription:
+      name: openshift-gitops-operator
+      source: redhat-operators
+      source_namespace: openshift-marketplace
+      # Optional: Pin to specific CSV version. If empty/undefined, uses latest from channel
+      starting_csv: openshift-gitops-operators.v1.16.0
+
+  # Instance configuration
+  instance:
+    name: openshift-gitops
+    namespace: openshift-gitops
+    ha_enabled: false
+    rbac_policy: |
+      g, system:cluster-admins, role:admin
+      g, cluster-admins, role:admin
+    # rbac_scopes: Optional, defaults to 'groups'
+    rbac_scopes: groups
+
+  # AppofApps configuration
+  sync:
+    prune: true
+    self_heal: true
+
+  # Git repository configuration
+  git:
+    name: app-of-apps-repo
+    repo: https://gitlab.example/openshift/openshift-configurations.git
+    path: clusters/ocp-cluster/appofapps
+    branch: main
+```
