@@ -1,5 +1,5 @@
 ---
-- name: Set folder facts
+- name: Set bootstrap facts
   ansible.builtin.set_fact:
     base_dir: "{{ iso_output_dir }}/{{ cluster_name }}"
     manifest_folder: "{{ iso_output_dir }}/{{ cluster_name }}/manifests"
