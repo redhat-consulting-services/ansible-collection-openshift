@@ -3,9 +3,9 @@
   gather_facts: false
   become: false
   vars:
-    iso_output_dir: &isodir /tmp/cluster/boostrap
+    iso_output_dir: /tmp/cluster/boostrap
     tenant_name: example
-    cluster_name: &cluster_name ocp
+    cluster_name: ocp
     base_domain: example.com
   vars_files:
     - /workdir/cluster_config.yaml
@@ -17,40 +17,23 @@
   become: false
   connection: local
   vars:
-    iso_output_dir: *isodir
-    cluster_name: *cluster_name
     iso_nfs_share: /nfs/isos
+    # bootfile_path is set by the bootstrap role to the generated ISO
+    bootfile_path: "{{ bootfile_path }}"
   tasks:
-    - name: Find all .iso files in the output directory
-      ansible.builtin.find:
-        paths: "{{ iso_output_dir }}/{{ cluster_name }}"
-        patterns: "*.iso"
-      register: found_iso_files
-      delegate_to: localhost
-
-    - name: Check if any ISO files were found
-      ansible.builtin.fail:
-        msg: "No ISO files found in {{ iso_output_dir }}/{{ cluster_name }}"
-      when: found_iso_files.matched == 0
-      delegate_to: localhost
-
     - name: Copy ISO files to NFS share (served by webserver)
       ansible.builtin.copy:
-        src: "{{ item.path }}"
+        src: "{{ bootfile_path }}"
         dest: "{{ iso_nfs_share }}/"
         mode: '0766'
         remote_src: yes
-      loop: "{{ found_iso_files.files }}"
-      when: found_iso_files.matched > 0
 
 - name: Boot initial nodes from NFS ISO
   hosts: initial
   gather_facts: false
   become: false
   vars:
-    virtual_media_uri: "/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia"
-    file_location: "http://webserver.example.com/isos/agent.x86_64.iso"
-    boot_source_mode: "uefi"
+    nfs_url: "nfs.example.com:/nfs/isos/agent.x86_64.iso"
   tasks:
     - name: Force unmount any existing virtual media
       dellemc.openmanage.idrac_virtual_media:
@@ -74,7 +57,7 @@
         virtual_media:
           - index: 1
             insert: true
-            image: "{{ file_location }}"
+            image: "{{ nfs_url }}"
       delegate_to: localhost
 
     - name: One-time boot with virtual media
@@ -83,7 +66,7 @@
         idrac_user: "{{ user }}"
         idrac_password: "{{ password }}"
         validate_certs: false
-        boot_source_override_mode: "{{ boot_source_mode }}"
+        boot_source_override_mode: "uefi"
         boot_source_override_target: "cd"
         boot_source_override_enabled: "once"
       delegate_to: localhost
@@ -92,19 +75,16 @@
   hosts: localhost
   gather_facts: false
   become: false
-  vars:
-    iso_output_dir: *isodir
-    cluster_name: *cluster_name
   environment:
-    KUBECONFIG: "{{ iso_output_dir }}/{{ cluster_name }}/auth/kubeconfig"
+    KUBECONFIG: "{{ kubeconfig_path }}"
   tasks:
     - name: Wait for cluster bootstrap to complete
       ansible.builtin.command: >
-        openshift-install wait-for bootstrap-complete --dir {{ iso_output_dir }}/{{ cluster_name }} --log-level=debug
+        openshift-install wait-for bootstrap-complete --dir {{ base_dir }} --log-level=debug
 
     - name: Wait for cluster installation to complete
       ansible.builtin.command: >
-        openshift-install wait-for install-complete --dir {{ iso_output_dir }}/{{ cluster_name }} --log-level=debug
+        openshift-install wait-for install-complete --dir {{ base_dir }} --log-level=debug
 
     - name: List cluster nodes
       ansible.builtin.command: >
@@ -116,7 +96,7 @@
   gather_facts: false
   become: false
   vars:
-    kubeconfig_path: &kubeconfig "/tmp/cluster/boostrap/ocp/auth/kubeconfig"
+    kubeconfig_path: "{{ kubeconfig_path }}"
     iso_output_dir: &isodir2 /tmp/cluster/scaling
   vars_files:
     - &scaling_config /workdir/nodes_config.yaml
@@ -203,7 +183,6 @@
   gather_facts: false
   become: false
   vars:
-    kubeconfig_path: *kubeconfig
     node_scaling_config: *scaling_config
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"

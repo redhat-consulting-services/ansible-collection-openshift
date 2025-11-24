@@ -223,3 +223,36 @@ agent_config:
                 # subnet_length is the subnet length for the interface.
                 subnet_length: 24
 ```
+
+## Role facts
+
+When this role is executed, it will set the following facts automatically:
+
+| Fact Name               | Description                                      |
+|-------------------------|--------------------------------------------------|
+| cluster_name            | The name of the OpenShift cluster.               |
+| base_domain             | The base domain of the OpenShift cluster.        |
+| cluster_domain          | The full domain of the OpenShift cluster.        |
+| base_dir                | The generated base directory in which the ISO and installation configs are stored. |
+| manifest_folder         | The generated directory where the agent-config.yaml and install-config.yaml files are backed up. |
+| kubeconfig_path         | The generated path to the kubeconfig file. |
+| kubeadmin_password_path | The generated path to the kubeadmin password file. |
+| bootfile_path           | The generated path to the bootable ISO file or PXE artifacts. |
+| master_node_count       | The number of master nodes defined in the agent_config. |
+| worker_node_count       | The number of worker nodes defined in the agent_config. |
+| total_node_count        | The total number of nodes (master + worker) defined in the agent_config. |
+
+## Example Playbook
+
+```yaml
+- name: Bootstrap OpenShift Cluster
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars_files:
+    - ./cluster_config.yaml
+  roles:
+    - redhat_consulting_services.openshift.bootstrap_cluster
+```
+
+For a more detailed example, please refer to the `examples/cluster-setup/playbook.yaml` file in this collection.
