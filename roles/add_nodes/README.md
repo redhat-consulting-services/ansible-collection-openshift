@@ -22,8 +22,8 @@ kubeconfig_path: ""
 
 # generate_iso defines whether to generate an ISO image for the cluster nodes. If set to true, the role will generate an ISO image with the OpenShift cluster boot artifacts.
 generate_iso: true
-# iso_output_dir defines the output directory for the generated ISO image. This directory is used to store the generated ISO image and its contents.
-iso_output_dir: ./tmp/iso
+# base_dir defines the output directory for the generated ISO image. This directory is used to store the generated ISO image and its contents.
+base_dir: /iso
 # pull_secret is the pull secret used to access the OpenShift container images. It is required to generate the ISO image if `generate_iso` is set to true.
 pull_secret: ""
 # worker defines the configuration for the worker nodes in the OpenShift cluster. It is used to configure the worker nodes, including their hostnames, root devices, network interfaces, and VLANs.
@@ -120,3 +120,33 @@ worker:
               # subnet_length is the subnet length for the VLAN interface. It is used to configure the subnet length for the VLAN interface.
               subnet_length: 24
 ```
+
+## Role facts
+
+When this role is executed, it will set the following facts automatically:
+
+| Fact Name               | Description                                      |
+|-------------------------|--------------------------------------------------|
+| base_dir                | The generated base directory in which the ISO and installation configs are stored. |
+| manifest_folder         | The generated directory where the agent-config.yaml and install-config.yaml files are backed up. |
+| kubeconfig_path         | The generated path to the kubeconfig file. |
+| kubeadmin_password_path | The generated path to the kubeadmin password file. |
+| bootfile_path           | The generated path to the bootable ISO file or PXE artifacts. |
+| master_node_count       | The number of master nodes defined in the agent_config. |
+| worker_node_count       | The number of worker nodes defined in the agent_config. |
+| total_node_count        | The total number of nodes (master + worker) defined in the agent_config. |
+
+## Example Playbook
+
+```yaml
+- name: Add OpenShift Nodes to Cluster
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars_files:
+    - ./node_config.yaml
+  roles:
+    - redhat_consulting_services.openshift.add_nodes
+```
+
+For a more detailed example, please refer to the `examples/cluster-setup/playbook.yaml` file in this collection.
