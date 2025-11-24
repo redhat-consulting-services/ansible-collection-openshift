@@ -1,39 +1,44 @@
 ---
+- name: Set facts for manifest generation
+  ansible.builtin.set_fact:
+    manifest_folder: "{{ base_dir }}/manifests"
+    credentials_folder: "{{ base_dir }}/credentials"
+
 - name: Create output directory for credentials files
   ansible.builtin.file:
-    path: "{{ iso_output_dir }}/credentials"
+    path: "{{ credentials_folder }}"
     state: directory
     mode: '0744'
 
 - name: Generate auth.json
   ansible.builtin.template:
     src: auth.json.j2
-    dest: "{{ iso_output_dir }}/credentials/auth.json"
+    dest: "{{ base_dir }}/credentials/auth.json"
     mode: '0644'
 
 - name: Create output directory structure
   ansible.builtin.file:
-    path: "{{ iso_output_dir }}/manifests"
+    path: "{{ manifest_folder }}"
     state: directory
     mode: '0744'
 
 - name: Generate nodes-config.yaml
   ansible.builtin.template:
     src: nodes-config.yaml.j2
-    dest: "{{ iso_output_dir }}/nodes-config.yaml"
+    dest: "{{ base_dir }}/nodes-config.yaml"
     mode: '0644'
 
 - name: Backup nodes-config.yaml manifest file
   ansible.builtin.copy:
-    src: "{{ iso_output_dir }}/nodes-config.yaml"
-    dest: "{{ iso_output_dir }}/manifests/nodes-config.yaml"
+    src: "{{ base_dir }}/nodes-config.yaml"
+    dest: "{{ manifest_folder }}/nodes-config.yaml"
     mode: '0644'
 
 - name: Create the bootable ISO
   when: generate_iso | bool
   ansible.builtin.command: >
-    oc adm node-image create --registry-config={{ iso_output_dir }}/credentials/auth.json --dir {{ iso_output_dir }}/
+    oc adm node-image create --registry-config={{ credentials_folder }}/auth.json --dir {{ base_dir }}/
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   args:
-    creates: "{{ iso_output_dir }}/agent.iso"
+    creates: "{{ base_dir }}/agent.iso"
