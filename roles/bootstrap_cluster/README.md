@@ -230,6 +230,9 @@ When this role is executed, it will set the following facts automatically:
 
 | Fact Name               | Description                                      |
 |-------------------------|--------------------------------------------------|
+| cluster_name            | The name of the OpenShift cluster.               |
+| base_domain             | The base domain of the OpenShift cluster.        |
+| cluster_domain          | The full domain of the OpenShift cluster.        |
 | base_dir                | The generated base directory in which the ISO and installation configs are stored. |
 | manifest_folder         | The generated directory where the agent-config.yaml and install-config.yaml files are backed up. |
 | kubeconfig_path         | The generated path to the kubeconfig file. |
