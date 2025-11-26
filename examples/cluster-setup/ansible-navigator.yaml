@@ -4,7 +4,13 @@ ansible-navigator:
     enable: false
   execution-environment:
     enabled: true
-    image: ghcr.io/redhat-consulting-services/ee-openshift:v0.2.0-ocp-4.19.18-latest
+    image: ghcr.io/redhat-consulting-services/ee-openshift:v0.3.0-ocp-4.20.4-latest
+    pull:
+      policy: missing
+    container-options:
+      - "--runtime=crun"
+      # depending on the permissions of the file system, it may be necessary to retain the user groups. In that case, uncomment the following line
+      # - "--annotation=run.oci.keep_original_groups=1"
     volume-mounts:
       - src: ./configs
         dest: /workdir
