@@ -7,7 +7,7 @@ spec:
   displayName: Internal Operator Catalog
   grpcPodConfig:
     securityContextConfig: restricted
-  image: oregistry.example.com/redhat/redhat-operator-index:v4.18
+  image: registry.example.com/redhat/redhat-operator-index:v4.18
   publisher: Continentale Mirror
   sourceType: grpc
   updateStrategy:
