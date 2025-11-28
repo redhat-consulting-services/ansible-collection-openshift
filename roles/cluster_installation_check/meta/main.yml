@@ -2,7 +2,7 @@
 galaxy_info:
   role_name: cluster_installation_check
   author: Red Hat Consulting Services
-  description: A role to bootstrap an OpenShift cluster
+  description: An Ansible role to ensure the OpenShift cluster is healthy and ready for further configuration. This role performs various checks and validations on the cluster components. Usually this role is executed as part of a larger playbook that bootstraps and installs an OpenShift cluster.
   company: Red Hat
 
   # If the issue tracker for your role is not on github, uncomment the
