@@ -71,7 +71,7 @@ ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=
 
 ### Usage
 
-Instructions on how to use the execution environment and the collection can be found in the [examples/cluster-setup](./examples/cluster-setup/README.md) directory.
+Instructions on how to use the execution environment and the collection can be found in the [examples/dell_hardware](./examples/dell_hardware/README.md) directory.
 
 ## CI Flow
 
