@@ -5,8 +5,8 @@ metadata:
 spec:
   imageDigestMirrors:
   - mirrors:
-    - oregistry.example.com/openshift/release-images
+    - registry.example.com/openshift/release-images
     source: quay.io/openshift-release-dev/ocp-release
   - mirrors:
-    - oregistry.example.com/openshift/release
+    - registry.example.com/openshift/release
     source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
