@@ -255,4 +255,4 @@ When this role is executed, it will set the following facts automatically:
     - redhat_consulting_services.openshift.bootstrap_cluster
 ```
 
-For a more detailed example, please refer to the `examples/cluster-setup/playbook.yaml` file in this collection.
+For a more detailed example, please refer to the `examples/dell_hardware/playbook.yaml` file in this collection.
