@@ -2,6 +2,7 @@
   hosts: localhost
   gather_facts: false
   become: false
+  tags: bootstrap_cluster
   vars:
     iso_output_dir: /tmp/cluster/boostrap
     tenant_name: example
@@ -15,6 +16,7 @@
 - name: Copy ISO to NFS Share
   hosts: localhost
   become: false
+  tags: copy_iso
   connection: local
   vars:
     iso_nfs_share: /nfs/isos
@@ -32,6 +34,7 @@
   hosts: initial
   gather_facts: false
   become: false
+  tags: boot_nodes
   vars:
     nfs_url: "nfs.example.com:/nfs/isos/agent.x86_64.iso"
   tasks:
@@ -75,6 +78,7 @@
   hosts: localhost
   gather_facts: false
   become: false
+  tags: monitor_installation
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   tasks:
@@ -95,6 +99,7 @@
   hosts: localhost
   gather_facts: false
   become: false
+  tags: setup_olm
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   tasks:
@@ -116,7 +121,7 @@
 - name: Setup OpenShift GitOps
   hosts: localhost
   gather_facts: false
-  become: true
+  become: false
   tags: bootstrap_gitops
   roles:
     - redhat_consulting_services.openshift.bootstrap_gitops
