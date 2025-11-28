@@ -8,7 +8,7 @@ spec:
   grpcPodConfig:
     securityContextConfig: restricted
   image: registry.example.com/redhat/redhat-operator-index:v4.18
-  publisher: Continentale Mirror
+  publisher: My Mirror
   sourceType: grpc
   updateStrategy:
     registryPoll:
