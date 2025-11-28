@@ -125,3 +125,23 @@
   tags: bootstrap_gitops
   roles:
     - redhat_consulting_services.openshift.bootstrap_gitops
+
+- name: Label and taint infra nodes
+  hosts: localhost
+  gather_facts: false
+  become: false
+  tags: configure_nodes
+  vars:
+    node_filter_pattern: '^infra-.*\.ocp\.example\.com$'
+    node_labels:
+      node-role.kubernetes.io/infra: ""
+      node-role.kubernetes.io/worker: null
+    node_taints:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/infra
+        value: reserved
+      - effect: NoExecute
+        key: node-role.kubernetes.io/infra
+        value: reserved
+  roles:
+    - redhat_consulting_services.openshift.configure_nodes
