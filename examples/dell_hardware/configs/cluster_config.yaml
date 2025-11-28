@@ -112,7 +112,7 @@ agent_config:
     bonds: *bonds
     vlans: *vlans
     hosts:
-      - hostname: worker-01.ocp1.example.com
+      - hostname: infra-01.ocp1.example.com
         root_device:
           serial_number: "0000010000000001"
         interfaces:
@@ -130,7 +130,7 @@ agent_config:
               - ip: 10.10.10.20
                 subnet_length: 24
 
-      - hostname: worker-02.ocp1.example.com
+      - hostname: infra-02.ocp1.example.com
         root_device:
           serial_number: "0000010000000002"
         interfaces:
@@ -148,7 +148,7 @@ agent_config:
               - ip: 10.10.10.21
                 subnet_length: 24
 
-      - hostname: worker-03.ocp1.example.com
+      - hostname: infra-03.ocp1.example.com
         root_device:
           serial_number: "0000010000000003"
         interfaces:
