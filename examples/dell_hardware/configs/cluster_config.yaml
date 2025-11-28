@@ -7,6 +7,14 @@ pull_secret: !vault |
 ssh_public_key: |
   ssh-ed25519 AAAAAAA... openshift@machines.ocp.example.com
 
+image_digest_sources:
+  - mirrors:
+      - registry.example.com/openshift/release
+    source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+  - mirrors:
+      - registry.example.com/openshift/release-images
+    source: quay.io/openshift-release-dev/ocp-release
+
 additional_ntp_sources:
   - 192.168.255.100
   - 192.168.255.101
