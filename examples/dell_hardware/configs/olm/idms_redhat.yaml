@@ -1,0 +1,24 @@
+apiVersion: config.openshift.io/v1
+kind: ImageDigestMirrorSet
+metadata:
+  name: idms-ocp4-operator
+spec:
+  imageDigestMirrors:
+  - mirrors:
+    - oregistry.example.com/openshift-gitops-1
+    source: registry.redhat.io/openshift-gitops-1
+  - mirrors:
+    - oregistry.example.com/openshift4
+    source: registry.redhat.io/openshift4
+  - mirrors:
+    - oregistry.example.com/rhel8
+    source: registry.redhat.io/rhel8
+  - mirrors:
+    - oregistry.example.com/rhel9
+    source: registry.redhat.io/rhel9
+  - mirrors:
+    - oregistry.example.com/ubi8
+    source: registry.redhat.io/ubi8
+  - mirrors:
+    - oregistry.example.com/ubi9
+    source: registry.redhat.io/ubi9
