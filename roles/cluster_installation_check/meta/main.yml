@@ -1,6 +1,6 @@
 #SPDX-License-Identifier: Apache-2.0
 galaxy_info:
-  role_name: bootstrap_cluster_health
+  role_name: cluster_installation_check
   author: Red Hat Consulting Services
   description: A role to bootstrap an OpenShift cluster
   company: Red Hat

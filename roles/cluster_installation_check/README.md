@@ -1,6 +1,6 @@
-# bootstrap_cluster_health
+# cluster_installation_check
 
-An Ansible role to ensure the OpenShift cluster is healthy and ready for further configuration. This role performs various health checks and validations on the cluster components. Usually this role is executed as part of a larger playbook that bootstraps and installs an OpenShift cluster.
+An Ansible role to ensure the OpenShift cluster is healthy and ready for further configuration. This role performs various checks and validations on the cluster components. Usually this role is executed as part of a larger playbook that bootstraps and installs an OpenShift cluster.
 
 ## Role Variables
 
