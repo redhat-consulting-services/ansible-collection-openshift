@@ -1,0 +1,17 @@
+#SPDX-License-Identifier: Apache-2.0
+---
+# kubeconfig_path: Path to the kubeconfig file for the cluster
+# This is usually located at <base_dir>/auth/kubeconfig
+# When executed as part of a larger playbook where the bootstrap_cluster role is used,
+# this variable is automatically set to the correct path.
+kubeconfig_path: ""
+
+# bootstrap_log_level: Level of logging for bootstrap wait command
+# Valid values are: debug, info, warn, error
+# Default is info
+bootstrap_log_level: info
+
+# installation_log_level: Level of logging for installation wait command
+# Valid values are: debug, info, warn, error
+# Default is info
+installation_log_level: info

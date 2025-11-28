@@ -6,6 +6,7 @@ A collection that bundles roles for the management of OpenShift clusters
 
 - **add_nodes**: A role to add nodes to an OpenShift cluster
 - **bootstrap_cluster**: A role to bootstrap an OpenShift cluster
+- **cluster_installation_check**: A role to check the installation status of an OpenShift cluster
 - **bootstrap_gitops**: A role to install and configure OpenShift GitOps on an OpenShift cluster
 - **configure_nodes**: A role to label and/or taint nodes in an OpenShift cluster
 - **mirror_images**: A role to mirror OpenShift Operators and container images to a private registry
