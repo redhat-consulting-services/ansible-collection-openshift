@@ -5,7 +5,7 @@ pull_secret: !vault |
           $ANSIBLE_VAULT;1.1;AES256
 
 ssh_public_key: |
-  ssh-ed25519 AAAAAAA... openshift@machines.ocp1.example.com
+  ssh-ed25519 AAAAAAA... openshift@machines.ocp.example.com
 
 additional_ntp_sources:
   - 192.168.255.100
@@ -17,7 +17,7 @@ ingress_vip: 10.10.10.9
 proxy:
   http: http://10.10.9.11:9148
   https: http://10.10.9.111:9148
-  no_proxy: "localhost,ocp1.example.com,apps.ocp1.example.com,10.10.10.0/24"
+  no_proxy: "localhost,ocp.example.com,apps.ocp.example.com,10.10.10.0/24"
 
 networking:
   cluster_networks:
@@ -51,7 +51,7 @@ agent_config:
         id: 1111
         base_interface: bond0
     hosts:
-      - hostname: master-01.ocp1.example.com
+      - hostname: master-01.ocp.example.com
         root_device:
           serial_number: "0000000000000001"
         interfaces:
@@ -69,7 +69,7 @@ agent_config:
               - ip: 10.10.10.10
                 subnet_length: 24
 
-      - hostname: master-02.ocp1.example.com
+      - hostname: master-02.ocp.example.com
         root_device:
           serial_number: "0000000000000002"
         interfaces:
@@ -87,7 +87,7 @@ agent_config:
               - ip: 10.10.10.11
                 subnet_length: 24
 
-      - hostname: master-03.ocp1.example.com
+      - hostname: master-03.ocp.example.com
         root_device:
           serial_number: "0000000000000003"
         interfaces:
@@ -112,7 +112,7 @@ agent_config:
     bonds: *bonds
     vlans: *vlans
     hosts:
-      - hostname: infra-01.ocp1.example.com
+      - hostname: infra-01.ocp.example.com
         root_device:
           serial_number: "0000010000000001"
         interfaces:
@@ -130,7 +130,7 @@ agent_config:
               - ip: 10.10.10.20
                 subnet_length: 24
 
-      - hostname: infra-02.ocp1.example.com
+      - hostname: infra-02.ocp.example.com
         root_device:
           serial_number: "0000010000000002"
         interfaces:
@@ -148,7 +148,7 @@ agent_config:
               - ip: 10.10.10.21
                 subnet_length: 24
 
-      - hostname: infra-03.ocp1.example.com
+      - hostname: infra-03.ocp.example.com
         root_device:
           serial_number: "0000010000000003"
         interfaces:
