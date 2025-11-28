@@ -1,0 +1,15 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: internal-operator-catalog
+  namespace: openshift-marketplace
+spec:
+  displayName: Internal Operator Catalog
+  grpcPodConfig:
+    securityContextConfig: restricted
+  image: registry.example.com/redhat/redhat-operator-index:v4.18
+  publisher: My Mirror
+  sourceType: grpc
+  updateStrategy:
+    registryPoll:
+      interval: 30m

@@ -3,6 +3,8 @@
   ansible.builtin.set_fact:
     manifest_folder: "{{ base_dir }}/manifests"
     credentials_folder: "{{ base_dir }}/credentials"
+    iso_location: "{{ base_dir }}/agent.iso"
+    additional_node_count: "{{ worker.hosts | length }}"
 
 - name: Create output directory for credentials files
   ansible.builtin.file:
@@ -13,7 +15,7 @@
 - name: Generate auth.json
   ansible.builtin.template:
     src: auth.json.j2
-    dest: "{{ base_dir }}/credentials/auth.json"
+    dest: "{{ credentials_folder }}/auth.json"
     mode: '0644'
 
 - name: Create output directory structure
@@ -41,4 +43,4 @@
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   args:
-    creates: "{{ base_dir }}/agent.iso"
+    creates: "{{ iso_location }}"

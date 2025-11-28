@@ -28,16 +28,16 @@ worker:
       id: 1111
       base_interface: bond0
   hosts:
-    - hostname: worker-04.ocp.example.com
+    - hostname: worker-01.ocp.example.com
       root_device:
-        serial_number: "0000010000000004"
+        serial_number: "0000020000000001"
       interfaces:
         - name: eth0
-          mac_address: "00:02:00:00:03:01"
+          mac_address: "00:03:00:00:01:01"
           part_of_bond: "bond0"
           mtu: 1500
         - name: eth1
-          mac_address: "00:02:00:00:03:02"
+          mac_address: "00:03:00:00:01:02"
           part_of_bond: "bond0"
           mtu: 1500
       vlans:
@@ -45,16 +45,16 @@ worker:
           addresses:
             - ip: 10.10.10.23
               subnet_length: 24
-    - hostname: worker-05.ocp.example.com
+    - hostname: worker-02.ocp.example.com
       root_device:
-        serial_number: "0000010000000005"
+        serial_number: "0000020000000002"
       interfaces:
         - name: eth0
-          mac_address: "00:02:00:00:04:01"
+          mac_address: "00:03:00:00:02:01"
           part_of_bond: "bond0"
           mtu: 1500
         - name: eth1
-          mac_address: "00:02:00:00:04:02"
+          mac_address: "00:03:00:00:02:02"
           part_of_bond: "bond0"
           mtu: 1500
       vlans:
@@ -62,16 +62,16 @@ worker:
           addresses:
             - ip: 10.10.10.24
               subnet_length: 24
-    - hostname: worker-06.ocp.example.com
+    - hostname: worker-03.ocp.example.com
       root_device:
-        serial_number: "0000010000000006"
+        serial_number: "0000020000000003"
       interfaces:
         - name: eth0
-          mac_address: "00:02:00:00:05:01"
+          mac_address: "00:03:00:00:03:01"
           part_of_bond: "bond0"
           mtu: 1500
         - name: eth1
-          mac_address: "00:02:00:00:05:02"
+          mac_address: "00:03:00:00:03:02"
           part_of_bond: "bond0"
           mtu: 1500
       vlans:
@@ -79,16 +79,16 @@ worker:
           addresses:
             - ip: 10.10.10.25
               subnet_length: 24
-    - hostname: worker-07.ocp.example.com
+    - hostname: worker-04.ocp.example.com
       root_device:
-        serial_number: "0000010000000007"
+        serial_number: "0000020000000004"
       interfaces:
         - name: eth0
-          mac_address: "00:02:00:00:06:01"
+          mac_address: "00:03:00:00:04:01"
           part_of_bond: "bond0"
           mtu: 1500
         - name: eth1
-          mac_address: "00:02:00:00:06:02"
+          mac_address: "00:03:00:00:04:02"
           part_of_bond: "bond0"
           mtu: 1500
       vlans:
@@ -96,16 +96,16 @@ worker:
           addresses:
             - ip: 10.10.10.26
               subnet_length: 24
-    - hostname: worker-08.ocp.example.com
+    - hostname: worker-05.ocp.example.com
       root_device:
-        serial_number: "0000010000000008"
+        serial_number: "0000020000000005"
       interfaces:
         - name: eth0
-          mac_address: "00:02:00:00:07:01"
+          mac_address: "00:03:00:00:05:01"
           part_of_bond: "bond0"
           mtu: 1500
         - name: eth1
-          mac_address: "00:02:00:00:07:02"
+          mac_address: "00:03:00:00:05:02"
           part_of_bond: "bond0"
           mtu: 1500
       vlans:
@@ -113,16 +113,16 @@ worker:
           addresses:
             - ip: 10.10.10.27
               subnet_length: 24
-    - hostname: worker-09.ocp.example.com
+    - hostname: worker-06.ocp.example.com
       root_device:
-        serial_number: "0000010000000009"
+        serial_number: "0000020000000006"
       interfaces:
         - name: eth0
-          mac_address: "00:02:00:00:08:01"
+          mac_address: "00:03:00:00:06:01"
           part_of_bond: "bond0"
           mtu: 1500
         - name: eth1
-          mac_address: "00:02:00:00:08:02"
+          mac_address: "00:03:00:00:06:02"
           part_of_bond: "bond0"
           mtu: 1500
       vlans:

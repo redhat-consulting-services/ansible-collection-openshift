@@ -18,59 +18,62 @@ all:
           password: "<password>"
           host: "http://10.10.9.12"
 
+    infra:
+      hosts:
+        infra-01:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.20"
+        infra-02:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.21"
+        infra-03:
+          user: "<user>"
+          password: "<password>"
+          host: "http://10.10.9.22"
+
     workers:
       hosts:
         worker-01:
           user: "<user>"
           password: "<password>"
-          host: "http://10.10.9.20"
+          host: "http://10.10.9.30"
         worker-02:
           user: "<user>"
           password: "<password>"
-          host: "http://10.10.9.21"
+          host: "http://10.10.9.31"
         worker-03:
           user: "<user>"
           password: "<password>"
-          host: "http://10.10.9.22"
+          host: "http://10.10.9.32"
         worker-04:
           user: "<user>"
           password: "<password>"
-          host: "http://10.10.9.23"
+          host: "http://10.10.9.33"
         worker-05:
           user: "<user>"
           password: "<password>"
-          host: "http://10.10.9.24"
+          host: "http://10.10.9.34"
         worker-06:
           user: "<user>"
           password: "<password>"
-          host: "http://10.10.9.25"
-        worker-07:
-          user: "<user>"
-          password: "<password>"
-          host: "http://10.10.9.26"
-        worker-08:
-          user: "<user>"
-          password: "<password>"
-          host: "http://10.10.9.27"
-        worker-09:
-          user: "<user>"
-          password: "<password>"
-          host: "http://10.10.9.28"
+          host: "http://10.10.9.35"
 
     initial:
       hosts:
         master-01:
         master-02:
         master-03:
-        worker-01:
-        worker-02:
-        worker-03:
+        infra-01:
+        infra-02:
+        infra-03:
 
     scaleout:
       hosts:
+        worker-01:
+        worker-02:
+        worker-03:
         worker-04:
         worker-05:
         worker-06:
-        worker-07:
-        worker-08:
-        worker-09:
