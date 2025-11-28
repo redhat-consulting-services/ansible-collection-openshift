@@ -1,0 +1,23 @@
+#SPDX-License-Identifier: Apache-2.0
+---
+- name: Wait for cluster bootstrap to complete
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  ansible.builtin.command: >
+    openshift-install wait-for bootstrap-complete --dir {{ base_dir }} --log-level={{ bootstrap_log_level }}
+
+- name: Wait for cluster installation to complete
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  ansible.builtin.command: >
+    openshift-install wait-for install-complete --dir {{ base_dir }} --log-level={{ installation_log_level }}
+
+- name: Get all nodes
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig_path }}"
+    kind: Node
+  register: node_info
+
+- name: Set cluster node count fact
+  ansible.builtin.set_fact:
+    cluster_node_count: "{{ node_info.resources | length }}"
