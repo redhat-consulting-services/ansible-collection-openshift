@@ -5,6 +5,12 @@ An Ansible role to ensure the OpenShift cluster is healthy and ready for further
 ## Role Variables
 
 ```yaml
+# base_dir: Directory where the OpenShift installation files are located
+# This is usually the directory where the install-config.yaml file is located.
+# When executed as part of a larger playbook where the bootstrap_cluster role is used,
+# this variable is automatically set to the correct path.
+base_dir: ""
+
 # kubeconfig_path: Path to the kubeconfig file for the cluster
 # This is usually located at <base_dir>/auth/kubeconfig
 # When executed as part of a larger playbook where the bootstrap_cluster role is used,
