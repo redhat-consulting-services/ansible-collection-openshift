@@ -1,0 +1,87 @@
+- name: Scale cluster by adding worker nodes
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars:
+    kubeconfig_path: "/tmp/cluster/boostrap/ocp/auth/kubeconfig"
+    base_dir: /tmp/cluster/scaling
+  vars_files:
+    - &scaling_config /workdir/nodes_config.yaml
+  roles:
+    - redhat_consulting_services.openshift.add_nodes
+
+- name: Copy ISO to NFS Share
+  hosts: localhost
+  become: false
+  connection: local
+  vars:
+    iso_nfs_share: /nfs/isos
+  tasks:
+    - name: Copy ISO files to NFS share (served by webserver)
+      ansible.builtin.copy:
+        src: "{{ iso_location }}"
+        dest: "{{ iso_nfs_share }}/"
+        mode: '0766'
+        remote_src: yes
+
+- name: Boot scaleout nodes from NFS ISO
+  hosts: scaleout
+  gather_facts: false
+  become: false
+  vars:
+    virtual_media_uri: "/redfish/v1/Managers/iDRAC.Embedded.1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia"
+    nfs_url: "nfs.example.com:/nfs/isos/agent.iso"
+    boot_source_mode: "uefi"
+  tasks:
+    - name: Force unmount any existing virtual media
+      dellemc.openmanage.idrac_virtual_media:
+        idrac_ip: "{{ host }}"
+        idrac_user: "{{ user }}"
+        idrac_password: "{{ password }}"
+        validate_certs: false
+        force: true
+        virtual_media:
+          - index: 1
+            insert: false
+      delegate_to: localhost
+
+    - name: Insert virtual media ISO
+      dellemc.openmanage.idrac_virtual_media:
+        idrac_ip: "{{ host }}"
+        idrac_user: "{{ user }}"
+        idrac_password: "{{ password }}"
+        validate_certs: false
+        force: true
+        virtual_media:
+          - index: 1
+            insert: true
+            image: "{{ nfs_url }}"
+      delegate_to: localhost
+
+    - name: One-time boot with virtual media
+      dellemc.openmanage.idrac_virtual_media:
+        idrac_ip: "{{ host }}"
+        idrac_user: "{{ user }}"
+        idrac_password: "{{ password }}"
+        validate_certs: false
+        boot_source_override_mode: "{{ boot_source_mode }}"
+        boot_source_override_target: "cd"
+        boot_source_override_enabled: "once"
+      delegate_to: localhost
+
+- name: Monitor cluster after scaling
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars:
+    node_scaling_config: *scaling_config
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  tasks:
+    - name: Wait for new nodes to be ready
+      ansible.builtin.command: >
+        oc adm node-image monitor --ip-addresses=$(echo $(yq '.worker.hosts[].vlans[0].addresses[0].ip' < {{ node_scaling_config }}) | sed -e "s/ /,/g")
+
+    - name: Wait for new nodes to be schedulable
+      ansible.builtin.command: >
+        oc wait --for=condition=Ready node --all --timeout=600s
