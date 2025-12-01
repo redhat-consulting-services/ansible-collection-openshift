@@ -127,14 +127,10 @@ When this role is executed, it will set the following facts automatically:
 
 | Fact Name               | Description                                      |
 |-------------------------|--------------------------------------------------|
-| base_dir                | The generated base directory in which the ISO and installation configs are stored. |
-| manifest_folder         | The generated directory where the agent-config.yaml and install-config.yaml files are backed up. |
-| kubeconfig_path         | The generated path to the kubeconfig file. |
-| kubeadmin_password_path | The generated path to the kubeadmin password file. |
-| bootfile_path           | The generated path to the bootable ISO file or PXE artifacts. |
-| master_node_count       | The number of master nodes defined in the agent_config. |
-| worker_node_count       | The number of worker nodes defined in the agent_config. |
-| total_node_count        | The total number of nodes (master + worker) defined in the agent_config. |
+| manifest_folder         | The generated directory where the nodes-config.yaml file is backed up. |
+| credentials_folder      | The generated directory where the pull secret (auth.json) file is stored. |
+| iso_location            | The generated path to the bootable ISO file. |
+| additional_node_count   | The number of nodes defined in `worker.hosts` |
 
 ## Example Playbook
 
@@ -149,4 +145,4 @@ When this role is executed, it will set the following facts automatically:
     - redhat_consulting_services.openshift.add_nodes
 ```
 
-For a more detailed example, please refer to the `examples/cluster-setup/playbook.yaml` file in this collection.
+For a more detailed example, please refer to the `examples/dell_hardware/playbook.yaml` file in this collection.

@@ -1,0 +1,20 @@
+argocd:
+  placement:
+    node_selector:
+      node-role.kubernetes.io/infra: ""
+    tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/infra
+        operator: Exists
+      - effect: NoExecute
+        key: node-role.kubernetes.io/infra
+        operator: Exists
+  operator:
+    channel: gitops-1.6
+    subscription:
+      starting_csv: openshift-gitops-operator.v1.16.3
+  git:
+    repo: https://github.com/redhat-consulting-services/app-of-apps.git
+    username: someuser
+    password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
