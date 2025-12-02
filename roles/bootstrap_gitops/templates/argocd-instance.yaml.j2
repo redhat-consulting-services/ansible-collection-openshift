@@ -21,7 +21,7 @@ spec:
     route:
       enabled: false
   ha:
-    enabled: "{{ argocd.instance.ha_enabled }}"
+    enabled: {{ argocd.instance.ha_enabled }}
   initialSSHKnownHosts: {}
   kustomizeBuildOptions: --enable-alpha-plugins --enable-helm
   monitoring:
