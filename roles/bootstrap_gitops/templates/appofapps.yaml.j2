@@ -2,17 +2,30 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: appofapps
+  name: {{ app_of_apps.name }}
   namespace: "{{ argocd.instance.namespace }}"
 spec:
   destination:
     namespace: "{{ argocd.instance.namespace }}"
     server: https://kubernetes.default.svc
-  project: default
+  project: {{ app_of_apps.default | default("default") }}
   source:
-    path: "{{ argocd.git.path }}"
-    repoURL: "{{ argocd.git.repo }}"
-    targetRevision: "{{ argocd.git.branch }}"
+    repoURL: "{{ app_of_apps.source.repo }}"
+    targetRevision: "{{ app_of_apps.source.target_revision | default("main")}}"
+    path: "{{ app_of_apps.source.path }}"
+
+{% if app_of_apps.sync_policy is defined %}
   syncPolicy:
+{% if app_of_apps.sync_policy.automated is defined %}
+    automated:
+      selfHeal: {{ app_of_apps.sync_policy.automated.self_heal | default(false) }}
+      prune: {{ app_of_apps.sync_policy.automated.prune | default(false) }}
+{% endif %}
+
+{% if app_of_apps.sync_policy.sync_options is defined %}
     syncOptions:
-    - Validate=true
+{% for item in app_of_apps.sync_policy.sync_options %}
+      - {{ item | to_yaml | indent(6) }}
+{% endfor %}
+{% endif %}
+{% endif %}

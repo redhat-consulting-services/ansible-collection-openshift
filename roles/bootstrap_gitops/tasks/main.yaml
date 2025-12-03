@@ -80,14 +80,8 @@
     loop_var: item
 
 - name: Set up App of Apps pattern
+  when: app_of_apps.enabled | default(false)
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig_path }}"
     state: present
     definition: "{{ lookup('template', 'appofapps.yaml.j2') | from_yaml }}"
-
-- name: Set up cluster resource to move pods to specific nodes
-  kubernetes.core.k8s:
-    kubeconfig: "{{ kubeconfig_path }}"
-    state: present
-    definition: "{{ lookup('template', 'argocd-gitops-service.yaml.j2') | from_yaml }}"
-  when: argocd.placement.node_selector is defined and argocd.placement.tolerations is defined

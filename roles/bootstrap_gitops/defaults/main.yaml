@@ -34,10 +34,27 @@ argocd:
       g, cluster-admins, role:admin
     rbac_scopes: groups  # Optional, defaults to 'groups'
 
-  # AppofApps configuration
-  sync:
-    prune: true
-    self_heal: true
+app_of_apps:
+  # enable or disable the App of Apps application definition creation
+  enabled: true
+  # name of the App of Apps application
+  name: app-of-apps
+  # project for the App of Apps application
+  project: default
+  # source defines where to find the App of Apps manifests
+  source:
+    # repo URL for the App of Apps application
+    repo: https://gitlab.example/openshift/openshift-configurations.git
+    # target_revision for the App of Apps application (e.g., branch, tag, commit)
+    target_revision: main
+    # path within the repo for the App of Apps application
+    path: overlays/app-of-apps
+  sync_policy:
+    automated:
+      prune: true
+      selfHeal: true
+    sync_options:
+      - Validate=false
 
 # repositories is a list of git/helm repositories to add to ArgoCD
 repositories: []
