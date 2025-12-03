@@ -46,16 +46,18 @@ argocd:
     prune: true
     self_heal: true
 
-  # Git repository configuration
-  git:
-    name: app-of-apps-repo
-    repo: https://gitlab.example/openshift/openshift-configurations.git
-    path: clusters/ocp-cluster/appofapps
-    branch: main
-    username: ""
-    password: ""
-    forceHttpBasicAuth: false
-    insecure: false
+# repositories is a list of git/helm repositories to add to ArgoCD
+repositories: []
+  # - name: app-of-apps
+  #   type: git
+  #   url: https://gitlab.example/openshift/openshift-configurations.git
+  #   branch: main
+  #   enableOCI: false
+  #   authentication:
+  #     username: ""
+  #     password: ""
+  #   insecure: false
+  #   forceHttpBasicAuth: false
 
 # certificate authority bundle for repository trust
 ca_bundle:

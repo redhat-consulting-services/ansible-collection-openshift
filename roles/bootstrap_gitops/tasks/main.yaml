@@ -24,7 +24,6 @@
           openshift.io/cluster-monitoring: "true"
 
 - name: Create user CA bundle config map
-  when: ca_bundle.enabled | default(true)
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig_path }}"
     state: present
