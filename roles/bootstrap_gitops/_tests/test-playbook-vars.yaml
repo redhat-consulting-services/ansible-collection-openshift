@@ -1,0 +1,17 @@
+kubeconfig_path: "~/.kube/config"
+
+repositories:
+  - name: app-of-apps
+    type: git
+    url: https://gitlab.example.com/openshift/openshift-configurations.git
+    authentication:
+      username: ""
+      password: ""
+
+  - name: app-of-apps-oci-repo
+    type: helm
+    url: https://registry.example.com/openshift/helm-charts
+    enableOCI: true
+    authentication:
+      username: ""
+      password: ""

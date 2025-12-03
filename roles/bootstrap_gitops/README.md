@@ -51,7 +51,6 @@ repositories: []
   # - name: app-of-apps
   #   type: git
   #   url: https://gitlab.example/openshift/openshift-configurations.git
-  #   branch: main
   #   enableOCI: false
   #   authentication:
   #     username: ""
