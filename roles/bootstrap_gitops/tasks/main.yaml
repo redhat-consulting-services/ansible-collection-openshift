@@ -70,11 +70,14 @@
   retries: 15
   delay: 20
 
-- name: Set up the repo secret
+- name: Set up the repo secrets
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig_path }}"
     state: present
-    definition: "{{ lookup('template', 'repo-secret.yaml.j2') | from_yaml }}"
+    definition: "{{ lookup('template', 'repo-secret.yaml.j2', template_vars={'repository': item}) | from_yaml }}"
+  loop: "{{ repositories }}"
+  loop_control:
+    loop_var: item
 
 - name: Set up App of Apps pattern
   kubernetes.core.k8s:

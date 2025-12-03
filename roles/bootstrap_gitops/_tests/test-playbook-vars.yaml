@@ -5,13 +5,13 @@ repositories:
     type: git
     url: https://gitlab.example.com/openshift/openshift-configurations.git
     authentication:
-      username: ""
-      password: ""
+      username: "a-username"
+      password: "a-password"
 
   - name: app-of-apps-oci-repo
     type: helm
     url: https://registry.example.com/openshift/helm-charts
     enableOCI: true
     authentication:
-      username: ""
-      password: ""
+      username: "a-username"
+      password: "a-password"
