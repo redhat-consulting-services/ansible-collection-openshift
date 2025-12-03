@@ -5,6 +5,16 @@ metadata:
   name: "{{ argocd.instance.name }}"
   namespace: "{{ argocd.instance.namespace }}"
 spec:
+  repo:
+    volumeMounts:
+      - mountPath: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+        subPath: "{{ ca_bundle.ca_key | default("ca-bundle.crt") }}"
+        name: cluster-root-ca-bundle
+    volumes:
+      - configMap:
+          name: "{{ ca_bundle.name | default("user-ca-bundle") }}"
+        name: cluster-root-ca-bundle
+        optional: true
   applicationSet:
     webhookServer:
       ingress:
