@@ -49,3 +49,10 @@ argocd:
     password: ""
     forceHttpBasicAuth: false
     insecure: false
+
+# certificate authority bundle for repository trust
+ca_bundle:
+  # name of the config map to create for user CA bundle
+  name: user-ca-bundle
+  # the key within the config map that contains the CA bundle data
+  ca_key: ca-bundle.crt
