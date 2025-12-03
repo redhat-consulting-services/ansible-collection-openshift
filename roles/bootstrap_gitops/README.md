@@ -41,21 +41,39 @@ argocd:
     # rbac_scopes: Optional, defaults to 'groups'
     rbac_scopes: groups
 
-  # AppofApps configuration
-  sync:
-    prune: true
-    self_heal: true
-
-  # Git repository configuration
-  git:
-    name: app-of-apps-repo
+app_of_apps:
+  # enable or disable the App of Apps application definition creation
+  enabled: true
+  # name of the App of Apps application
+  name: app-of-apps
+  # project for the App of Apps application
+  project: default
+  # source defines where to find the App of Apps manifests
+  source:
+    # repo URL for the App of Apps application
     repo: https://gitlab.example/openshift/openshift-configurations.git
-    path: clusters/ocp-cluster/appofapps
-    branch: main
-    username: ""
-    password: ""
-    forceHttpBasicAuth: false
-    insecure: false
+    # target_revision for the App of Apps application (e.g., branch, tag, commit)
+    target_revision: main
+    # path within the repo for the App of Apps application
+    path: overlays/app-of-apps
+  sync_policy:
+    automated:
+      prune: true
+      selfHeal: true
+    sync_options:
+      - Validate=false
+
+# repositories is a list of git/helm repositories to add to ArgoCD
+repositories: []
+  # - name: app-of-apps
+  #   type: git
+  #   url: https://gitlab.example/openshift/openshift-configurations.git
+  #   enableOCI: false
+  #   authentication:
+  #     username: ""
+  #     password: ""
+  #   insecure: false
+  #   forceHttpBasicAuth: false
 
 # certificate authority bundle for repository trust
 ca_bundle:

@@ -1,0 +1,39 @@
+kubeconfig_path: "~/.kube/config"
+
+app_of_apps:
+  # enable or disable the App of Apps application definition creation
+  enabled: true
+  # name of the App of Apps application
+  name: app-of-apps
+  # project for the App of Apps application
+  project: default
+  # source defines where to find the App of Apps manifests
+  source:
+    # repo URL for the App of Apps application
+    repo: https://gitlab.example/openshift/openshift-configurations.git
+    # target_revision for the App of Apps application (e.g., branch, tag, commit)
+    target_revision: main
+    # path within the repo for the App of Apps application
+    path: overlays/app-of-apps
+  sync_policy:
+    automated:
+      prune: true
+      selfHeal: true
+    sync_options:
+      - Validate=false
+
+repositories:
+  - name: app-of-apps
+    type: git
+    url: https://gitlab.example.com/openshift/openshift-configurations.git
+    authentication:
+      username: "a-username"
+      password: "a-password"
+
+  - name: app-of-apps-oci-repo
+    type: helm
+    url: https://registry.example.com/openshift/helm-charts
+    enableOCI: true
+    authentication:
+      username: "a-username"
+      password: "a-password"
