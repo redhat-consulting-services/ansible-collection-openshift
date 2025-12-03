@@ -45,3 +45,7 @@ argocd:
     repo: https://gitlab.example/openshift/openshift-configurations.git
     path: clusters/ocp-cluster/appofapps
     branch: main
+    username: ""
+    password: ""
+    forceHttpBasicAuth: false
+    insecure: false
