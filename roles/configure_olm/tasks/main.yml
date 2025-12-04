@@ -27,7 +27,7 @@
 - name: Wait for a short moment to allow MCP status to start changing
   ansible.builtin.pause:
     seconds: 10
-  when: monitor_mcp_updates | default(true)
+  when: machine_config_pool.watch_updates | default(true)
 
 - name: Wait for MCP update completion
   kubernetes.core.k8s_info:
@@ -35,7 +35,7 @@
     api_version: machineconfiguration.openshift.io/v1
     kind: MachineConfigPool
     name: "{{ item }}"
-  loop: "{{ mcp_names }}"
+  loop: "{{ machine_config_pool.pool_names }}"
   register: mcp_status
   until:
     mcp_status.resources[0].status.conditions
@@ -50,11 +50,11 @@
     and
     mcp_status.resources[0].status.readyMachineCount
       == mcp_status.resources[0].status.machineCount
-  retries: "{{ (mcp_check_timeout / mcp_check_interval) | int }}"
-  delay: "{{ mcp_check_interval }}"
+  retries: "{{ (machine_config_pool.timeout / machine_config_pool.interval) | int }}"
+  delay: "{{ machine_config_pool.interval }}"
   loop_control:
     label: "{{ item }}"
-  when: monitor_mcp_updates | default(true) and wait_for_mcp_completion | default(true)
+  when: machine_config_pool.watch_updates | default(true) and machine_config_pool.wait_for_completion | default(true)
 
 - name: Show final MCP state
   ansible.builtin.debug:
@@ -66,7 +66,7 @@
   loop: "{{ mcp_status.results | default([]) }}"
   loop_control:
     label: "{{ item.resources[0].metadata.name | default('N/A') }}"
-  when: monitor_mcp_updates | default(true)
+  when: machine_config_pool.watch_updates | default(true)
 
 - name: Get catalog source pods
   kubernetes.core.k8s_info:

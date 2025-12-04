@@ -34,13 +34,13 @@ operator_pod_label_selectors:
   - "olm.catalogSource"
 
 # MachineConfigPool monitoring
-monitor_mcp_updates: true
-wait_for_mcp_completion: true
-mcp_names:
+machine_config_pool.watch_updates: true
+machine_config_pool.wait_for_completion: true
+machine_config_pool.pool_names:
   - "master"
   - "worker"
-mcp_check_timeout: 1800  # 30 minutes
-mcp_check_interval: 30   # 30 seconds
+machine_config_pool.timeout: 1800  # 30 minutes
+machine_config_pool.interval: 30   # 30 seconds
 ```
 
 ## Example Playbook
