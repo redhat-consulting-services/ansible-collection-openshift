@@ -22,11 +22,8 @@ galaxy_info:
   galaxy_tags:
     - openshift
     - ocp
-    - k8s
-    - kubernetes
-    - gitops
-    - argocd
-    - openshift gitops
+    - operators
+    - olm
     - ansible
     - automation
 
