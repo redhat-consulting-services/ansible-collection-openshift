@@ -76,24 +76,11 @@
 
 - name: Monitor cluster installation progress
   hosts: localhost
-  gather_facts: false
+  gather_facts: true
   become: false
-  tags: monitor_installation
-  environment:
-    KUBECONFIG: "{{ kubeconfig_path }}"
-  tasks:
-    - name: Wait for cluster bootstrap to complete
-      ansible.builtin.command: >
-        openshift-install wait-for bootstrap-complete --dir {{ base_dir }} --log-level=debug
-
-    - name: Wait for cluster installation to complete
-      ansible.builtin.command: >
-        openshift-install wait-for install-complete --dir {{ base_dir }} --log-level=debug
-
-    - name: List cluster nodes
-      ansible.builtin.command: >
-        oc get nodes
-      register: oc_get_nodes
+  tags: cluster_installation_check
+  roles:
+    - redhat_consulting_services.openshift.cluster_installation_check
 
 - name: Setup initial OLM so OpenShift GitOps can be installed
   hosts: localhost
