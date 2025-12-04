@@ -1,0 +1,12 @@
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: "cs-redhat-operator-index-{{ ocp_version }}"
+  namespace: "{{ operator_marketplace_namespace | default('openshift-marketplace') }}"
+spec:
+  sourceType: grpc
+  image: "{{ mirror_registry }}/operators/redhat/redhat-operator-index:{{ ocp_version }}"
+  updateStrategy:
+    registryPoll:
+      interval: 15m
