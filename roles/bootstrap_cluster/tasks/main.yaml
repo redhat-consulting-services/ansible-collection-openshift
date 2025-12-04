@@ -1,6 +1,7 @@
 ---
 - name: Set bootstrap facts
   ansible.builtin.set_fact:
+    cacheable: yes
     cluster_name: "{{ cluster_name }}"
     base_domain: "{{ base_domain }}"
     cluster_domain: "{{ cluster_name }}.{{ base_domain }}"
