@@ -1,38 +1,57 @@
-Role Name
-=========
+# configure_olm
 
-A brief description of the role goes here.
+A role to configure the Operator Life Cycle Management of a disconnected OpenShift Cluster.
 
-Requirements
-------------
+It does the following:
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+* Disable default catalogsources
+* Deploy a custom catalogsource
+* Deploy a ImageDigestMirrorSet for the GitOps Operator
+* Checks and waits until the changes has rolled out
 
-Role Variables
---------------
+## Role Variables
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+```yaml
+---
+# Mirror registry configuration
+mirror_registry: "mirrorregistry.example.com:8443"
 
-Dependencies
-------------
+# OpenShift Version
+ocp_version: "4.18"
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+# OperatorHub management
+manage_operator_hub: true
+disable_default_operator_sources: true
 
-Example Playbook
-----------------
+# Operator marketplace configuration
+operator_marketplace_namespace: "openshift-marketplace"
+restart_operator_pods: true
+wait_for_pod_ready: true
+operator_pod_restart_timeout: 300
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+# Pod label selectors for catalog sources
+operator_pod_label_selectors:
+  - "olm.catalogSource"
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+# MachineConfigPool monitoring
+monitor_mcp_updates: true
+wait_for_mcp_completion: true
+mcp_names:
+  - "master"
+  - "worker"
+mcp_check_timeout: 1800  # 30 minutes
+mcp_check_interval: 30   # 30 seconds
+```
 
-License
--------
+## Example Playbook
 
-BSD
+```yaml
+---
+- name: Configure OLM
+  hosts: localhost
+  gather_facts: false
+  connection: local
 
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+  roles:
+    - redhat_consulting_services.openshift.configure_olm
+```
