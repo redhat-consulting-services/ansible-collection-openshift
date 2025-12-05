@@ -9,8 +9,8 @@
     patch:
       - op: add
         path: "/spec/disableAllDefaultSources"
-        value: "{{ disable_default_operator_sources | default(true) }}"
-  when: manage_operator_hub | default(true)
+        value: "{{ operator_hub.disable_default_sources | default(true) }}"
+  when: operator_hub.manage | default(true)
 
 - name: Apply Operator CatalogSources
   kubernetes.core.k8s:
@@ -73,10 +73,10 @@
     kubeconfig: "{{ kubeconfig_path }}"
     api_version: v1
     kind: Pod
-    namespace: "{{ operator_marketplace_namespace }}"
-    label_selectors: "{{ operator_pod_label_selectors }}"
+    namespace: "{{ olm.marketplace_namespace }}"
+    label_selectors: "{{ olm.pods.label_selectors }}"
   register: catalog_pods_info
-  when: restart_operator_pods | default(false)
+  when: olm.pods.restart | default(false)
 
 - name: Delete catalog source pods
   kubernetes.core.k8s:
@@ -84,37 +84,42 @@
     state: absent
     kind: Pod
     name: "{{ item.metadata.name }}"
-    namespace: "{{ operator_marketplace_namespace }}"
+    namespace: "{{ olm.marketplace_namespace }}"
   loop: "{{ catalog_pods_info.resources | default([]) }}"
   loop_control:
     label: "{{ item.metadata.name }}"
-  when: restart_operator_pods | default(false)
+  when: olm.pods.restart | default(false)
 
 - name: Wait for new catalog pods to appear
   kubernetes.core.k8s_info:
     kubeconfig: "{{ kubeconfig_path }}"
     api_version: v1
     kind: Pod
-    namespace: "{{ operator_marketplace_namespace }}"
-    label_selectors: "{{ operator_pod_label_selectors }}"
+    namespace: "{{ olm.marketplace_namespace }}"
+    label_selectors: "{{ olm.pods.label_selectors }}"
   register: new_catalog_pods
   retries: 10
   delay: 5
   until: new_catalog_pods.resources | length > 0
-  when: restart_operator_pods | default(false)
+  when: olm.pods.restart | default(false)
+
+- name: Wait for a short moment to ensure the status field is populated
+  ansible.builtin.pause:
+    seconds: 5
+  when: olm.pods.restart | default(false)
 
 - name: Wait for catalog pods to become Ready
   kubernetes.core.k8s_info:
     kubeconfig: "{{ kubeconfig_path }}"
     api_version: v1
     kind: Pod
-    namespace: "{{ operator_marketplace_namespace }}"
-    label_selectors: "{{ operator_pod_label_selectors }}"
+    namespace: "{{ olm.marketplace_namespace }}"
+    label_selectors: "{{ olm.pods.label_selectors }}"
     wait: true
     wait_condition:
       type: Ready
       status: "True"
-    wait_timeout: "{{ operator_pod_restart_timeout }}"
+    wait_timeout: "{{ olm.pods.restart_timeout }}"
   when:
-    - restart_operator_pods | default(false)
-    - wait_for_pod_ready | default(true)
+    - olm.pods.restart | default(false)
+    - olm.pods.wait_for_ready | default(true)
