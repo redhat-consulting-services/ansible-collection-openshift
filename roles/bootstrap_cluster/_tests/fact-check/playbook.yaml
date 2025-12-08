@@ -1,0 +1,30 @@
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ./vars.yaml
+  roles:
+    - ../../../bootstrap_cluster
+
+- name: Copy ISO to NFS Share
+  hosts: localhost
+  become: false
+  tags: copy_iso
+  connection: local
+  vars:
+    iso_nfs_share: /nfs
+    # bootfile_path is set by the bootstrap role to the generated ISO
+  tasks:
+    - name: Print iso path
+      ansible.builtin.debug:
+        msg:
+          - "cluster_name: {{ cluster_name }}"
+          - "base_domain: {{ base_domain }}"
+          - "cluster_domain: {{ cluster_domain }}"
+          - "base_dir: {{ base_dir }}"
+          - "manifest_folder: {{ manifest_folder }}"
+          - "kubeconfig_path: {{ kubeconfig_path }}"
+          - "kubeadmin_password_path: {{ kubeadmin_password_path }}"
+          - "bootfile_path: {{ bootfile_path }}"
+          - "master_node_count: {{ master_node_count }}"
+          - "worker_node_count: {{ worker_node_count }}"
+          - "total_node_count: {{ total_node_count }}"
