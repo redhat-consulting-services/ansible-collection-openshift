@@ -6,7 +6,7 @@ baseDomain: {{ base_domain }}
 compute:
 - hyperthreading: Enabled
   name: worker
-  replicas: {{ agent_config.worker.hosts | length }}
+  replicas: {{ agent_config.worker.hosts | length | default(0) }}
 controlPlane:
   hyperthreading: Enabled
   name: master
