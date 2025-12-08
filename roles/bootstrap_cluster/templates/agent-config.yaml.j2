@@ -77,8 +77,22 @@ hosts:
           mtu: {{ interface.mtu }}
 {% endif %}
           state: up
+{% if interface.addresses is defined and interface.addresses | length > 0 %}
+          ipv4:
+            enabled: true
+            dhcp: false
+            address:
+{% for address in interface.addresses %}
+              - ip: {{ address.ip }}
+                prefix-length: {{ address.subnet_length }}
+{% endfor %}
+{% else %}
           ipv4:
             enabled: false
+
+{% endif %}
+
+
 {% endfor %}
 {# ------------------------------------ #}
 {#       generate bond interface        #}

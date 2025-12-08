@@ -1,0 +1,59 @@
+tenant_name: test-tenant
+cluster_name: ocp4-test
+base_domain: ocp4.example.com
+api_vip: 192.168.50.10
+ingress_vip: 192.168.50.9
+generate_iso: false
+pull_secret: |
+  {"auths":{"cloud.openshift.com":{"auth":"..."} } }
+ssh_public_key: |
+  ssh-ed25519 AAAA...
+iso_output_dir: ./iso
+image_digest_sources:
+  - source: "quay.io/openshift-release-dev/ocp-release"
+    mirrors:
+      - "registry.example.com/ocp4/openshift-release"
+  - source: "quay.io/openshift-release-dev/ocp-v4.0-art-dev"
+    mirrors:
+      - "registry.example.com/ocp4/openshift-release"
+agent_config:
+  master:
+    hostname_prefix: "master-"
+    root_device_name: "/dev/sda"
+    dns_resolvers: &dns_resolvers
+      - 172.16.11.1
+      - 8.8.8.8
+      - 1.1.1.1
+    routes: &routes
+      - destination: 0.0.0.0/0
+        gateway: 192.168.50.1
+        interface: enp0s0
+        table_id: 254
+    hosts:
+      - hostname: master-abcd-0
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:00"
+            addresses:
+              - ip: 192.168.50.20
+                subnet_length: 24
+      - hostname: master-abcd-1
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:01:00"
+            addresses:
+              - ip: 192.168.50.21
+                subnet_length: 24
+      - hostname: master-abcd-2
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:02:00"
+            addresses:
+              - ip: 192.168.50.22
+                subnet_length: 24
