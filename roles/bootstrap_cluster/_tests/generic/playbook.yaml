@@ -1,0 +1,7 @@
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ./vars.yaml
+    - ./secrets.yaml
+  roles:
+    - ../../../bootstrap_cluster

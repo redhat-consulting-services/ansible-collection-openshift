@@ -1,7 +1,0 @@
-- hosts: localhost
-  gather_facts: false
-  vars_files:
-    - ./test-playbook-vars.yaml
-    - ./test-playbook-vars-secret.yaml
-  roles:
-    - ../../bootstrap-cluster
