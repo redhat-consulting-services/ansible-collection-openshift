@@ -34,6 +34,9 @@ argocd:
   instance:
     name: openshift-gitops
     namespace: openshift-gitops
+    # host defines the ArgoCD server host address; if empty, a default will be generated
+    # If using a custom host, ensure it is part of the cluster's *.apps domain.
+    host: ""
     ha_enabled: false
     rbac_policy: |
       g, system:cluster-admins, role:admin
