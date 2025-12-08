@@ -49,7 +49,7 @@
     name: argocds.argoproj.io
   register: argocd_crd
   until: argocd_crd.resources | length > 0
-  retries: 12
+  retries: 60
   delay: 10
 
 - name: Deploy ArgoCD instance
@@ -67,8 +67,8 @@
     namespace: "{{ argocd.instance.namespace }}"
   register: argocd_instance
   until: argocd_instance.resources | length > 0 and argocd_instance.resources[0].status is defined and argocd_instance.resources[0].status.phase == 'Available'
-  retries: 15
-  delay: 20
+  retries: 60
+  delay: 10
 
 - name: Set up the repo secrets
   kubernetes.core.k8s:
