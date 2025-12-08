@@ -18,6 +18,7 @@ additionalNTPSources: {{ additional_ntp_sources }}
 {# add hosts to cluster #}
 hosts:
 {% for host_type, host_value in agent_config.items() %}
+{% if host_value.hosts is defined and host_value.hosts | length > 0 %}
 {% for hosts in host_value.hosts %}
 {% set host_index = loop %}
 {# identify the role of the node #}
@@ -186,5 +187,7 @@ hosts:
 {% endif %}
 {# endfor for host_value.hosts #}
 {% endfor %}
+{# endif for host_value.hosts is defined and host_value.hosts | length > 0 #}
+{% endif %}
 {# endfor for agent_config.items() #}
 {% endfor %}
