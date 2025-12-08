@@ -129,6 +129,9 @@ spec:
     kind: InstallPlan
   resourceTrackingMethod: annotation
   server:
+{% if argocd.instance.host is defined and argocd.instance.host != "" %}
+    host: {{ argocd.instance.host }}
+{% endif %}
     autoscale:
       enabled: false
     grpc:

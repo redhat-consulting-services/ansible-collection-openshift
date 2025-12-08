@@ -29,6 +29,7 @@ argocd:
     name: openshift-gitops
     namespace: openshift-gitops
     ha_enabled: false
+    host: ""
     rbac_policy: |
       g, system:cluster-admins, role:admin
       g, cluster-admins, role:admin
