@@ -11,7 +11,7 @@ argocd:
         key: node-role.kubernetes.io/infra
         operator: Exists
   operator:
-    channel: gitops-1.16
+    channel: gitops-1.19
     install_plan_approval: Automatic
     metadata:
       name: openshift-gitops-operator
@@ -21,7 +21,7 @@ argocd:
       source: redhat-operators
       source_namespace: openshift-marketplace
       # Optional: Pin to specific CSV version. If empty/undefined, uses latest from channel
-      starting_csv: openshift-gitops-operators.v1.16.0
+      starting_csv: openshift-gitops-operators.v1.19.0
       # Example: starting_csv: openshift-gitops-operator.v1.16.0
 
   # Instance configuration
