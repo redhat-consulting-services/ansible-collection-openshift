@@ -50,6 +50,14 @@ As part of this example, we assume the following server and network setup:
 | worker        | worker-05.ocp.example.com | 10.10.9.35     | 10.10.10.35    | eth0=00:03:00:00:05:01 eth1=00:03:00:00:05:02 | sda=240G serial_number=0000020000000005 |
 | worker        | worker-06.ocp.example.com | 10.10.9.36     | 10.10.10.36    | eth0=00:03:00:00:06:01 eth1=00:03:00:00:06:02 | sda=240G serial_number=0000020000000006 |
 
+## Inventory Configuration
+
+The host inventory (`inventory/hosts.yaml`) is a critical component of this setup. It is required for the following reasons:
+
+1.  **Hardware Management (BMC/iDRAC Access)**: The inventory defines the connection details (IP, username, password) for the Baseboard Management Controllers (BMCs) of your physical nodes. This allows Ansible to connect to the servers' management interfaces to perform tasks like mounting virtual media (ISO) and forcing a reboot to start the installation.
+2.  **Provisioning Orchestration**: The inventory groups hosts into logical sets (`initial`, `scaleout`, `masters`, `workers`) that determine their role in the deployment process. This allows playbooks to target specific sets of hardware (e.g., booting only the initial nodes for bootstrapping).
+3.  **Separation of Concerns**: While `agent-config.yaml` and `install-config.yaml` handle the OpenShift cluster configuration, the Ansible inventory manages the underlying physical infrastructure configuration.
+
 ## Execute the Playbooks
 
 ### Cluster installation
