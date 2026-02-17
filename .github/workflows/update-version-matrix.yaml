@@ -19,7 +19,7 @@ jobs:
       - name: Determine if PR exist
         id: pr-exist
         run: |
-          pull_requests=$(gh pr list -s open --head feat/update-openshift-version-matrix --label enhancement --label automation --label dependencies --repo leonsteinhaeuser/github-actions-tests --json number,title,headRefName --limit 1)
+          pull_requests=$(gh pr list -s open --head feat/update-openshift-version-matrix --label enhancement --label automation --label dependencies --repo redhat-consulting-services/ansible-collection-openshift --json number,title,headRefName --limit 1)
           isDefined=$(echo $pull_requests | jq 'if length > 0 then true else false end')
           pr_number=$(echo $pull_requests | jq '.[0].number')
           ref_name=$(echo $pull_requests | jq '.[0].headRefName' | sed -e 's/"//g')
