@@ -54,7 +54,7 @@ jobs:
 
       - name: Execute version extraction script
         run: |
-          python3 ./scripts/versions-extract.py ${{ env.VERSION_MATRIX_FILE }} --minor 3 --patch 5
+          python3 ./scripts/versions-extract.py ${{ env.VERSION_MATRIX_FILE }} --minor 5 --patch 5
 
       - name: Check if changes were made
         id: git-check
