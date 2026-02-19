@@ -38,7 +38,7 @@ Assuming a release version of `v1.0.0`, OpenShift version `4.19.15`, and a build
 v1.0.0-ocp-4.19.15-202407221430
 ```
 
-Right now, we build images for the last three minor OpenShift versions, each with the last five patch versions. For the list of supported OpenShift versions, refer to the `.github/openshift-versions.json` file.
+Right now, we build images for the last five minor OpenShift versions, each with the last five patch versions. For the list of supported OpenShift versions, refer to the `.github/openshift-versions.json` file.
 
 When a new release is created, we also create `latest` tags for the most recent patch version of each minor OpenShift version. Continuing the previous example, if `4.19.15` is the latest patch version for the `4.19` minor version, the following `latest` tag would also be created:
 
