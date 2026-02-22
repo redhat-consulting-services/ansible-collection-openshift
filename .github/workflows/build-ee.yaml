@@ -56,7 +56,7 @@ jobs:
       openshift_versions: ${{ steps.get-versions.outputs.openshift_versions }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get OpenShift versions
         id: get-versions
@@ -85,7 +85,7 @@ jobs:
           echo "Image Name: ${{ env.IMAGE_NAME }}"
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install yq
         run: |
