@@ -90,3 +90,16 @@ jobs:
       registry_redhat_io_password: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}
       ee_registry_username: ${{ secrets.QUAY_IO_USERNAME }}
       ee_registry_password: ${{ secrets.QUAY_IO_PASSWORD }}
+
+  info:
+    runs-on: ubuntu-latest
+    needs:
+      - build-execution-environment
+    permissions:
+      contents: read
+    steps:
+      - name: Output combined tags
+        run: |
+          echo "Combined tags: ${{ needs.build-execution-environment.outputs.combined }}"
+          echo "Combined tags (without latest): ${{ needs.build-execution-environment.outputs.combined_tags }}"
+          echo "Combined latest tags: ${{ needs.build-execution-environment.outputs.combined_latest_tags }}"

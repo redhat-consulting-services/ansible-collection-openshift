@@ -99,7 +99,7 @@ flowchart LR
 
     F[Run Execution Environment Build]
     F1{Execution Environment Build successful?}
-    F2[Push to quay.io/quay.io/redhat-consultingservices/ee-openshift]
+    F2[Push to quay.io/redhat-consulting-services/ee-openshift]
 
     G[Inform developers]
 
