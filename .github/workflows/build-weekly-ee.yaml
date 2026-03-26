@@ -38,10 +38,10 @@ jobs:
     with:
       push: true
       version: ${{ needs.tag-lookup.outputs.repo_tag }}
-      ee_registry_url: ghcr.io
+      ee_registry_url: quay.io
       ee_image_repo: "redhat-consulting-services/ee-openshift"
     secrets:
       registry_redhat_io_username: ${{ secrets.REGISTRY_REDHAT_IO_USERNAME }}
       registry_redhat_io_password: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}
-      ee_registry_username: ${{ github.actor }}
-      ee_registry_password: ${{ secrets.GITHUB_TOKEN }}
+      ee_registry_username: ${{ secrets.QUAY_IO_USERNAME }}
+      ee_registry_password: ${{ secrets.QUAY_IO_PASSWORD }}

@@ -34,7 +34,7 @@ on:
         required: true
 
 env:
-  IMAGE_NAME: ${{ inputs.ee_registry_url }}/${{ inputs.ee_image_repo }}
+  IMAGE_NAME: quay.io/redhat-consulting-services/ee-openshift
 
 jobs:
   generate-timestamp:
@@ -114,7 +114,7 @@ jobs:
           echo "tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-${{ needs.generate-timestamp.outputs.timestamp }}" >> $GITHUB_OUTPUT
           echo "latest_tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-latest" >> $GITHUB_OUTPUT
 
-      - name: Login to GitHub Container Registry
+      - name: Login to Release Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ inputs.ee_registry_url }}
