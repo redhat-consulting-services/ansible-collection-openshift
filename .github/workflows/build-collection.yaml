@@ -13,6 +13,8 @@ env:
 jobs:
   tag-lookup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       repo_tag: ${{ steps.repo_tag.outputs.repo_tag }}
       repo_tag_sanitized: ${{ steps.repo_tag.outputs.repo_tag_sanitized }}
