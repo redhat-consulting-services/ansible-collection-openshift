@@ -7,4 +7,8 @@ spec:
   imageDigestMirrors:
     - source: registry.redhat.io/openshift-gitops-1
       mirrors:
-        - "{{ registry.url }}/operators/openshift-gitops-1"
+{% if registry.repository is not defined or registry.repository == "" %}
+        - "{{ registry.url }}/openshift-gitops-1"
+{% else %}
+        - "{{ registry.url }}/{{ registry.repository }}/openshift-gitops-1"
+{% endif %}
