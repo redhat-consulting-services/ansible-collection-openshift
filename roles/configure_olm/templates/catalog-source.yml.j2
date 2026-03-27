@@ -2,7 +2,7 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
-  name: "{{ catalogsource.name | default('redhat-operators') }}"
+  name: "{{ catalog_source.name | default('redhat-operators') }}"
   namespace: "{{ olm.marketplace_namespace | default('openshift-marketplace') }}"
 spec:
   sourceType: grpc
