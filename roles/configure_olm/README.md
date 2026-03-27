@@ -18,9 +18,15 @@ registry:
   # The full hostname and port of your disconnected/private image mirror.
   url: "mirrorregistry.example.com:8443"
   # The repository path on the mirror where operator images are stored.
-  repository: "operators/redhat"
+  # Will be used as the base for constructing the idms mirror registry urls for each operator (e.g., "my-operators").
+  #
+  # Example:
+  # If your mirror registry is at "mirrorregistry.example.com:8443" and you store operator images under "my-operators", set this to "my-operators".
+  # If your mirror registry does not use a repository path and images are stored directly under the registry (e.g., "mirrorregistry.example.com:8443/openshift-gitops-1/gitops-operator-bundle"), set this to an empty string "".
+  repository: ""
   # The specific index image name (excluding tag/digest) used to create the CatalogSource.
-  index: "redhat-operator-index"
+  # This must include the repository path if your mirror uses one (e.g., "my-operators/catalog-index").
+  index: "redhat/redhat-operator-index"
 
 catalog_source:
   # The specific OpenShift version tag to use for the CatalogSource index image (e.g., 4.20).
