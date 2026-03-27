@@ -32,9 +32,19 @@ on:
       ee_registry_password:
         description: "Password for the execution environment registry"
         required: true
+    outputs:
+      combined:
+        description: "Combined output of all built image tags"
+        value: ${{ jobs.aggregate.outputs.combined }}
+      combined_tags:
+        description: "Combined output of all built image tags (without latest tags)"
+        value: ${{ jobs.aggregate.outputs.combined_tags }}
+      combined_latest_tags:
+        description: "Combined output of all built image latest tags"
+        value: ${{ jobs.aggregate.outputs.combined_latest_tags }}
 
 env:
-  IMAGE_NAME: ${{ inputs.ee_registry_url }}/${{ inputs.ee_image_repo }}
+  IMAGE_NAME: quay.io/redhat-consulting-services/ee-openshift
 
 jobs:
   generate-timestamp:
@@ -114,7 +124,7 @@ jobs:
           echo "tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-${{ needs.generate-timestamp.outputs.timestamp }}" >> $GITHUB_OUTPUT
           echo "latest_tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-latest" >> $GITHUB_OUTPUT
 
-      - name: Login to GitHub Container Registry
+      - name: Login to Release Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ inputs.ee_registry_url }}
@@ -187,3 +197,47 @@ jobs:
           echo "Repository tag: ${{ inputs.version }}"
           echo "Timestamp used: ${{ needs.generate-timestamp.outputs.timestamp }}"
           docker images | grep ${{ env.IMAGE_NAME }} || true
+
+      - name: Create version files
+        run: |
+          echo "${{ steps.image_tag.outputs.tag }}" > version-tag-${{ matrix.openshift_versions }}.txt
+          echo "${{ steps.image_tag.outputs.latest_tag }}" > version-latest-${{ matrix.openshift_versions }}.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: outputs-${{ matrix.openshift_versions }}
+          path: |
+            version-tag-${{ matrix.openshift_versions }}.txt
+            version-latest-${{ matrix.openshift_versions }}.txt
+
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+    outputs:
+      combined: ${{ steps.aggregate.outputs.combined }}
+      combined_tags: ${{ steps.aggregate.outputs.combined_tags }}
+      combined_latest_tags: ${{ steps.aggregate.outputs.combined_latest_tags }}
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+
+      - name: Aggregate outputs
+        id: aggregate
+        run: |
+          cat */version-tag-*.txt > combined-tags.txt
+          cat */version-latest-*.txt > combined-latest-tags.txt
+
+          echo "combined_tags<<EOF" >> $GITHUB_OUTPUT
+          cat combined-tags.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "combined_latest_tags<<EOF" >> $GITHUB_OUTPUT
+          cat combined-latest-tags.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "combined<<EOF" >> $GITHUB_OUTPUT
+          cat combined-latest-tags.txt combined-tags.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT

@@ -20,13 +20,19 @@ This collection includes an Ansible Execution Environment (EE) that packages the
 
 The execution environment images are automatically built and published to:
 
-**GitHub Container Registry**: <https://ghcr.io/redhat-consulting-services/ee-openshift>
+**Quay.io Container Registry**: <https://quay.io/redhat-consulting-services/ee-openshift>
+
+> ⚠️ **Attention**
+>
+> Starting with release `v1.0.0`, we have switched from GitHub Container Registry (GHCR) to Quay.io for hosting our execution environment images.
+>
+> The GHCR registry will no longer receive updates, and all new images will be published to Quay.io.
 
 ### Automatic Builds
 
 When a new release is created, we automatically build both the collection and execution environment container images. These builds are based on the OpenShift versions specified in the `.github/openshift-versions.json` file.
 
-Once the builds are complete, the execution environment container images are tagged and pushed to the GitHub Container Registry (GHCR). The image tags follow the format:
+Once the builds are complete, the execution environment container images are tagged and pushed to the Quay.io Container Registry. The image tags follow the format:
 
 ```txt
 <release-version>-ocp-<openshift-version>-<build-timestamp>
@@ -40,10 +46,10 @@ v1.0.0-ocp-4.19.15-202407221430
 
 Right now, we build images for the last five minor OpenShift versions, each with the last five patch versions. For the list of supported OpenShift versions, refer to the `.github/openshift-versions.json` file.
 
-When a new release is created, we also create `latest` tags for the most recent patch version of each minor OpenShift version. Continuing the previous example, if `4.19.15` is the latest patch version for the `4.19` minor version, the following `latest` tag would also be created:
+When a new release is created, we also create `latest` tags for the most recent patch version of each minor OpenShift version. Continuing the previous example, if `4.21.5` is the latest patch version for the `4.21` minor version, the following `latest` tag would also be created:
 
 ```txt
-v1.0.0-ocp-4.19.15-latest
+v1.0.0-ocp-4.21.5-latest
 ```
 
 ### Adding New OpenShift Versions
@@ -93,7 +99,7 @@ flowchart LR
 
     F[Run Execution Environment Build]
     F1{Execution Environment Build successful?}
-    F2[Push to ghcr.io/quay.io/redhat-consultingservices/ee-openshift]
+    F2[Push to quay.io/redhat-consulting-services/ee-openshift]
 
     G[Inform developers]
 
