@@ -1,0 +1,10 @@
+- name: Bootstrap OpenShift Cluster
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars:
+    kubeconfig_path: "TODO"
+  vars_files:
+    - ./config.yaml
+  roles:
+    - ../../configure_olm

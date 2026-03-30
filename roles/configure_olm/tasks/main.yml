@@ -13,12 +13,21 @@
   when: operator_hub.manage | default(true)
 
 - name: Apply Operator CatalogSources
+  tags: catalog_source
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig_path }}"
     state: present
     definition: "{{ lookup('template', 'catalog-source.yml.j2') }}"
 
-- name: Apply Operator ImageDigestMirrorSets
+- name: Apply Operator ImageDigestMirrorSets for OCP release images
+  tags: idms
+  kubernetes.core.k8s:
+    kubeconfig: "{{ kubeconfig_path }}"
+    state: present
+    definition: "{{ lookup('template', 'idms-ocp4.yml.j2') }}"
+
+- name: Apply Operator ImageDigestMirrorSets for GitOps Operator
+  tags: idms
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig_path }}"
     state: present
