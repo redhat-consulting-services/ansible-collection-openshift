@@ -9,8 +9,9 @@ spec:
 {% if registry.repository is not defined or registry.repository == "" %}
     - "{{ registry.url }}/openshift/release-images"
 {% else %}
-    source: "{{ registry.url }}/{{ registry.repository }}/openshift-release-dev/ocp-release"
+    - "{{ registry.url }}/{{ registry.repository }}/openshift/release-images"
 {% endif %}
+    source: quay.io/openshift-release-dev/ocp-release
   - mirrors:
 {% if registry.repository is not defined or registry.repository == "" %}
     - "{{ registry.url }}/openshift/release"
