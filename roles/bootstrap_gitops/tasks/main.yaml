@@ -66,7 +66,7 @@
     name: "{{ argocd.instance.name }}"
     namespace: "{{ argocd.instance.namespace }}"
   register: argocd_instance
-  until: argocd_instance.resources | length > 0 and argocd_instance.resources[0].status is defined and argocd_instance.resources[0].status.phase == 'Available'
+  until: (argocd_instance.resources | default([]) | length) > 0 and argocd_instance.resources[0].status is defined and argocd_instance.resources[0].status.phase == 'Available'
   retries: 60
   delay: 10
 
