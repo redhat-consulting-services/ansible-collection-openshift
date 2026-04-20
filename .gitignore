@@ -2,3 +2,5 @@ context/
 _build/
 Containerfile
 collections/
+
+!.devcontainer/Containerfile

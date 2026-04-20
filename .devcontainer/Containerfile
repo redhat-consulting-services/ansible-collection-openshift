@@ -1,0 +1,5 @@
+FROM quay.io/redhat-consulting-services/ee-openshift:v1.0.3-ocp-4.21.7-latest
+
+USER root
+RUN dnf update -y && dnf -y install git
+RUN python3 -m pip install ansible-navigator
