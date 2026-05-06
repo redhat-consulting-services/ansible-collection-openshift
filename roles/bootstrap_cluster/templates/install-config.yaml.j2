@@ -34,6 +34,10 @@ sshKey: |
 platform:
 {% if type == "baremetal" %}
   baremetal:
+{% if (lb_type | default("")) == "UserManaged"  %}
+    loadBalancer:
+      type: UserManaged
+{% endif %}
     apiVIP: {{ api_vip }}
     ingressVIP: {{ ingress_vip }}
 {% else %}

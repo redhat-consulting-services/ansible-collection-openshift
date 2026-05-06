@@ -17,6 +17,9 @@ cluster_name: "my-cluster"
 # baremetal should be used for OpenShift clusters that are installed on bare metal (default).
 type: baremetal
 
+# lb_type defines the type of load balancer to be used for the cluster. Valid values are "UserManaged" or "". If set to "UserManaged", the OpenShift cluster is expected to run behind a user-provided load balancer. If set to "", the Keepalived load balancer will be used for the cluster. The Keepalived load balancer is only supported for bare metal installations. If the installation type is set to "none", lb_type will be ignored and the Keepalived load balancer will not be used, regardless of the value of lb_type.
+lb_type: ""
+
 # boot_artifacts_base_url is optional, if not provided, it will not be included in the agent-config.yaml
 # boot_artifacts_base_url: "http://example.com/boot-artifacts"
 
