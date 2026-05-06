@@ -1,6 +1,7 @@
 tenant_name: test-tenant
 cluster_name: ocp4-test
 base_domain: example.com
+lb_type: UserManaged
 
 api_vip: 10.10.10.4
 ingress_vip: 10.10.10.5
