@@ -2,40 +2,63 @@ tenant_name: test-tenant
 cluster_name: ocp4-test
 base_domain: example.com
 
-api_vip: 10.10.10.4
-ingress_vip: 10.10.10.5
+api_vip:
+  - 10.10.10.4
+  - fd2e:6f44:5dd8::4
+ingress_vip:
+  - 10.10.10.5
+  - fd2e:6f44:5dd8::5
 
 generate_iso: true
 iso_type: "iso"
 iso_output_dir: ./iso
 
+additional_ntp_sources:
+  - "0.pool.ntp.org"
+  - "1.pool.ntp.org"
+
 networking:
   cluster_networks:
     - cidr: "10.128.0.0/14"
       host_prefix: 23
+    - cidr: "fd01::/48"
+      host_prefix: 64
   service_networks:
     - 172.30.0.0/16
+    - fd02::/112
   network_type: "OVNKubernetes"
   machine_network:
     - cidr: 10.10.10.0/24
+    - cidr: fd2e:6f44:5dd8::/64
 
 agent_config:
   master:
-    hostname_prefix: "master-"
-    root_device_name: "/dev/sda"
-    dns_resolvers:
-      - 8.8.8.8
-      - 1.1.1.1
-    routes:
+    dns_resolvers: &dns_resolvers
+      - 10.10.10.2
+      - fd2e:6f44:5dd8::2
+    routes: &routes
       - destination: 0.0.0.0/0
-        gateway: 10.10.10.254
-        interface: bond0
+        gateway: 10.10.10.1
+        interface: bond0.100
         table_id: 254
-    bonds:
+      - destination: ::/0
+        gateway: fd2e:6f44:5dd8::1
+        interface: bond0.100
+        table_id: 254
+    bonds: &bonds
       - name: bond0
         mode: 802.3ad
         options:
           miimon: "100"
+    #bridges:
+    #  - name: br0
+    #    type: ovs-bridge
+    #    interfaces:
+    #      - name: bond0.100
+    vlans:
+      - name: bond0.100
+        id: 100
+        base_interface: bond0
     hosts:
       - hostname: master-1.ocp4-test.example.com
         root_device:
@@ -49,36 +72,60 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+        #bridges:
+        #  - interface: br0
+        vlans:
+          - interface: bond0.100
+            ipv4_dhcp: false
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.10
                 subnet_length: 24
+              - ip: fd2e:6f44:5dd8::10
+                subnet_length: 64
       - hostname: master-2.ocp4-test.example.com
         root_device:
           name: "/dev/sda"
         interfaces:
           - name: eth0
-            mac_address: "00:aa:aa:aa:bb:01"
+            mac_address: "00:aa:aa:aa:ab:01"
             part_of_bond: "bond0"
           - name: eth1
-            mac_address: "00:aa:aa:aa:bb:02"
+            mac_address: "00:aa:aa:aa:ab:02"
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+        #bridges:
+        #  - interface: br0
+        vlans:
+          - interface: bond0.100
+            ipv4_dhcp: false
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.11
                 subnet_length: 24
+              - ip: fd2e:6f44:5dd8::11
+                subnet_length: 64
       - hostname: master-3.ocp4-test.example.com
         root_device:
           name: "/dev/sda"
         interfaces:
           - name: eth0
-            mac_address: "00:aa:aa:aa:cc:01"
+            mac_address: "00:aa:aa:aa:ac:01"
             part_of_bond: "bond0"
           - name: eth1
-            mac_address: "00:aa:aa:aa:cc:02"
+            mac_address: "00:aa:aa:aa:ac:02"
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+        #bridges:
+        #  - interface: br0
+        vlans:
+          - interface: bond0.100
+            ipv4_dhcp: false
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.12
                 subnet_length: 24
+              - ip: fd2e:6f44:5dd8::12
+                subnet_length: 64

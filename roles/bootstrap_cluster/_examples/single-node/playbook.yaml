@@ -2,5 +2,8 @@
   gather_facts: false
   vars_files:
     - ./vars.yaml
+  vars:
+    pull_secret: "{{ lookup('env', 'OPENSHIFT_PULL_SECRET') }}"
+    ssh_public_key: "{{ lookup('env', 'OPENSHIFT_SSH_PUBLIC_KEY') }}"
   roles:
-    - ../../../ansible-role-cluster-bootstrap
+    - ../../../bootstrap_cluster

@@ -9,11 +9,6 @@ generate_iso: true
 iso_type: "iso"
 iso_output_dir: ./iso
 
-pull_secret: |
-   {"auths":{"cloud.openshift.com":{"auth":"...
-ssh_public_key: |
-  ssh-ed25519 AAAA...
-
 networking:
   cluster_networks:
     - cidr: "10.128.0.0/14"
