@@ -67,10 +67,18 @@ ssh_public_key: |
 rendezvous_ip: 172.16.11.20
 
 # api_vip is the virtual IP address pointing to the cluster's API load balancer.
+# In dual-stack clusters, provide both the IPv4 and IPv6 VIPs as a list, for example:
+# api_vip:
+#   - "192.168.10.2"
+#   - "2001:db8::2"
 api_vip: ""
 
 # ingress_vip is the virtual IP address pointing to the cluster's ingress load balancer.
-# It is used to access the cluster's ingress. Therefore, it is required to be set
+# It is used to access the cluster's ingress. Therefore, it is required to be set.
+# In dual-stack clusters, provide both the IPv4 and IPv6 VIPs as a list, for example:
+# ingress_vip:
+#   - "192.168.10.3"
+#   - "2001:db8::3"
 ingress_vip: ""
 
 # enable_fips is a boolean variable that specifies whether FIPS mode should be enabled for the cluster.
@@ -89,15 +97,24 @@ networking:
       cidr: "10.128.0.0/14"
       # host_prefix defines the size of the IP address range for each node in the cluster_networks. It is used to calculate the number of IP addresses available for each node.
       host_prefix: 23
+    -
+      # cidr defines the pod network CIDR. Each node receives a unique IP address range from the cluster_networks to be used for pod networking. Ensure that the CIDR is large enough to accommodate the number of nodes in the cluster.
+      cidr: "fd01::/48"
+      # host_prefix defines the size of the IP address range for each node in the cluster_networks. It is used to calculate the number of IP addresses available for each node.
+      host_prefix: 64
   # service_networks defines the cluster internal service networks. Each network must be a unique CIDR and should not overlap with the cluster_networks.
   # The CIDR is required to be set.
   service_networks:
     - 172.30.0.0/16
+    - fd02::/112
   # machine_network defines the machine network CIDR. It is used to configure the machine network for the cluster. Ensure that the CIDR is large enough to accommodate the number of nodes in the cluster.
   machine_network:
     -
       # cidr defines the machine network CIDR.
-      cidr: 192.168.255.0/24
+      cidr: 192.168.10.0/24
+    -
+      # cidr defines the machine network CIDR.
+      cidr: 2001:db8::/64
 
   # network_type defines the type of networking to be used in the cluster. It is required to be set.
   network_type: "OVNKubernetes"
@@ -133,13 +150,6 @@ proxy:
 agent_config:
   # master|worker defines the configuration for either the master or worker nodes. In both cases, the configuration is the same.
   <master|worker>:
-    # hostname_prefix is the prefix for the hostnames of the nodes. It is used to generate the hostnames using the prefix and the node id.
-    # If the hosts[].hostname variable is set, this prefix is ignored and the hostname is used instead.
-    # Example: If the hostname_prefix is `master-` and the node id is `0`, the generated hostname is `master-0`.
-    hostname_prefix: "master-"
-    # root_device_name is the name of the root device for the nodes.
-    # This option only applies if `hosts[].root_device.name`, `hosts[].root_device.serial_number`, `hosts[].root_device.wwn` are not set.
-    root_device_name: "/dev/sda"
     # bonds defines the bonding configuration for the nodes.
     bonds:
       -
@@ -199,6 +209,10 @@ agent_config:
             part_of_bond: "bond0"
             # mtu (optional) is the MTU of the interface. If not set, the default MTU of the hardware will be used.
             mtu: 1500
+            # ipv4_dhcp (optional) defines whether the interface should use DHCP to obtain an IPv4 address. If not set, it defaults to false.
+            ipv4_dhcp: false
+            # ipv6_dhcp (optional) defines whether the interface should use DHCP to obtain an IPv6 address. If not set, it defaults to false.
+            ipv6_dhcp: false
             # addresses (optional) defines the IP addresses for the interface.
             # This section should only be used if bonds, bridges or vlans are not used.
             # If bonds, bridges or vlans are used, the IP addresses must be defined in the respective section.
@@ -208,12 +222,21 @@ agent_config:
                 ip: 192.168.10.222
                 # subnet_length is the subnet length for the interface.
                 subnet_length: 24
+              -
+                # ip is the IPv4 or IPv6 address to assign to the interface.
+                ip: 2001:db8::1
+                # subnet_length is the subnet length for the interface.
+                subnet_length: 64
         # bonds defines the host specific bond configuration.
         bonds:
           -
             # interface is the name of the bond interface to which an IP address should be assigned.
             # This interface must match the name of the bond interface defined in `bonds[].name`.
             interface: bond0
+            # ipv4_dhcp (optional) defines whether the interface should use DHCP to obtain an IPv4 address. If not set, it defaults to false.
+            ipv4_dhcp: false
+            # ipv6_dhcp (optional) defines whether the interface should use DHCP to obtain an IPv6 address. If not set, it defaults to false.
+            ipv6_dhcp: false
             # addresses defines the IP addresses for the interface.
             addresses:
               -
@@ -221,12 +244,21 @@ agent_config:
                 ip: 192.168.10.222
                 # subnet_length is the subnet length for the interface.
                 subnet_length: 24
+              -
+                # ip is the IPv4 or IPv6 address to assign to the interface.
+                ip: 2001:db8::1
+                # subnet_length is the subnet length for the interface.
+                subnet_length: 64
         # vlans defines the host specific bond configuration.
         vlans:
           -
             # interface is the name of the bond interface to which an IP address should be assigned.
             # This interface must match the name of the bond interface defined in `vlans[].name`.
             interface: bond0.100
+            # ipv4_dhcp (optional) defines whether the interface should use DHCP to obtain an IPv4 address. If not set, it defaults to false.
+            ipv4_dhcp: false
+            # ipv6_dhcp (optional) defines whether the interface should use DHCP to obtain an IPv6 address. If not set, it defaults to false.
+            ipv6_dhcp: false
             # addresses defines the IP addresses for the interface.
             addresses:
               -
@@ -234,6 +266,11 @@ agent_config:
                 ip: 192.168.10.222
                 # subnet_length is the subnet length for the interface.
                 subnet_length: 24
+              -
+                # ip is the IPv4 or IPv6 address to assign to the interface.
+                ip: 2001:db8::1
+                # subnet_length is the subnet length for the interface.
+                subnet_length: 64
 ```
 
 ## Role facts
@@ -268,3 +305,14 @@ When this role is executed, it will set the following facts automatically:
 ```
 
 For a more detailed example, please refer to the `examples/dell_hardware/playbook.yaml` file in this collection.
+
+## Development
+
+To set up the development environment for this role, you can use the provided DevContainer configuration. This allows you to develop and test the role in a consistent environment without needing to set up all dependencies on your local machine. To use the DevContainer, follow these steps:
+
+1. Ensure you have Docker and Visual Studio Code installed on your machine.
+2. Open the role's directory in Visual Studio Code.
+3. When prompted, reopen the folder in the DevContainer. If you are not prompted, you can manually trigger this by opening the Command Palette (Ctrl+Shift+P) and selecting "Remote-Containers: Reopen in Container".
+4. The DevContainer will build the necessary environment based on the configuration defined in the `.devcontainer` directory. This may take a few minutes the first time you do it.
+5. Once the DevContainer is running, you can develop and test the role as if you were working on your local machine, but with all dependencies and tools pre-installed in the container.
+6. You can run the example playbooks provided in the `_examples` directory to test the role's functionality. The examples are designed to work out of the box. The only thing you need to provide is the `OPENSHIFT_PULL_SECRET` and `OPENSHIFT_SSH_PUBLIC_KEY` environment variables for the examples that require them. You can set these environment variables in the DevContainer terminal before running the playbooks.
