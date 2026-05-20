@@ -4,7 +4,7 @@
     cacheable: yes
     manifest_folder: "{{ base_dir }}/manifests"
     credentials_folder: "{{ base_dir }}/credentials"
-    iso_location: "{{ base_dir }}/agent.iso"
+    iso_location: "{{ base_dir }}/node.iso"
     additional_node_count: "{{ worker.hosts | length }}"
 
 - name: Create output directory for credentials files
@@ -40,7 +40,7 @@
 - name: Create the bootable ISO
   when: generate_iso | bool
   ansible.builtin.command: >
-    oc adm node-image create --registry-config={{ credentials_folder }}/auth.json --dir {{ base_dir }}/
+    oc adm node-image create --registry-config={{ credentials_folder }}/auth.json --dir {{ base_dir }}/ -o node.iso
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   args:
