@@ -23,15 +23,11 @@ kubeconfig_path: ""
 # generate_iso defines whether to generate an ISO image for the cluster nodes. If set to true, the role will generate an ISO image with the OpenShift cluster boot artifacts.
 generate_iso: true
 # base_dir defines the output directory for the generated ISO image. This directory is used to store the generated ISO image and its contents.
-base_dir: /iso
+base_dir: ./iso
 # pull_secret is the pull secret used to access the OpenShift container images. It is required to generate the ISO image if `generate_iso` is set to true.
 pull_secret: ""
 # worker defines the configuration for the worker nodes in the OpenShift cluster. It is used to configure the worker nodes, including their hostnames, root devices, network interfaces, and VLANs.
 worker:
-  # hostname_prefix is the prefix for the worker node hostnames. It is used to generate the hostnames for the worker nodes.
-  hostname_prefix: "worker-"
-  # root_device_name is the name of the root device for the worker nodes. It is used to configure the root device for the worker nodes. This option only applies if `agent_config.worker.hosts[].root_device.name`, `agent_config.worker.hosts[].root_device.serial_number`, `agent_config.worker.hosts[].root_device.wwn` are not set.
-  root_device_name: "/dev/sda"
   # bonds defines the bonding configuration for the worker nodes. It is used to configure the network bonding for the worker nodes.
   bonds:
     -
