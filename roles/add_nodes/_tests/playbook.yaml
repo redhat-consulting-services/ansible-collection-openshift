@@ -1,0 +1,10 @@
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ./vars.yaml
+  vars:
+    pull_secret: "{{ lookup('env', 'OPENSHIFT_PULL_SECRET') }}"
+    kubeconfig_path: "{{ lookup('env', 'OPENSHIFT_KUBECONFIG') }}"
+    base_dir: ./iso
+  roles:
+    - ../../add_nodes
