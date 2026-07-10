@@ -38,8 +38,16 @@ platform:
     loadBalancer:
       type: UserManaged
 {% endif %}
+{% if api_vip is string %}
+    apiVIP: {{ api_vip }}
+{% else %}
     apiVIPs: {{ api_vip }}
+{% endif %}
+{% if ingress_vip is string %}
+    ingressVIP: {{ ingress_vip }}
+{% else %}
     ingressVIPs: {{ ingress_vip }}
+{% endif %}
 {% else %}
   none: {}
 {% endif %}
