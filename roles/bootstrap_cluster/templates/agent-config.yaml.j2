@@ -26,10 +26,6 @@ additionalNTPSources: {{ additional_ntp_sources }}
 {# add hosts to cluster #}
 hosts:
 {% for agent_config_node_type, agent_config_host_value in agent_config.items() %}
-  {%- if agent_config_host_value.hosts is defined and agent_config_host_value.hosts | length <= 0 %}
-    {{- ('A minimum of at least one master node is required') | mandatory }}
-  {%- endif %}
-
   {%- if agent_config_node_type not in ['master', 'worker'] %}
     {{- ('Invalid agent_config_node_type: ' ~ agent_config_node_type ~ '. Expected master or worker') | mandatory }}
   {%- endif %}
