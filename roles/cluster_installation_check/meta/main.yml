@@ -29,11 +29,11 @@ galaxy_info:
     - k8s
     - kubernetes
     - nodes
-    - health check
+    - health-check
     - health
     - check
     - status
-    - cluster status
+    - cluster-status
     - ansible
     - automation
 
