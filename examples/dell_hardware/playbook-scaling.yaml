@@ -22,7 +22,7 @@
         src: "{{ iso_location }}"
         dest: "{{ iso_nfs_share }}/"
         mode: '0766'
-        remote_src: yes
+        remote_src: true
 
 - name: Boot scaleout nodes from NFS ISO
   hosts: scaleout

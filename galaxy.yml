@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 namespace: redhat_consulting_services
 
 # The name of the collection. Has the same character restrictions as 'namespace'
@@ -13,9 +13,9 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
-- Leon Steinhäuser <lsteinha@redhat.com>
-- Oscar Lindholm <olindhol@redhat.com>
-- Suresh Vishnoi <svishnoi@redhat.com>
+  - Leon Steinhäuser <lsteinha@redhat.com>
+  - Oscar Lindholm <olindhol@redhat.com>
+  - Suresh Vishnoi <svishnoi@redhat.com>
 
 description: Bootstrapping and manage OpenShift clusters on Red Hat OpenShift Container Platform (OCP) 4.x.
 
@@ -24,13 +24,16 @@ license_file: LICENSE
 # A list of tags you want to associate with the collection for indexing/searching. A tag name has the same character
 # requirements as 'namespace' and 'name'
 tags:
-- openshift
-- ocp
-- kubernetes
-- container
-- automation
-- bootstrap
-- installation
+  - cloud
+  - infrastructure
+  - tools
+  - openshift
+  - ocp
+  - kubernetes
+  - container
+  - automation
+  - bootstrap
+  - installation
 
 # Collections that this collection requires to be installed for it to be usable. The key of the dict is the
 # collection label 'namespace.name'. The value is a version range
