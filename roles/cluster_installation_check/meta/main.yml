@@ -1,8 +1,11 @@
-#SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 galaxy_info:
   role_name: cluster_installation_check
   author: Red Hat Consulting Services
-  description: An Ansible role to ensure the OpenShift cluster is healthy and ready for further configuration. This role performs various checks and validations on the cluster components. Usually this role is executed as part of a larger playbook that bootstraps and installs an OpenShift cluster.
+  description: |
+    An Ansible role to ensure the OpenShift cluster is healthy and ready for further configuration.
+    This role performs various checks and validations on the cluster components.
+    Usually this role is executed as part of a larger playbook that bootstraps and installs an OpenShift cluster.
   company: Red Hat
 
   # If the issue tracker for your role is not on github, uncomment the
@@ -24,16 +27,16 @@ galaxy_info:
   # min_ansible_container_version:
 
   galaxy_tags:
+    - cloud
     - openshift
     - ocp
     - k8s
     - kubernetes
     - nodes
-    - health-check
     - health
     - check
     - status
-    - cluster-status
+    - cluster
     - ansible
     - automation
 

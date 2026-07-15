@@ -1,4 +1,5 @@
-- hosts: localhost
+- name: Scale Nodes
+  hosts: localhost
   gather_facts: false
   vars_files:
     - ./vars.yaml

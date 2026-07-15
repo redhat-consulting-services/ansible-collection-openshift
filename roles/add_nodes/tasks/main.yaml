@@ -1,7 +1,7 @@
 ---
 - name: Set facts for manifest generation
   ansible.builtin.set_fact:
-    cacheable: yes
+    cacheable: true
     manifest_folder: "{{ base_dir }}/manifests"
     credentials_folder: "{{ base_dir }}/credentials"
     iso_location: "{{ base_dir }}/node.iso"

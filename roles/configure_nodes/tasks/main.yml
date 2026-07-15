@@ -25,7 +25,7 @@
   when: (node_labels is defined and node_labels | length > 0) or (node_taints is defined and node_taints | length > 0)
 
 - name: Display nodes that were modified
-  debug:
+  ansible.builtin.debug:
     msg: "Modified node: {{ item.result.metadata.name }}"
   loop: "{{ taint_result.results }}"
   when: item.changed

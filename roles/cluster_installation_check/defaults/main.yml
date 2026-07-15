@@ -1,4 +1,4 @@
-#SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: Apache-2.0
 ---
 # base_dir: Directory where the OpenShift installation files are located
 # This is usually the directory where the install-config.yaml file is located.

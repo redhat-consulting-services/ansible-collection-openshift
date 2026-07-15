@@ -83,7 +83,7 @@
   register: oc_mirror_results
 
 - name: Show output
-  debug:
+  ansible.builtin.debug:
     msg: "{{ item.stdout }}"
   loop: "{{ oc_mirror_results.results | selectattr('stdout', 'defined') | list }}"
   loop_control:

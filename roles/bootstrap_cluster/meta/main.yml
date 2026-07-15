@@ -20,17 +20,18 @@ galaxy_info:
   min_ansible_version: "2.18"
 
   galaxy_tags:
+    - cloud
     - openshift
     - ocp
     - k8s
     - kubernetes
     - nodes
-    - master-nodes
-    - infra-nodes
-    - worker-nodes
-    - bootstrap-nodes
+    - master
+    - infra
+    - worker
+    - bootstrap
     - installation
-    - install-openshift
+    - install
     - ansible
     - automation
 

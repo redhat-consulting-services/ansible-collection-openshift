@@ -20,6 +20,7 @@ galaxy_info:
   min_ansible_version: "2.18"
 
   galaxy_tags:
+    - cloud
     - openshift
     - ocp
     - k8s
@@ -28,7 +29,8 @@ galaxy_info:
     - operators
     - mirror
     - images
-    - container-registry
+    - container
+    - registry
 
 dependencies: []
   # List your role dependencies here, one per line. Be sure to remove the '[]' above,
