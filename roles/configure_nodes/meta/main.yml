@@ -25,9 +25,9 @@ galaxy_info:
     - k8s
     - kubernetes
     - nodes
-    - master nodes
-    - infra nodes
-    - worker nodes
+    - master-nodes
+    - infra-nodes
+    - worker-nodes
     - ansible
     - automation
 
