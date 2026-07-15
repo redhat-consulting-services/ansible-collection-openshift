@@ -50,11 +50,11 @@ agent_config:
         mode: 802.3ad
         options:
           miimon: "100"
-    #bridges:
-    #  - name: br0
-    #    type: ovs-bridge
-    #    interfaces:
-    #      - name: bond0.100
+    # bridges:
+    #   - name: br0
+    #     type: ovs-bridge
+    #     interfaces:
+    #       - name: bond0.100
     vlans:
       - name: bond0.100
         id: 100
@@ -72,8 +72,8 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
-        #bridges:
-        #  - interface: br0
+        # bridges:
+        #   - interface: br0
         vlans:
           - interface: bond0.100
             ipv4_dhcp: false
@@ -95,8 +95,8 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
-        #bridges:
-        #  - interface: br0
+        # bridges:
+        #   - interface: br0
         vlans:
           - interface: bond0.100
             ipv4_dhcp: false
@@ -118,8 +118,8 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
-        #bridges:
-        #  - interface: br0
+        # bridges:
+        #   - interface: br0
         vlans:
           - interface: bond0.100
             ipv4_dhcp: false

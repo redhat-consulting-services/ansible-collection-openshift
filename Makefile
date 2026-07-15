@@ -14,7 +14,7 @@ build-collection:
 
 build-ee:
 	ansible-builder build \
-            --tag ${EE_TAG} \
-            --container-runtime ${CONTAINER_RUNTIME} \
-            --build-arg OPENSHIFT_VERSION=${OPENSHIFT_VERSION} \
-            --context .
+		--tag ${EE_TAG} \
+		--container-runtime ${CONTAINER_RUNTIME} \
+		--build-arg OPENSHIFT_VERSION=${OPENSHIFT_VERSION} \
+		--context .

@@ -34,7 +34,7 @@ hosts:
   {%- set host_index = loop %}
 
   - role: {{ agent_config_node_type }}
-    hostname: {{ hosts.hostname }}
+    hostname: {{ hosts.hostname | mandatory }}
     rootDeviceHints:
 {% if hosts.root_device.serial_number is not defined and hosts.root_device.wwn is not defined %}
       deviceName: {{ hosts.root_device.name }}

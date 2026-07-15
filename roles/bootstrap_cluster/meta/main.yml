@@ -26,12 +26,12 @@ galaxy_info:
     - k8s
     - kubernetes
     - nodes
-    - master-nodes
-    - infra-nodes
-    - worker-nodes
-    - bootstrap-nodes
+    - master
+    - infra
+    - worker
+    - bootstrap
     - installation
-    - install-openshift
+    - install
     - ansible
     - automation
 

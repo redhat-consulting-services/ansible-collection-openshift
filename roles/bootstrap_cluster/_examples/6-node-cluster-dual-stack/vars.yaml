@@ -29,8 +29,6 @@ networking:
 
 agent_config:
   master:
-    hostname_prefix: "master-"
-    root_device_name: "/dev/sda"
     dns_resolvers: &dns_resolvers
       - 8.8.8.8
       - 1.1.1.1

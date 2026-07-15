@@ -27,7 +27,6 @@ galaxy_info:
     - kubernetes
     - gitops
     - argocd
-    - openshift-gitops
     - ansible
     - automation
 
