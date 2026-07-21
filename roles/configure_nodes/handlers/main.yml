@@ -1,0 +1,10 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Display nodes that were modified
+  ansible.builtin.debug:
+    msg: "Modified node: {{ item.result.metadata.name }}"
+  loop: "{{ taint_result.results | default([]) }}"
+  when: item.changed
+  loop_control:
+    label: "{{ item.result.metadata.name }}"

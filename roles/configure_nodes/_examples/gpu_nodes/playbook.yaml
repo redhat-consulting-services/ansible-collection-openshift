@@ -1,7 +1,7 @@
 # Copyright redhat-consulting-services Authors
 # SPDX-License-Identifier: Apache-2.0
 ---
-- name: configure node labeling and taints for GPU nodes
+- name: Configure node labeling and taints for GPU nodes
   hosts: localhost
   gather_facts: false
   vars_files:

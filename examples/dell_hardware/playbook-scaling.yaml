@@ -81,7 +81,9 @@
     - name: Wait for new nodes to be ready
       ansible.builtin.command: >
         oc adm node-image monitor --ip-addresses=$(echo $(yq '.worker.hosts[].vlans[0].addresses[0].ip' < {{ node_scaling_config }}) | sed -e "s/ /,/g")
+      changed_when: false
 
     - name: Wait for new nodes to be schedulable
       ansible.builtin.command: >
         oc wait --for=condition=Ready node --all --timeout=600s
+      changed_when: false
