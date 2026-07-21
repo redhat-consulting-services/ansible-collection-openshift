@@ -23,11 +23,4 @@
     label: "{{ item.metadata.name }}"
   register: taint_result
   when: (node_labels is defined and node_labels | length > 0) or (node_taints is defined and node_taints | length > 0)
-
-- name: Display nodes that were modified
-  ansible.builtin.debug:
-    msg: "Modified node: {{ item.result.metadata.name }}"
-  loop: "{{ taint_result.results }}"
-  when: item.changed
-  loop_control:
-    label: "{{ item.result.metadata.name }}"
+  notify: Display nodes that were modified
