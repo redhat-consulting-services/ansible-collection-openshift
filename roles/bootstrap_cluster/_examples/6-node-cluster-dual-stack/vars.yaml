@@ -48,11 +48,6 @@ agent_config:
         mode: 802.3ad
         options:
           miimon: "100"
-    bridges:
-      - name: br0
-        type: ovs-bridge
-        interfaces:
-          - name: bond0.100
     vlans:
       - name: bond0.100
         id: 100
@@ -65,10 +60,6 @@ agent_config:
           - name: eth0
             mac_address: "00:aa:aa:aa:aa:01"
             part_of_bond: "bond0"
-            ipv4_dhcp: true
-            addresses:
-              - ip: 10.192.100.1
-                subnet_length: 24
           - name: eth1
             mac_address: "00:aa:aa:aa:aa:02"
             part_of_bond: "bond0"
@@ -79,24 +70,6 @@ agent_config:
               - ip: 10.10.10.10
                 subnet_length: 24
               - ip: fd2e:6f44:5dd8::10
-                subnet_length: 64
-        bridges:
-          - interface: br0
-            ipv4_dhcp: true
-            ipv6_dhcp: false
-            addresses:
-              - ip: 10.10.10.10
-                subnet_length: 24
-              - ip: fd2e:6f44:5dd8::10
-                subnet_length: 64
-        vlans:
-          - interface: bond0.100
-            ipv4_dhcp: false
-            ipv6_dhcp: false
-            addresses:
-              - ip: 192.168.10.222
-                subnet_length: 24
-              - ip: fd2e:6f44:5dd8::222
                 subnet_length: 64
       - hostname: master-2.ocp4-test.example.com
         root_device:
@@ -110,6 +83,7 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.11
                 subnet_length: 24
@@ -127,14 +101,13 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.12
                 subnet_length: 24
               - ip: fd2e:6f44:5dd8::12
                 subnet_length: 64
   worker:
-    hostname_prefix: "worker-"
-    root_device_name: "/dev/sda"
     dns_resolvers: *dns_resolvers
     routes: *routes
     bonds: *bonds
@@ -151,6 +124,7 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.20
                 subnet_length: 24
@@ -168,6 +142,7 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.21
                 subnet_length: 24
@@ -185,6 +160,7 @@ agent_config:
             part_of_bond: "bond0"
         bonds:
           - interface: bond0
+            ipv6_dhcp: false
             addresses:
               - ip: 10.10.10.22
                 subnet_length: 24

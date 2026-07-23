@@ -1,4 +1,4 @@
-# ansible-role-cluster-bootstrap
+# Ansible role cluster_bootstrap
 
 An Ansible role for booting an OpenShift cluster. This role uses the agent-based installation method.
 
@@ -188,11 +188,11 @@ agent_config:
     hosts:
       # master / worker: 0
       -
-        # hostname (optional) explicitly defines the hostname of the host. If this is set, hostname_prefix is ignored.
+        # hostname explicitly defines the hostname of the host.
         hostname: "master-0"
         # root_device defines the root device RHCOS will be installed on.
         root_device:
-          # name (optional) is the name of the root device. It is recommended to use the `/dev/disk/by-path/<device_path>` path.
+          # name (required if serial_number or wwn is not defined) is the name of the root device. It is recommended to use the `/dev/disk/by-path/<device_path>` path.
           name: "/dev/sda"
           # serial_number (optional) is the serial number of the root device.
           serial_number: "1234567890"
