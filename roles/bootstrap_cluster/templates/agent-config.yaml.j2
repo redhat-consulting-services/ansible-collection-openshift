@@ -1,6 +1,5 @@
-{%- set ipv4_enabled = networking.cluster_networks | selectattr('cidr', 'ansible.utils.ipv4') | list | length > 0 %}
-{%- set ipv6_enabled = networking.cluster_networks | selectattr('cidr', 'ansible.utils.ipv6') | list | length > 0 %}
-
+{%- set ipv4_enabled = (((networking | default({})).get('cluster_networks', [])) | selectattr('cidr', 'ansible.utils.ipv4') | list | length) > 0 %}
+{%- set ipv6_enabled = (((networking | default({})).get('cluster_networks', [])) | selectattr('cidr', 'ansible.utils.ipv6') | list | length) > 0 %}
 
 apiVersion: v1beta1
 kind: AgentConfig
