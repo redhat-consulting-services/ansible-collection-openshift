@@ -41,49 +41,20 @@
 
 - name: Execute oc-mirror to mirror images
   when: mirror.enabled | bool and item.enabled | default(false) | bool
+  changed_when: true
   ansible.builtin.command: >
-    {% if mirror.source.type == 'registry' and mirror.destination.type == 'disk' %}
-    {# registry-to-disk #}
-    oc-mirror \
-      --v2 \
-      --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
-      --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json \
-      --log-level debug \
-      --workspace {{ oc_mirror_base_path }}/workspace \
-      --cache-dir {{ oc_mirror_base_path }}/cache \
-      file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }}
-    {% endif %}
-
-    {% if mirror.source.type == 'disk' and mirror.destination.type == 'registry' %}
-    {# disk-to-registry #}
-    oc-mirror \
-      --v2 \
-      --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
-      --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json \
-      --from file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }} \
-      --log-level debug \
-      --workspace {{ oc_mirror_base_path }}/workspace \
-      --cache-dir {{ oc_mirror_base_path }}/cache \
-      {{ mirror.destination.registry }}/{{ item.destination }}
-    {% endif %}
-
-    {% if mirror.source.type == 'registry' and mirror.destination.type == 'registry' %}
-    {# registry-to-registry #}
-    oc-mirror \
-      --v2 \
-      --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
-      --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json \
-      --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json \
-      --log-level debug \
-      --workspace {{ oc_mirror_base_path }}/workspace \
-      --cache-dir {{ oc_mirror_base_path }}/cache \
-      {{ mirror.destination.registry }}/{{ item.destination }}
-    {% endif %}
+    {%- if mirror.source.type == 'registry' and mirror.destination.type == 'disk' -%}
+    oc-mirror --v2 --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json --log-level debug --workspace {{ oc_mirror_base_path }}/workspace --cache-dir {{ oc_mirror_base_path }}/cache file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }}
+    {%- elif mirror.source.type == 'disk' and mirror.destination.type == 'registry' -%}
+    oc-mirror --v2 --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json --from file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }} --log-level debug --workspace {{ oc_mirror_base_path }}/workspace --cache-dir {{ oc_mirror_base_path }}/cache {{ mirror.destination.registry }}/{{ item.destination }}
+    {%- elif mirror.source.type == 'registry' and mirror.destination.type == 'registry' -%}
+    oc-mirror --v2 --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json --log-level debug --workspace {{ oc_mirror_base_path }}/workspace --cache-dir {{ oc_mirror_base_path }}/cache {{ mirror.destination.registry }}/{{ item.destination }}
+    {%- endif -%}
   loop: "{{ image_sets }}"
   register: oc_mirror_results
 
 - name: Show output
-  debug:
+  ansible.builtin.debug:
     msg: "{{ item.stdout }}"
   loop: "{{ oc_mirror_results.results | selectattr('stdout', 'defined') | list }}"
   loop_control:

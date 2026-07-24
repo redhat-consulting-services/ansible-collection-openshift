@@ -28,7 +28,7 @@
         src: "{{ bootfile_path }}"
         dest: "{{ iso_nfs_share }}/"
         mode: '0766'
-        remote_src: yes
+        remote_src: true
 
 - name: Boot initial nodes from NFS ISO
   hosts: initial

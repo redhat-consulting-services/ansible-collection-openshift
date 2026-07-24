@@ -1,10 +1,11 @@
-- name: Setup single node cluster
+- name: Scale Nodes
   hosts: localhost
   gather_facts: false
   vars_files:
     - ./vars.yaml
   vars:
     pull_secret: "{{ lookup('env', 'OPENSHIFT_PULL_SECRET') }}"
-    ssh_public_key: "{{ lookup('env', 'OPENSHIFT_SSH_PUBLIC_KEY') }}"
+    kubeconfig_path: "{{ lookup('env', 'OPENSHIFT_KUBECONFIG') }}"
+    base_dir: ./iso
   roles:
-    - ../../../bootstrap_cluster
+    - ../../add_nodes

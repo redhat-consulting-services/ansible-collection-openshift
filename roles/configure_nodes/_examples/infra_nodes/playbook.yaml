@@ -1,9 +1,10 @@
 # Copyright redhat-consulting-services Authors
 # SPDX-License-Identifier: Apache-2.0
 ---
-- hosts: localhost
+- name: Label infra nodes
+  hosts: localhost
   gather_facts: false
   vars_files:
     - ./vars.yaml
   roles:
-    - ../../../configure-nodes
+    - ../../../configure_nodes

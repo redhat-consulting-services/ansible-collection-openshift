@@ -1,0 +1,5 @@
+skip_list:
+  - var-naming[no-role-prefix]
+  - role-name[path]
+  - galaxy[no-changelog]
+  - yaml[line-length]

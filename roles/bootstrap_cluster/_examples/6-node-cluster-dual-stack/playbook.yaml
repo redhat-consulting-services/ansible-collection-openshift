@@ -1,4 +1,4 @@
-- name: Setup single node cluster
+- name: Setup 6 node dual stack cluster
   hosts: localhost
   gather_facts: false
   vars_files:
