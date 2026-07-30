@@ -1,0 +1,15 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Reset mock kubernetes state
+  ansible.builtin.copy:
+    dest: "{{ test_mock_state }}"
+    mode: "0644"
+    content: |
+      {"resources": {{ seed_resources | default([]) | to_json }}, "calls": []}
+
+- name: Ensure role artifact directory exists
+  ansible.builtin.file:
+    path: "{{ test_artifact_dir }}"
+    state: directory
+    mode: "0755"

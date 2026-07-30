@@ -1,0 +1,10 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+# Test artifacts and locally installed Galaxy collections
+.artifacts/
+collections/ansible_collections/ansible/
+collections/ansible_collections/community/
+collections/ansible_collections/*.info
+*.retry
+# Keep committed mocks: collections/ansible_collections/kubernetes/

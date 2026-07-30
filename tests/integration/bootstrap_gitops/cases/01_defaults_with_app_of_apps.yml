@@ -1,0 +1,82 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 01_defaults_with_app_of_apps
+vars:
+  argocd:
+    placement:
+      node_selector:
+        node-role.kubernetes.io/infra: ""
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/infra
+          operator: Exists
+    operator:
+      channel: gitops-1.19
+      install_plan_approval: Automatic
+      metadata:
+        name: openshift-gitops-operator
+        namespace: openshift-gitops-operator
+      subscription:
+        name: openshift-gitops-operator
+        source: redhat-operators
+        source_namespace: openshift-marketplace
+        starting_csv: openshift-gitops-operators.v1.19.0
+    instance:
+      name: openshift-gitops
+      namespace: openshift-gitops
+      ha_enabled: false
+      host: ""
+      rbac_policy: |
+        g, system:cluster-admins, role:admin
+      rbac_scopes: groups
+  app_of_apps:
+    enabled: true
+    name: app-of-apps
+    project: default
+    source:
+      repo: https://gitlab.example/openshift/openshift-configurations.git
+      target_revision: main
+      path: overlays/app-of-apps
+    sync_policy:
+      automated:
+        prune: true
+        self_heal: true
+      sync_options:
+        - Validate=false
+  repositories: []
+  ca_bundle:
+    name: user-ca-bundle
+    ca_key: ca-bundle.crt
+seed_resources:
+  - kind: CustomResourceDefinition
+    metadata:
+      name: argocds.argoproj.io
+  - kind: ArgoCD
+    metadata:
+      name: openshift-gitops
+      namespace: openshift-gitops
+    status:
+      phase: Available
+assertions:
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Namespace')
+       | map(attribute='metadata.name') | list)
+      is contains('openshift-gitops')
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Namespace')
+       | map(attribute='metadata.name') | list)
+      is contains('openshift-gitops-operator')
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Subscription') | first).spec.channel
+      == 'gitops-1.19'
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Subscription') | first).spec.startingCSV
+      == 'openshift-gitops-operators.v1.19.0'
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'ArgoCD') | first).spec.ha.enabled | bool == false
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Application') | list | length) == 1
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Application') | first).spec.source.repoURL
+      == 'https://gitlab.example/openshift/openshift-configurations.git'

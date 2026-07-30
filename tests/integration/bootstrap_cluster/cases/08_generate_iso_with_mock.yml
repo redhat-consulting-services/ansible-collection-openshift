@@ -1,0 +1,40 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 08_generate_iso_with_mock
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-iso
+  base_domain: example.com
+  api_vip: 192.168.50.10
+  ingress_vip: 192.168.50.11
+  generate_iso: true
+  iso_type: iso
+  agent_config:
+    master:
+      dns_resolvers:
+        - 8.8.8.8
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: master-0
+          root_device:
+            name: "/dev/sda"
+          interfaces:
+            - name: eth0
+              mac_address: "00:11:22:33:66:01"
+              ipv4_dhcp: true
+    worker:
+      dns_resolvers: []
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts: []
+assertions:
+  - generate_iso | bool == true
+  - iso_type == 'iso'
+  - install_config.metadata.name == 'ocp-iso'
+  - "'agent.x86_64.iso' in bootfile_path"

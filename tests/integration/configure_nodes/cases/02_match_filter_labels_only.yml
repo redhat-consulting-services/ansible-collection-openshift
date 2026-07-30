@@ -1,0 +1,25 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 02_match_filter_labels_only
+vars:
+  node_filter_type: match
+  node_filter_pattern: "^infra-0$"
+  node_labels:
+    node-role.kubernetes.io/infra: ""
+  node_taints: []
+seed_resources:
+  - kind: Node
+    metadata:
+      name: worker-0
+  - kind: Node
+    metadata:
+      name: infra-0
+  - kind: Node
+    metadata:
+      name: infra-01
+assertions:
+  - k8s_patch_calls | length == 1
+  - k8s_patch_calls[0].name == 'infra-0'
+  - k8s_patch_calls[0].definition.metadata.labels['node-role.kubernetes.io/infra'] == ''
+  - k8s_patch_calls[0].definition.spec.taints == []

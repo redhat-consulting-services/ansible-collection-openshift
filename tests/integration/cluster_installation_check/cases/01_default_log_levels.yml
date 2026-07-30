@@ -1,0 +1,24 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 01_default_log_levels
+vars:
+  bootstrap_log_level: info
+  installation_log_level: info
+seed_resources:
+  - kind: Node
+    metadata:
+      name: master-0
+  - kind: Node
+    metadata:
+      name: master-1
+  - kind: Node
+    metadata:
+      name: master-2
+assertions:
+  - cluster_node_count | int == 3
+  - bootstrap_log_level == 'info'
+  - installation_log_level == 'info'
+  - >-
+      (mock_calls | selectattr('module', 'equalto', 'k8s_info')
+       | selectattr('kind', 'equalto', 'Node') | list | length) == 1

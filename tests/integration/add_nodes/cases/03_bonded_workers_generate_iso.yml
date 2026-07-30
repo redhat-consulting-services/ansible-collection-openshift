@@ -1,0 +1,60 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 03_bonded_workers_generate_iso
+vars:
+  cpu_architecture: amd64
+  generate_iso: true
+  worker:
+    dns_resolvers:
+      - 192.168.100.1
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 192.168.100.1
+        interface: bond0
+        table_id: 254
+    bonds:
+      - name: bond0
+        mode: "802.3ad"
+        options:
+          miimon: "100"
+    bridges: []
+    vlans: []
+    hosts:
+      - hostname: worker-bond-0
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: ens1f0
+            mac_address: "00:11:22:33:88:01"
+            part_of_bond: bond0
+          - name: ens1f1
+            mac_address: "00:11:22:33:88:02"
+            part_of_bond: bond0
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 192.168.100.40
+                subnet_length: 24
+      - hostname: worker-bond-1
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: ens1f0
+            mac_address: "00:11:22:33:88:03"
+            part_of_bond: bond0
+          - name: ens1f1
+            mac_address: "00:11:22:33:88:04"
+            part_of_bond: bond0
+        bonds:
+          - interface: bond0
+            addresses:
+              - ip: 192.168.100.41
+                subnet_length: 24
+assertions:
+  - additional_node_count | int == 2
+  - nodes_config.hosts | length == 2
+  - >-
+      (nodes_config.hosts[0].networkConfig.interfaces
+       | selectattr('type', 'equalto', 'bond') | list | length) == 1
+  - iso_location == (base_dir ~ '/node.iso')

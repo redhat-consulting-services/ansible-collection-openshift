@@ -1,0 +1,24 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Test bootstrap_gitops role
+  hosts: localhost
+  gather_facts: false
+  vars:
+    kubeconfig_path: "{{ test_artifact_dir }}/kubeconfig"
+    case_file:
+      path: "{{ case_file_path }}"
+  tasks:
+    - name: Create dummy kubeconfig
+      ansible.builtin.copy:
+        dest: "{{ kubeconfig_path }}"
+        mode: "0600"
+        content: |
+          apiVersion: v1
+          kind: Config
+          clusters: []
+          contexts: []
+          users: []
+
+    - name: Run case
+      ansible.builtin.include_tasks: run_case.yml

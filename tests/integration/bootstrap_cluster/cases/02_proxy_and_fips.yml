@@ -1,0 +1,43 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 02_proxy_and_fips
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-proxy
+  base_domain: example.com
+  api_vip: 192.168.50.10
+  ingress_vip: 192.168.50.11
+  enable_fips: true
+  proxy:
+    http: http://proxy.example.com:8080
+    https: https://proxy.example.com:8443
+    no_proxy: .example.com,192.168.50.0/24
+  agent_config:
+    master:
+      dns_resolvers:
+        - 8.8.8.8
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: master-0
+          root_device:
+            name: "/dev/sda"
+          interfaces:
+            - name: eth0
+              mac_address: "00:11:22:33:44:01"
+              ipv4_dhcp: true
+    worker:
+      dns_resolvers: []
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts: []
+assertions:
+  - install_config.fips | bool == true
+  - install_config.proxy.httpProxy == 'http://proxy.example.com:8080'
+  - install_config.proxy.httpsProxy == 'https://proxy.example.com:8443'
+  - install_config.proxy.noProxy == '.example.com,192.168.50.0/24'

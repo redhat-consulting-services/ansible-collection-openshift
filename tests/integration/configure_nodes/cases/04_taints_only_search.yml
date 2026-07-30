@@ -1,0 +1,29 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 04_taints_only_search
+vars:
+  node_filter_type: search
+  node_filter_pattern: gpu
+  node_labels: {}
+  node_taints:
+    - key: nvidia.com/gpu
+      value: "true"
+      effect: NoSchedule
+seed_resources:
+  - kind: Node
+    metadata:
+      name: worker-0
+  - kind: Node
+    metadata:
+      name: gpu-worker-0
+  - kind: Node
+    metadata:
+      name: gpu-worker-1
+assertions:
+  - k8s_patch_calls | length == 2
+  - >-
+      (k8s_patch_calls | map(attribute='name') | list | sort)
+      == ['gpu-worker-0', 'gpu-worker-1']
+  - k8s_patch_calls[0].definition.metadata.labels == {}
+  - k8s_patch_calls[0].definition.spec.taints[0].key == 'nvidia.com/gpu'

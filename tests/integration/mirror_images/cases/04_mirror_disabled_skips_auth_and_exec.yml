@@ -1,0 +1,28 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 04_mirror_disabled_skips_auth_and_exec
+vars:
+  mirror:
+    enabled: false
+    source:
+      type: registry
+      auth_config: |
+        {"auths":{"registry.redhat.io":{"auth":"c291cmNlOnBhc3M="}}}
+    destination:
+      type: registry
+      registry: mirror.example.com
+      auth_config: |
+        {"auths":{"mirror.example.com":{"auth":"ZGVzdDpwYXNz"}}}
+  image_sets:
+    - name: ocp4
+      enabled: true
+      destination: platform
+      platform:
+        channels:
+          - name: stable-4.20
+            type: ocp
+assertions:
+  - image_set_files.files | length == 1
+  - not cred_stats.results[0].stat.exists
+  - not cred_stats.results[1].stat.exists

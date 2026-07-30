@@ -1,0 +1,18 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 03_skip_when_no_labels_or_taints
+vars:
+  node_filter_type: search
+  node_filter_pattern: ".*"
+  node_labels: {}
+  node_taints: []
+seed_resources:
+  - kind: Node
+    metadata:
+      name: worker-0
+assertions:
+  - k8s_patch_calls | length == 0
+  - >-
+      (mock_calls | selectattr('module', 'equalto', 'k8s_info')
+       | selectattr('kind', 'equalto', 'Node') | list | length) == 1

@@ -1,0 +1,27 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 03_disk_to_registry_additional_images
+vars:
+  mirror:
+    enabled: true
+    source:
+      type: disk
+      auth_config: ""
+    destination:
+      type: registry
+      registry: mirror.example.com
+      auth_config: |
+        {"auths":{"mirror.example.com":{"auth":"ZGVzdDpwYXNz"}}}
+  image_sets:
+    - name: additional
+      enabled: true
+      destination: platform
+      additional_images:
+        - name: registry.redhat.io/ubi9/ubi:latest
+        - name: registry.redhat.io/openshift4/ose-cli:latest
+assertions:
+  - image_set.mirror.additionalImages | length == 2
+  - image_set.mirror.additionalImages[0].name == 'registry.redhat.io/ubi9/ubi:latest'
+  - not cred_stats.results[0].stat.exists
+  - cred_stats.results[1].stat.exists

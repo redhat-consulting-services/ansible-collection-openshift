@@ -1,0 +1,54 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Load case definition
+  ansible.builtin.include_vars:
+    file: "{{ case_file.path }}"
+    name: case
+
+- name: Build role variables for case
+  ansible.builtin.set_fact:
+    case_role_vars: >-
+      {{
+        case.vars | combine({
+          'base_dir': test_artifact_dir ~ '/' ~ case.name,
+          'generate_iso': case.vars.generate_iso | default(false),
+          'pull_secret': pull_secret,
+          'kubeconfig_path': kubeconfig_path
+        })
+      }}
+
+- name: Write merged role vars
+  ansible.builtin.copy:
+    dest: "{{ test_artifact_dir }}/{{ case.name }}-role-vars.yml"
+    mode: "0644"
+    content: "{{ case_role_vars | to_nice_yaml(indent=2) }}"
+
+- name: Load role vars into host scope
+  ansible.builtin.include_vars:
+    file: "{{ test_artifact_dir }}/{{ case.name }}-role-vars.yml"
+
+- name: Apply add_nodes for case {{ case.name }}
+  ansible.builtin.include_role:
+    name: add_nodes
+
+- name: Load generated nodes-config
+  ansible.builtin.slurp:
+    src: "{{ base_dir }}/nodes-config.yaml"
+  register: nodes_config_raw
+
+- name: Load generated auth.json
+  ansible.builtin.slurp:
+    src: "{{ credentials_folder }}/auth.json"
+  register: auth_raw
+
+- name: Parse generated files
+  ansible.builtin.set_fact:
+    nodes_config: "{{ nodes_config_raw.content | b64decode | from_yaml }}"
+    auth_content: "{{ auth_raw.content | b64decode }}"
+
+- name: Assert case expectations for {{ case.name }}
+  ansible.builtin.assert:
+    that: "{{ case.assertions }}"
+    quiet: true
+    fail_msg: "Assertions failed for case {{ case.name }}"

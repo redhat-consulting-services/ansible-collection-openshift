@@ -46,8 +46,6 @@ proxy:
 
 agent_config:
   master:
-    hostname_prefix: "master-"
-    root_device_name: "/dev/sda"
     dns_resolvers: []
     routes: []
     bonds: []
@@ -55,8 +53,6 @@ agent_config:
     vlans: []
     hosts: []
   worker:
-    hostname_prefix: "worker-"
-    root_device_name: "/dev/sda"
     dns_resolvers: []
     routes: []
     bonds: []

@@ -39,7 +39,10 @@ tags:
 # collection label 'namespace.name'. The value is a version range
 # L(specifiers,https://python-semanticversion.readthedocs.io/en/latest/#requirement-specification). Multiple version
 # range specifiers can be set and are separated by ','
-dependencies: {}
+dependencies:
+  ansible.utils: ">=2.0.0"
+  kubernetes.core: ">=3.0.0"
+  community.general: ">=8.0.0"
 
 repository: https://github.com/redhat-consulting-services/ansible-collection-openshift
 
@@ -56,7 +59,11 @@ issues: https://github.com/redhat-consulting-services/ansible-collection-openshi
 # artifact. A pattern is matched from the relative path of the file or directory of the collection directory. This
 # uses 'fnmatch' to match the files or directories. Some directories and files like 'galaxy.yml', '*.pyc', '*.retry',
 # and '.git' are always filtered. Mutually exclusive with 'manifest'
-build_ignore: []
+build_ignore:
+  - tests/.artifacts
+  - tests/collections/ansible_collections/ansible
+  - tests/collections/ansible_collections/community
+  - "*.tar.gz"
 
 # A dict controlling use of manifest directives used in building the collection artifact. The key 'directives' is a
 # list of MANIFEST.in style

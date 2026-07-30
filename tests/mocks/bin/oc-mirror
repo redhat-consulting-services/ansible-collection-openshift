@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Mock oc-mirror for CI tests
+set -euo pipefail
+echo "mock oc-mirror: $*"
+exit 0

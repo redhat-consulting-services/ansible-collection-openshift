@@ -1,0 +1,47 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Load case definition
+  ansible.builtin.include_vars:
+    file: "{{ case_file.path }}"
+    name: case
+
+- name: Seed mock cluster state for GitOps
+  ansible.builtin.include_tasks: ../_helpers/reset_mock_state.yml
+  vars:
+    seed_resources: "{{ case.seed_resources | default([]) }}"
+
+- name: Build role variables for case
+  ansible.builtin.set_fact:
+    case_role_vars: "{{ case.vars | combine({'kubeconfig_path': kubeconfig_path}) }}"
+
+- name: Write merged role vars
+  ansible.builtin.copy:
+    dest: "{{ test_artifact_dir }}/{{ case.name }}-role-vars.yml"
+    mode: "0644"
+    content: "{{ case_role_vars | to_nice_yaml(indent=2) }}"
+
+- name: Load role vars into host scope
+  ansible.builtin.include_vars:
+    file: "{{ test_artifact_dir }}/{{ case.name }}-role-vars.yml"
+
+- name: Apply bootstrap_gitops for case {{ case.name }}
+  ansible.builtin.include_role:
+    name: bootstrap_gitops
+
+- name: Load mock call log
+  ansible.builtin.slurp:
+    src: "{{ test_mock_state }}"
+  register: mock_state_raw
+
+- name: Parse mock state
+  ansible.builtin.set_fact:
+    mock_state: "{{ mock_state_raw.content | b64decode | from_json }}"
+    mock_calls: "{{ (mock_state_raw.content | b64decode | from_json).calls }}"
+    mock_resources: "{{ (mock_state_raw.content | b64decode | from_json).resources }}"
+
+- name: Assert case expectations for {{ case.name }}
+  ansible.builtin.assert:
+    that: "{{ case.assertions }}"
+    quiet: true
+    fail_msg: "Assertions failed for case {{ case.name }}"

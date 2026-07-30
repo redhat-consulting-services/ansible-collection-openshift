@@ -1,0 +1,61 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Load case definition
+  ansible.builtin.include_vars:
+    file: "{{ case_file.path }}"
+    name: case
+
+- name: Build role variables for case
+  ansible.builtin.set_fact:
+    case_role_vars: >-
+      {{
+        case.vars | combine({
+          'oc_mirror_base_path': test_artifact_dir ~ '/' ~ case.name
+        })
+      }}
+
+- name: Write merged role vars
+  ansible.builtin.copy:
+    dest: "{{ test_artifact_dir }}/{{ case.name }}-role-vars.yml"
+    mode: "0644"
+    content: "{{ case_role_vars | to_nice_yaml(indent=2) }}"
+
+- name: Load role vars into host scope
+  ansible.builtin.include_vars:
+    file: "{{ test_artifact_dir }}/{{ case.name }}-role-vars.yml"
+
+- name: Apply mirror_images for case {{ case.name }}
+  ansible.builtin.include_role:
+    name: mirror_images
+
+- name: Collect generated image-set files
+  ansible.builtin.find:
+    paths: "{{ oc_mirror_base_path }}/image-sets"
+    patterns: "*.yaml"
+  register: image_set_files
+
+- name: Load first image-set when present
+  when: image_set_files.files | length > 0
+  ansible.builtin.slurp:
+    src: "{{ image_set_files.files[0].path }}"
+  register: image_set_raw
+
+- name: Parse image-set
+  when: image_set_files.files | length > 0
+  ansible.builtin.set_fact:
+    image_set: "{{ image_set_raw.content | b64decode | from_yaml }}"
+
+- name: Check credential files
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - "{{ oc_mirror_base_path }}/credentials/source-config.json"
+    - "{{ oc_mirror_base_path }}/credentials/destination-config.json"
+  register: cred_stats
+
+- name: Assert case expectations for {{ case.name }}
+  ansible.builtin.assert:
+    that: "{{ case.assertions }}"
+    quiet: true
+    fail_msg: "Assertions failed for case {{ case.name }}"

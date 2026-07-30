@@ -1,0 +1,35 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 01_single_worker_defaults
+vars:
+  cpu_architecture: amd64
+  worker:
+    dns_resolvers:
+      - 8.8.8.8
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 192.168.50.1
+        interface: eth0
+        table_id: 254
+    bonds: []
+    bridges: []
+    vlans: []
+    hosts:
+      - hostname: worker-extra-0
+        root_device:
+          name: "/dev/sda"
+        interfaces:
+          - name: eth0
+            mac_address: "00:11:22:33:77:01"
+            addresses:
+              - ip: 192.168.50.30
+                subnet_length: 24
+assertions:
+  - nodes_config.cpuArchitecture == 'amd64'
+  - nodes_config.hosts | length == 1
+  - nodes_config.hosts[0].hostname == 'worker-extra-0'
+  - nodes_config.hosts[0].role == 'worker'
+  - additional_node_count | int == 1
+  - "'auths' in auth_content"
+  - iso_location == (base_dir ~ '/node.iso')

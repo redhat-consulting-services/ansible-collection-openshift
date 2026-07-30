@@ -1,0 +1,6 @@
+---
+collections:
+  - name: ansible.utils
+  # kubernetes.core is intentionally omitted: tests use the mock collection under
+  # tests/collections/ansible_collections/kubernetes/core
+  - name: community.general

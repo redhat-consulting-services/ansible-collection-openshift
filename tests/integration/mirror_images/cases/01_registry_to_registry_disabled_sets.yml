@@ -1,0 +1,34 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 01_registry_to_registry_disabled_sets
+vars:
+  mirror:
+    enabled: true
+    source:
+      type: registry
+      auth_config: |
+        {"auths":{"registry.redhat.io":{"auth":"c291cmNlOnBhc3M="}}}
+    destination:
+      type: registry
+      registry: mirror.example.com
+      auth_config: |
+        {"auths":{"mirror.example.com":{"auth":"ZGVzdDpwYXNz"}}}
+  image_sets:
+    - name: ocp4
+      enabled: false
+      destination: platform
+      platform:
+        channels:
+          - name: stable-4.20
+            min_version: 4.20.0
+            max_version: 4.20.0
+            shortestPath: true
+            type: ocp
+assertions:
+  - image_set_files.files | length == 1
+  - image_set.kind == 'ImageSetConfiguration'
+  - image_set.mirror.platform.channels[0].name == 'stable-4.20'
+  - image_set.mirror.platform.channels[0].minVersion == '4.20.0'
+  - cred_stats.results[0].stat.exists
+  - cred_stats.results[1].stat.exists

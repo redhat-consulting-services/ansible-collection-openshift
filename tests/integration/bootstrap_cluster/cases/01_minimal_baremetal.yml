@@ -1,0 +1,55 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 01_minimal_baremetal
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-minimal
+  base_domain: example.com
+  api_vip: 192.168.50.10
+  ingress_vip: 192.168.50.11
+  type: baremetal
+  agent_config:
+    master:
+      dns_resolvers:
+        - 8.8.8.8
+      routes:
+        - destination: 0.0.0.0/0
+          gateway: 192.168.50.1
+          interface: eth0
+          table_id: 254
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: master-0.ocp-minimal.example.com
+          root_device:
+            name: "/dev/sda"
+          interfaces:
+            - name: eth0
+              mac_address: "00:11:22:33:44:00"
+              addresses:
+                - ip: 192.168.50.20
+                  subnet_length: 24
+    worker:
+      dns_resolvers: []
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts: []
+assertions:
+  - install_config.metadata.name == 'ocp-minimal'
+  - install_config.baseDomain == 'example.com'
+  - install_config.platform.baremetal.apiVIP == '192.168.50.10'
+  - install_config.platform.baremetal.ingressVIP == '192.168.50.11'
+  - install_config.controlPlane.replicas | int == 1
+  - install_config.compute[0].replicas | int == 0
+  - install_config.networking.networkType == 'OVNKubernetes'
+  - install_config.fips | bool == false
+  - agent_config_doc.kind == 'AgentConfig'
+  - master_node_count | int == 1
+  - worker_node_count | int == 0
+  - total_node_count | int == 1
+  - cluster_domain == 'ocp-minimal.example.com'
+  - "'agent.x86_64.iso' in bootfile_path"

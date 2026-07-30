@@ -1,0 +1,16 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+# Option-matrix tests for bootstrap_cluster.
+# case_file_path is provided by tests/run-tests.sh for a single case.
+- name: Test bootstrap_cluster role
+  hosts: localhost
+  gather_facts: false
+  vars:
+    pull_secret: '{"auths":{"fake.registry":{"auth":"dGVzdDp0ZXN0"}}}'
+    ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBootstrapClusterTestKey test@example.com"
+    case_file:
+      path: "{{ case_file_path }}"
+  tasks:
+    - name: Run case
+      ansible.builtin.include_tasks: run_case.yml

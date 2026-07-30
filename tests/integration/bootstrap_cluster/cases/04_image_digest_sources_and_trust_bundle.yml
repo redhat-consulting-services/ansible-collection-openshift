@@ -1,0 +1,49 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 04_image_digest_sources_and_trust_bundle
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-disconnected
+  base_domain: example.com
+  api_vip: 192.168.50.10
+  ingress_vip: 192.168.50.11
+  additional_trust_bundle: |
+    -----BEGIN CERTIFICATE-----
+    MIIBtest
+    -----END CERTIFICATE-----
+  image_digest_sources:
+    - source: quay.io/openshift-release-dev/ocp-release
+      mirrors:
+        - registry.example.com/ocp4/openshift-release
+    - source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+      mirrors:
+        - registry.example.com/ocp4/openshift-release
+  agent_config:
+    master:
+      dns_resolvers:
+        - 8.8.8.8
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: master-0
+          root_device:
+            name: "/dev/sda"
+          interfaces:
+            - name: eth0
+              mac_address: "00:11:22:33:44:03"
+              ipv4_dhcp: true
+    worker:
+      dns_resolvers: []
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts: []
+assertions:
+  - install_config.imageDigestSources | length == 2
+  - install_config.imageDigestSources[0].source == 'quay.io/openshift-release-dev/ocp-release'
+  - "'registry.example.com/ocp4/openshift-release' in install_config.imageDigestSources[0].mirrors"
+  - "'BEGIN CERTIFICATE' in install_config.additionalTrustBundle"

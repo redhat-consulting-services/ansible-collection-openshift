@@ -12,6 +12,17 @@ A collection that bundles roles for the management of OpenShift clusters
 - **configure_nodes**: A role to label and/or taint nodes in an OpenShift cluster
 - **mirror_images**: A role to mirror OpenShift Operators and container images to a private registry
 
+## Testing
+
+Offline role tests cover every configurable option without requiring a live OpenShift cluster:
+
+```bash
+make test                      # all roles
+make test-bootstrap_cluster    # single role
+```
+
+See [tests/README.md](tests/README.md) for details. CI runs these tests on pull requests via `.github/workflows/test.yaml`.
+
 ## Execution Environment
 
 This collection includes an Ansible Execution Environment (EE) that packages the collection with all its dependencies and OpenShift CLI tools for easy deployment and usage.

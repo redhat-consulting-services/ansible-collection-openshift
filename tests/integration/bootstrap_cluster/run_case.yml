@@ -1,0 +1,60 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Load case definition
+  ansible.builtin.include_vars:
+    file: "{{ case_file.path }}"
+    name: case
+
+- name: Build role variables for case
+  ansible.builtin.set_fact:
+    case_role_vars: >-
+      {{
+        case.vars | combine({
+          'iso_output_dir': test_artifact_dir ~ '/' ~ case.name ~ '/iso',
+          'generate_iso': case.vars.generate_iso | default(false),
+          'pull_secret': pull_secret,
+          'ssh_public_key': ssh_public_key
+        })
+      }}
+
+- name: Prepare case output directory
+  ansible.builtin.file:
+    path: "{{ case_role_vars.iso_output_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Write merged role vars
+  ansible.builtin.copy:
+    dest: "{{ test_artifact_dir }}/{{ case.name }}/role-vars.yml"
+    mode: "0644"
+    content: "{{ case_role_vars | to_nice_yaml(indent=2) }}"
+
+- name: Load role vars into host scope
+  ansible.builtin.include_vars:
+    file: "{{ test_artifact_dir }}/{{ case.name }}/role-vars.yml"
+
+- name: Apply bootstrap_cluster for case {{ case.name }}
+  ansible.builtin.include_role:
+    name: bootstrap_cluster
+
+- name: Load generated install-config
+  ansible.builtin.slurp:
+    src: "{{ base_dir }}/install-config.yaml"
+  register: install_config_raw
+
+- name: Load generated agent-config
+  ansible.builtin.slurp:
+    src: "{{ base_dir }}/agent-config.yaml"
+  register: agent_config_raw
+
+- name: Parse generated manifests
+  ansible.builtin.set_fact:
+    install_config: "{{ install_config_raw.content | b64decode | from_yaml }}"
+    agent_config_doc: "{{ agent_config_raw.content | b64decode | from_yaml }}"
+
+- name: Assert case expectations for {{ case.name }}
+  ansible.builtin.assert:
+    that: "{{ case.assertions }}"
+    quiet: true
+    fail_msg: "Assertions failed for case {{ case.name }}"

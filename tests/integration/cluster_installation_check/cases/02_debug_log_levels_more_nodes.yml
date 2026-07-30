@@ -1,0 +1,27 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 02_debug_log_levels_more_nodes
+vars:
+  bootstrap_log_level: debug
+  installation_log_level: debug
+seed_resources:
+  - kind: Node
+    metadata:
+      name: master-0
+  - kind: Node
+    metadata:
+      name: master-1
+  - kind: Node
+    metadata:
+      name: master-2
+  - kind: Node
+    metadata:
+      name: worker-0
+  - kind: Node
+    metadata:
+      name: worker-1
+assertions:
+  - cluster_node_count | int == 5
+  - bootstrap_log_level == 'debug'
+  - installation_log_level == 'debug'

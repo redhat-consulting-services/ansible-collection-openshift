@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Mock oc for CI tests
+set -euo pipefail
+echo "mock oc: $*"
+# Support "oc adm node-image create ... -o node.iso"
+if [[ "$*" == *"node-image create"* ]]; then
+  out="node.iso"
+  prev=""
+  for arg in "$@"; do
+    if [[ "$prev" == "-o" ]]; then
+      out="$arg"
+    fi
+    prev="$arg"
+  done
+  # Write beside cwd (role uses --dir)
+  touch "${out}"
+fi
+exit 0

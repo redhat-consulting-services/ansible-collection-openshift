@@ -3,3 +3,9 @@ skip_list:
   - role-name[path]
   - galaxy[no-changelog]
   - yaml[line-length]
+
+exclude_paths:
+  - examples/
+  - tests/.artifacts/
+  - tests/collections/ansible_collections/ansible/
+  - tests/collections/ansible_collections/community/

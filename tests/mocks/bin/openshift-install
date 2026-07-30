@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Mock openshift-install for CI tests
+set -euo pipefail
+echo "mock openshift-install: $*"
+exit 0

@@ -1,0 +1,48 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 03_pxe_boot_artifacts_ntp
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-pxe
+  base_domain: example.com
+  api_vip: 192.168.50.10
+  ingress_vip: 192.168.50.11
+  iso_type: pxe
+  arch: x86_64
+  boot_artifacts_base_url: http://boot.example.com/artifacts
+  additional_ntp_sources:
+    - 0.pool.ntp.org
+    - 1.pool.ntp.org
+  rendezvous_ip: 192.168.50.20
+  agent_config:
+    master:
+      dns_resolvers:
+        - 8.8.8.8
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: master-0
+          root_device:
+            name: "/dev/sda"
+          interfaces:
+            - name: eth0
+              mac_address: "00:11:22:33:44:02"
+              addresses:
+                - ip: 192.168.50.20
+                  subnet_length: 24
+    worker:
+      dns_resolvers: []
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts: []
+assertions:
+  - iso_type == 'pxe'
+  - "'boot-artifacts' in bootfile_path"
+  - agent_config_doc.bootArtifactsBaseURL == 'http://boot.example.com/artifacts'
+  - agent_config_doc.additionalNTPSources | length == 2
+  - agent_config_doc.rendezvousIP == '192.168.50.20'

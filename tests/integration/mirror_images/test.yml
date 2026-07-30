@@ -1,0 +1,12 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+- name: Test mirror_images role
+  hosts: localhost
+  gather_facts: false
+  vars:
+    case_file:
+      path: "{{ case_file_path }}"
+  tasks:
+    - name: Run case
+      ansible.builtin.include_tasks: run_case.yml

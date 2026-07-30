@@ -1,0 +1,15 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 03_warn_error_log_levels
+vars:
+  bootstrap_log_level: warn
+  installation_log_level: error
+seed_resources:
+  - kind: Node
+    metadata:
+      name: master-0
+assertions:
+  - cluster_node_count | int == 1
+  - bootstrap_log_level == 'warn'
+  - installation_log_level == 'error'

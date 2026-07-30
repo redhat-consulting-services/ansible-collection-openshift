@@ -1,0 +1,91 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 02_ha_host_repos_no_app_of_apps
+vars:
+  argocd:
+    placement:
+      node_selector:
+        node-role.kubernetes.io/worker: ""
+      tolerations: []
+    operator:
+      channel: gitops-1.16
+      install_plan_approval: Manual
+      metadata:
+        name: openshift-gitops-operator
+        namespace: gitops-operator
+      subscription:
+        name: openshift-gitops-operator
+        source: custom-operators
+        source_namespace: openshift-marketplace
+        # intentionally omit starting_csv to exercise optional path
+    instance:
+      name: cluster-gitops
+      namespace: cluster-gitops
+      ha_enabled: true
+      host: gitops.apps.example.com
+      rbac_policy: |
+        g, admins, role:admin
+      rbac_scopes: groups
+  app_of_apps:
+    enabled: false
+    name: unused
+    project: default
+    source:
+      repo: https://example.com/unused.git
+      target_revision: main
+      path: unused
+  repositories:
+    - name: configs
+      type: git
+      url: https://gitlab.example/configs.git
+      authentication:
+        username: gituser
+        password: gitpass
+      insecure: false
+      forceHttpBasicAuth: true
+    - name: helm-oci
+      type: helm
+      url: registry.example.com/helm
+      enableOCI: true
+  ca_bundle:
+    name: custom-ca
+    ca_key: custom-ca.crt
+seed_resources:
+  - kind: CustomResourceDefinition
+    metadata:
+      name: argocds.argoproj.io
+  - kind: ArgoCD
+    metadata:
+      name: cluster-gitops
+      namespace: cluster-gitops
+    status:
+      phase: Available
+assertions:
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Subscription') | first).spec.channel
+      == 'gitops-1.16'
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Subscription') | first).spec.installPlanApproval
+      == 'Manual'
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Subscription') | first).spec.source
+      == 'custom-operators'
+  - >-
+      'startingCSV' not in (mock_resources | selectattr('kind', 'equalto', 'Subscription') | first).spec
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'ArgoCD') | first).spec.ha.enabled | bool == true
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'ArgoCD') | first).spec.server.host
+      == 'gitops.apps.example.com'
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Application') | list | length) == 0
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Secret') | list | length) == 2
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'Secret')
+       | selectattr('metadata.name', 'equalto', 'configs') | first).stringData.username
+      == 'gituser'
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'ConfigMap') | first).metadata.name
+      == 'custom-ca'

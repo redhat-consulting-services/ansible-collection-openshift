@@ -1,0 +1,66 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 05_user_managed_lb_and_multi_vip
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-lb
+  base_domain: example.com
+  lb_type: UserManaged
+  api_vip:
+    - 192.168.50.10
+    - 2001:db8::10
+  ingress_vip:
+    - 192.168.50.11
+    - 2001:db8::11
+  networking:
+    cluster_networks:
+      - cidr: "10.128.0.0/14"
+        host_prefix: 23
+      - cidr: "fd01::/48"
+        host_prefix: 64
+    service_networks:
+      - 172.30.0.0/16
+      - fd02::/112
+    network_type: "OVNKubernetes"
+    machine_network:
+      - cidr: 192.168.50.0/24
+      - cidr: 2001:db8::/64
+  agent_config:
+    master:
+      dns_resolvers:
+        - 8.8.8.8
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: master-0
+          root_device:
+            serial_number: "SN123"
+            wwn: "wwn-abc"
+          interfaces:
+            - name: eth0
+              mac_address: "00:11:22:33:44:04"
+              addresses:
+                - ip: 192.168.50.20
+                  subnet_length: 24
+                - ip: "2001:db8::20"
+                  subnet_length: 64
+    worker:
+      dns_resolvers: []
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts: []
+assertions:
+  - install_config.platform.baremetal.loadBalancer.type == 'UserManaged'
+  - install_config.platform.baremetal.apiVIPs | length == 2
+  - install_config.platform.baremetal.ingressVIPs | length == 2
+  - install_config.networking.clusterNetwork | length == 2
+  - install_config.networking.serviceNetwork | length == 2
+  - install_config.networking.machineNetwork | length == 2
+  - agent_config_doc.hosts[0].rootDeviceHints.serialNumber == 'SN123'
+  - agent_config_doc.hosts[0].rootDeviceHints.wwn == 'wwn-abc'
+  - "'deviceName' not in agent_config_doc.hosts[0].rootDeviceHints"

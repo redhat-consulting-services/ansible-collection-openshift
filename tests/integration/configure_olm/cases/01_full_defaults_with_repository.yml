@@ -1,0 +1,91 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 01_full_defaults_with_repository
+vars:
+  registry:
+    url: mirror.example.com:8443
+    repository: operators/redhat
+    index: redhat-operator-index
+  catalog_source:
+    ocp_version: "4.20"
+    name: redhat-operators
+  operator_hub:
+    manage: true
+    disable_default_sources: true
+  olm:
+    marketplace_namespace: openshift-marketplace
+    pods:
+      restart: true
+      wait_for_ready: true
+      restart_timeout: 60
+      label_selectors:
+        - olm.catalogSource
+  machine_config_pool:
+    watch_updates: true
+    wait_for_completion: true
+    timeout: 60
+    interval: 1
+    pool_names:
+      - master
+      - worker
+seed_resources:
+  - kind: MachineConfigPool
+    metadata:
+      name: master
+    status:
+      readyMachineCount: 3
+      machineCount: 3
+      updatedMachineCount: 3
+      configuration:
+        name: rendered-master-1
+      conditions:
+        - type: Updated
+          status: "True"
+        - type: Updating
+          status: "False"
+  - kind: MachineConfigPool
+    metadata:
+      name: worker
+    status:
+      readyMachineCount: 2
+      machineCount: 2
+      updatedMachineCount: 2
+      configuration:
+        name: rendered-worker-1
+      conditions:
+        - type: Updated
+          status: "True"
+        - type: Updating
+          status: "False"
+  - kind: Pod
+    metadata:
+      name: redhat-operators-abc
+      namespace: openshift-marketplace
+      labels:
+        olm.catalogSource: redhat-operators
+    status:
+      phase: Running
+assertions:
+  - >-
+      (mock_calls | selectattr('module', 'equalto', 'k8s_json_patch') | list | length) == 1
+  - >-
+      (mock_calls | selectattr('module', 'equalto', 'k8s_json_patch') | first).patch[0].value | bool == true
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'CatalogSource') | list | length) >= 1
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'CatalogSource') | first).spec.image
+      == 'mirror.example.com:8443/redhat-operator-index:4.20'
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'ImageDigestMirrorSet')
+       | map(attribute='metadata.name') | list)
+      is contains('idms-ocp4')
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'ImageDigestMirrorSet')
+       | map(attribute='metadata.name') | list)
+      is contains('idms-gitops')
+  - >-
+      (mock_resources | selectattr('kind', 'equalto', 'ImageDigestMirrorSet')
+       | selectattr('metadata.name', 'equalto', 'idms-ocp4') | first)
+      .spec.imageDigestMirrors[0].mirrors[0]
+      == 'mirror.example.com:8443/operators/redhat/openshift/release-images'

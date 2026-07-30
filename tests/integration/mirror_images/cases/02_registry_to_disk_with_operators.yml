@@ -1,0 +1,42 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 02_registry_to_disk_with_operators
+vars:
+  mirror:
+    enabled: true
+    source:
+      type: registry
+      auth_config: |
+        {"auths":{"registry.redhat.io":{"auth":"c291cmNlOnBhc3M="}}}
+    destination:
+      type: disk
+      registry: ""
+      auth_config: ""
+  image_sets:
+    - name: openshift-operators
+      enabled: true
+      destination: operators
+      platform:
+        architectures:
+          - amd64
+        channels:
+          - name: stable-4.20
+            min_version: 4.20.1
+            max_version: 4.20.1
+            type: ocp
+      operators:
+        - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.20
+          packages:
+            - name: openshift-gitops-operator
+              channels:
+                - name: latest
+                  min_version: 1.19.0
+            - name: cluster-logging
+assertions:
+  - image_set.mirror.platform.architectures == ['amd64']
+  - image_set.mirror.operators | length == 1
+  - image_set.mirror.operators[0].packages | length == 2
+  - image_set.mirror.operators[0].packages[0].channels[0].name == 'latest'
+  - cred_stats.results[0].stat.exists
+  - not cred_stats.results[1].stat.exists

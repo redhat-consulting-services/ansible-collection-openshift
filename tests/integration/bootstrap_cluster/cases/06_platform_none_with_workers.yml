@@ -1,0 +1,90 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 06_platform_none_with_workers
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-none
+  base_domain: example.com
+  type: none
+  agent_config:
+    master:
+      dns_resolvers:
+        - 1.1.1.1
+      routes:
+        - destination: 0.0.0.0/0
+          gateway: 10.10.10.1
+          interface: eth0
+          table_id: 254
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: master-0
+          root_device:
+            name: "/dev/nvme0n1"
+          interfaces:
+            - name: eth0
+              mac_address: "00:aa:bb:cc:dd:01"
+              mtu: 9000
+              addresses:
+                - ip: 10.10.10.10
+                  subnet_length: 24
+        - hostname: master-1
+          root_device:
+            name: "/dev/nvme0n1"
+          interfaces:
+            - name: eth0
+              mac_address: "00:aa:bb:cc:dd:02"
+              addresses:
+                - ip: 10.10.10.11
+                  subnet_length: 24
+        - hostname: master-2
+          root_device:
+            name: "/dev/nvme0n1"
+          interfaces:
+            - name: eth0
+              mac_address: "00:aa:bb:cc:dd:03"
+              addresses:
+                - ip: 10.10.10.12
+                  subnet_length: 24
+    worker:
+      dns_resolvers:
+        - 1.1.1.1
+      routes:
+        - destination: 0.0.0.0/0
+          gateway: 10.10.10.1
+          interface: eth0
+          table_id: 254
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts:
+        - hostname: worker-0
+          root_device:
+            name: "/dev/nvme0n1"
+          interfaces:
+            - name: eth0
+              mac_address: "00:aa:bb:cc:ee:01"
+              addresses:
+                - ip: 10.10.10.20
+                  subnet_length: 24
+        - hostname: worker-1
+          root_device:
+            name: "/dev/nvme0n1"
+          interfaces:
+            - name: eth0
+              mac_address: "00:aa:bb:cc:ee:02"
+              addresses:
+                - ip: 10.10.10.21
+                  subnet_length: 24
+assertions:
+  - install_config.platform.none == {}
+  - "'baremetal' not in install_config.platform"
+  - install_config.controlPlane.replicas | int == 3
+  - install_config.compute[0].replicas | int == 2
+  - master_node_count | int == 3
+  - worker_node_count | int == 2
+  - total_node_count | int == 5
+  - agent_config_doc.hosts | length == 5
+  - agent_config_doc.hosts[0].networkConfig.interfaces[0].mtu | int == 9000

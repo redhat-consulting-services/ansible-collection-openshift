@@ -15,8 +15,6 @@ image_digest_sources:
       - "registry.example.com/ocp4/openshift-release"
 agent_config:
   master:
-    hostname_prefix: "master-"
-    root_device_name: "/dev/sda"
     dns_resolvers: &dns_resolvers
       - 172.16.11.1
       - 8.8.8.8
@@ -88,8 +86,6 @@ agent_config:
             mac_address: "00:00:00:00:02:01"
             part_of_bond: "bond0"
   worker:
-    hostname_prefix: "worker-"
-    root_device_name: "/dev/sda"
     dns_resolvers: *dns_resolvers
     routes: *routes
     bonds:

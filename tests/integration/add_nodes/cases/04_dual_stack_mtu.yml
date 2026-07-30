@@ -1,0 +1,36 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 04_dual_stack_mtu
+vars:
+  cpu_architecture: amd64
+  worker:
+    dns_resolvers:
+      - 8.8.8.8
+      - "2001:4860:4860::8888"
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 192.168.50.1
+        interface: eth0
+        table_id: 254
+    bonds: []
+    bridges: []
+    vlans: []
+    hosts:
+      - hostname: worker-ds-0
+        root_device:
+          name: "/dev/nvme0n1"
+        interfaces:
+          - name: eth0
+            mac_address: "00:11:22:33:99:01"
+            mtu: 9000
+            addresses:
+              - ip: 192.168.50.50
+                subnet_length: 24
+              - ip: "2001:db8::50"
+                subnet_length: 64
+assertions:
+  - nodes_config.hosts[0].networkConfig.interfaces[0].mtu | int == 9000
+  - nodes_config.hosts[0].networkConfig.interfaces[0].ipv4.address | length == 1
+  - nodes_config.hosts[0].networkConfig.interfaces[0].ipv6.address | length == 1
+  - nodes_config.hosts[0].networkConfig['dns-resolver'].config.server | length == 2

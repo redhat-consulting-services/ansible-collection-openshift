@@ -1,0 +1,31 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 02_arm64_ntp_and_serial_hints
+vars:
+  cpu_architecture: arm64
+  additional_ntp_sources:
+    - 0.pool.ntp.org
+  worker:
+    dns_resolvers:
+      - 1.1.1.1
+    routes: []
+    bonds: []
+    bridges: []
+    vlans: []
+    hosts:
+      - hostname: worker-arm-0
+        root_device:
+          serial_number: "ARM-SN-1"
+          wwn: "wwn-arm-1"
+        interfaces:
+          - name: eth0
+            mac_address: "00:11:22:33:77:02"
+            ipv4_dhcp: true
+assertions:
+  - nodes_config.cpuArchitecture == 'arm64'
+  - nodes_config.additionalNTPSources | length == 1
+  - nodes_config.hosts[0].rootDeviceHints.serialNumber == 'ARM-SN-1'
+  - nodes_config.hosts[0].rootDeviceHints.wwn == 'wwn-arm-1'
+  - "'deviceName' not in nodes_config.hosts[0].rootDeviceHints"
+  - nodes_config.hosts[0].networkConfig.interfaces[0].ipv4.dhcp | bool == true

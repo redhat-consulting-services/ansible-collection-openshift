@@ -1,0 +1,74 @@
+# Copyright redhat-consulting-services Authors
+# SPDX-License-Identifier: Apache-2.0
+---
+name: 07_bonded_vlan_network
+vars:
+  tenant_name: test-tenant
+  cluster_name: ocp-bond
+  base_domain: example.com
+  api_vip: 192.168.100.10
+  ingress_vip: 192.168.100.11
+  networking:
+    cluster_networks:
+      - cidr: "10.128.0.0/14"
+        host_prefix: 23
+    service_networks:
+      - 172.30.0.0/16
+    network_type: "OVNKubernetes"
+    machine_network:
+      - cidr: 192.168.100.0/24
+  agent_config:
+    master:
+      dns_resolvers:
+        - 192.168.100.1
+      routes:
+        - destination: 0.0.0.0/0
+          gateway: 192.168.100.1
+          interface: bond0.100
+          table_id: 254
+      bonds:
+        - name: bond0
+          mode: "802.3ad"
+          options:
+            miimon: "100"
+            lacp_rate: "fast"
+      bridges: []
+      vlans:
+        - name: bond0.100
+          id: 100
+          base_interface: bond0
+      hosts:
+        - hostname: master-0
+          root_device:
+            name: "/dev/sda"
+          interfaces:
+            - name: ens1f0
+              mac_address: "00:11:22:33:55:01"
+              part_of_bond: bond0
+            - name: ens1f1
+              mac_address: "00:11:22:33:55:02"
+              part_of_bond: bond0
+          vlans:
+            - interface: bond0.100
+              addresses:
+                - ip: 192.168.100.20
+                  subnet_length: 24
+    worker:
+      dns_resolvers: []
+      routes: []
+      bonds: []
+      bridges: []
+      vlans: []
+      hosts: []
+assertions:
+  - agent_config_doc.hosts | length == 1
+  - agent_config_doc.hosts[0].interfaces | length == 2
+  - >-
+      (agent_config_doc.hosts[0].networkConfig.interfaces
+       | selectattr('type', 'equalto', 'bond') | list | length) == 1
+  - >-
+      (agent_config_doc.hosts[0].networkConfig.interfaces
+       | selectattr('type', 'equalto', 'vlan') | list | length) == 1
+  - >-
+      (agent_config_doc.hosts[0].networkConfig.interfaces
+       | selectattr('name', 'equalto', 'bond0.100') | first).vlan.id | int == 100
