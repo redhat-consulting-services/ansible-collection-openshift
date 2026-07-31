@@ -2,8 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 ---
 mirror:
-  enabled: false
+  enabled: true
   destination:
+    type: registry
+    tls_verify: false
+    registry: destination-registry.example.com
     auth_config: |
       {
         "auths": {
@@ -13,6 +16,8 @@ mirror:
         }
       }
   source:
+    type: registry
+    tls_verify: false
     auth_config: |
       {
         "auths": {
@@ -42,6 +47,7 @@ image_sets:
           type: ocp
 
   - name: openshift-operators
+    enabled: true
     destination: operators
     platform:
       architectures:
@@ -63,6 +69,7 @@ image_sets:
           - name: cluster-logging
 
   - name: community-operators
+    enabled: true
     operators:
       - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.22
         packages:
