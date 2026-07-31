@@ -1,6 +1,27 @@
 # Copyright redhat-consulting-services Authors
 # SPDX-License-Identifier: Apache-2.0
 ---
+mirror:
+  enabled: false
+  destination:
+    auth_config: |
+      {
+        "auths": {
+          "quay.io": {
+            "auth": "cXVheW9fY2xpOjEyMzQ1Njc4OTA="
+          }
+        }
+      }
+  source:
+    auth_config: |
+      {
+        "auths": {
+          "registry.redhat.io": {
+            "auth": "cmVnaXN0cnlfY2xpOjEyMzQ1Njc4OTA="
+          }
+        }
+      }
+
 image_sets:
   - name: openshift-additional
     enabled: true
@@ -14,9 +35,9 @@ image_sets:
     destination: platform
     platform:
       channels:
-        - name: stable-4.18
-          min_version: 4.18.20
-          max_version: 4.18.20
+        - name: stable-4.22
+          min_version: 4.22.7
+          max_version: 4.22.7
           shortestPath: true
           type: ocp
 
@@ -26,13 +47,13 @@ image_sets:
       architectures:
         - amd64
       channels:
-        - name: stable-4.18
-          min_version: 4.18.20
-          max_version: 4.18.20
+        - name: stable-4.22
+          min_version: 4.22.7
+          max_version: 4.22.7
           shortestPath: true
           type: ocp
     operators:
-      - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
+      - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.22
         packages:
           - name: advanced-cluster-management
           - name: multicluster-engine
@@ -43,7 +64,7 @@ image_sets:
 
   - name: community-operators
     operators:
-      - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
+      - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.22
         packages:
           - name: advanced-cluster-management
           - name: multicluster-engine

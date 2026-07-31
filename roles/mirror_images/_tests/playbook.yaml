@@ -7,4 +7,4 @@
   vars_files:
     - vars.yaml
   roles:
-    - ../../mirror-images
+    - ../../mirror_images
