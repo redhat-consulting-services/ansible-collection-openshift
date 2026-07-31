@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 ---
 
-- hosts: localhost
+- name: Mirror images from source to destination
+  hosts: localhost
   gather_facts: false
   vars_files:
     - vars.yaml

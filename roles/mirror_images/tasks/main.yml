@@ -30,7 +30,7 @@
   vars:
     config: "{{ (mirror.source.auth_config | from_json) | combine(mirror.destination.auth_config | from_json, recursive=True) }}"
 
-- name: Execute oc-mirror to mirror images ({{ item.name }})
+- name: Execute oc-mirror to mirror images
   when: mirror.enabled | bool and item.enabled | default(false) | bool
   ansible.builtin.command: >
     {% if mirror.source.type == 'registry' and mirror.destination.type == 'disk' %}
