@@ -11,31 +11,31 @@
   ansible.builtin.file:
     path: "{{ credentials_folder }}"
     state: directory
-    mode: '0744'
+    mode: '2770'
 
 - name: Generate auth.json
   ansible.builtin.template:
     src: auth.json.j2
     dest: "{{ credentials_folder }}/auth.json"
-    mode: '0644'
+    mode: '0660'
 
 - name: Create output directory structure
   ansible.builtin.file:
     path: "{{ manifest_folder }}"
     state: directory
-    mode: '0744'
+    mode: '2770'
 
 - name: Generate nodes-config.yaml
   ansible.builtin.template:
     src: nodes-config.yaml.j2
     dest: "{{ base_dir }}/nodes-config.yaml"
-    mode: '0644'
+    mode: '0660'
 
 - name: Backup nodes-config.yaml manifest file
   ansible.builtin.copy:
     src: "{{ base_dir }}/nodes-config.yaml"
     dest: "{{ manifest_folder }}/nodes-config.yaml"
-    mode: '0644'
+    mode: '0660'
 
 - name: Create the bootable ISO
   when: generate_iso | bool

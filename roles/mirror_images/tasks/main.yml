@@ -6,7 +6,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: '0775'
+    mode: '2775'
   loop:
     - "{{ oc_mirror_base_path }}/workspace"
     - "{{ oc_mirror_base_path }}/mirror"
@@ -18,7 +18,7 @@
   ansible.builtin.template:
     src: image-set.yaml.j2
     dest: "{{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml"
-    mode: '0644'
+    mode: '0660'
   loop: "{{ image_sets }}"
 
 - name: Generate source registry authentication file
@@ -26,7 +26,7 @@
   ansible.builtin.template:
     src: plain.txt.j2
     dest: "{{ oc_mirror_base_path }}/credentials/source-config.json"
-    mode: '0644'
+    mode: '0660'
   vars:
     config: "{{ mirror.source.auth_config }}"
 
@@ -35,7 +35,7 @@
   ansible.builtin.template:
     src: plain.txt.j2
     dest: "{{ oc_mirror_base_path }}/credentials/destination-config.json"
-    mode: '0644'
+    mode: '0660'
   vars:
     config: "{{ mirror.destination.auth_config }}"
 
