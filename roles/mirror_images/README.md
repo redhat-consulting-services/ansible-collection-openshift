@@ -15,6 +15,8 @@ mirror:
   source:
     # type: The type of source for the images. Can be 'registry' or 'disk'.
     type: registry
+    # tls_verify: Set to false to skip TLS verification for the destination registry (optional).
+    tls_verify: false
     # auth_config: The authentication configuration for the source registry.
     auth_config: |
       {
@@ -30,6 +32,8 @@ mirror:
     type: disk
     # registry: The destination registry URL if the type is 'registry'.
     registry: destination-registry.example.com
+    # tls_verify: Set to false to skip TLS verification for the destination registry (optional).
+    tls_verify: false
     # auth_config: The authentication configuration for the destination registry.
     auth_config: |
       {
@@ -45,7 +49,9 @@ image_sets:
     name: openshift-additional
     # enabled: Set to true to include this image set in the mirroring process.
     enabled: true
-    # destination: The destination path in the mirror registry or directory.
+    # destination: The destination path in the mirror registry or directory (optional).
+    # If not specified, the default root path in the destination registry will be used.
+    # oc-mirror by default uses already a pre-defined prefix for the destination path (e.g., "openshift" for OpenShift images).
     destination: ocp-additional
     # additional_images: A list of additional images to include in the mirroring process (optional).
     additional_images:
@@ -61,9 +67,9 @@ image_sets:
         - # name: The name of the channel.
           name: stable
           # min_version: The minimum version for the channel (optional).
-          min_version: 4.11
+          min_version: 4.22
           # max_version: The maximum version for the channel (optional).
-          max_version: 4.11
+          max_version: 4.22
     # operators: A list of operators to include in the image set (optional).
     operators:
       - # catalog: The catalog image for the operator.

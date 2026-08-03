@@ -21,23 +21,14 @@
     mode: '0660'
   loop: "{{ image_sets }}"
 
-- name: Generate source registry authentication file
-  when: mirror.enabled | bool and mirror.source.type == 'registry'
+- name: Generate registry authentication file
+  when: mirror.enabled | bool and (mirror.source.type == 'registry' or mirror.destination.type == 'registry')
   ansible.builtin.template:
     src: plain.txt.j2
-    dest: "{{ oc_mirror_base_path }}/credentials/source-config.json"
+    dest: "{{ oc_mirror_base_path }}/credentials/auth.json"
     mode: '0660'
   vars:
-    config: "{{ mirror.source.auth_config }}"
-
-- name: Generate destination registry authentication file
-  when: mirror.enabled | bool and mirror.destination.type == 'registry'
-  ansible.builtin.template:
-    src: plain.txt.j2
-    dest: "{{ oc_mirror_base_path }}/credentials/destination-config.json"
-    mode: '0660'
-  vars:
-    config: "{{ mirror.destination.auth_config }}"
+    config: "{{ (mirror.source.auth_config | from_json) | combine(mirror.destination.auth_config | from_json, recursive=True) }}"
 
 - name: Execute oc-mirror to mirror images
   when: mirror.enabled | bool and item.enabled | default(false) | bool
@@ -47,10 +38,11 @@
     oc-mirror \
       --v2 \
       --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
-      --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json \
+      --authfile {{ oc_mirror_base_path }}/credentials/auth.json \
       --log-level debug \
-      --workspace {{ oc_mirror_base_path }}/workspace \
+      --workspace file://{{ oc_mirror_base_path }}/workspace \
       --cache-dir {{ oc_mirror_base_path }}/cache \
+      --src-tls-verify={{ mirror.source.tls_verify | default(true) }} \
       file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }}
     {% endif %}
 
@@ -59,12 +51,13 @@
     oc-mirror \
       --v2 \
       --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
-      --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json \
+      --authfile {{ oc_mirror_base_path }}/credentials/auth.json \
       --from file://{{ oc_mirror_base_path }}/mirror/{{ item.destination }} \
+      --dest-tls-verify={{ mirror.destination.tls_verify | default(true) }} \
       --log-level debug \
-      --workspace {{ oc_mirror_base_path }}/workspace \
+      --workspace file://{{ oc_mirror_base_path }}/workspace \
       --cache-dir {{ oc_mirror_base_path }}/cache \
-      {{ mirror.destination.registry }}/{{ item.destination }}
+      docker://{{ mirror.destination.registry }}{% if item.destination is defined and item.destination %}/{{ item.destination }}{% endif %}
     {% endif %}
 
     {% if mirror.source.type == 'registry' and mirror.destination.type == 'registry' %}
@@ -72,12 +65,13 @@
     oc-mirror \
       --v2 \
       --config {{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml \
-      --auth-file {{ oc_mirror_base_path }}/credentials/source-config.json \
-      --dest-authfile {{ oc_mirror_base_path }}/credentials/destination-config.json \
+      --authfile {{ oc_mirror_base_path }}/credentials/auth.json \
+      --src-tls-verify={{ mirror.source.tls_verify | default(true) }} \
+      --dest-tls-verify={{ mirror.destination.tls_verify | default(true) }} \
       --log-level debug \
-      --workspace {{ oc_mirror_base_path }}/workspace \
+      --workspace file://{{ oc_mirror_base_path }}/workspace \
       --cache-dir {{ oc_mirror_base_path }}/cache \
-      {{ mirror.destination.registry }}/{{ item.destination }}
+      docker://{{ mirror.destination.registry }}{% if item.destination is defined and item.destination %}/{{ item.destination }}{% endif %}
     {% endif %}
   loop: "{{ image_sets }}"
   register: oc_mirror_results
