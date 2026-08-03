@@ -23,31 +23,31 @@
   ansible.builtin.file:
     path: "{{ manifest_folder }}"
     state: directory
-    mode: '0744'
+    mode: '2770'
 
 - name: Generate agent-config.yaml
   ansible.builtin.template:
     src: agent-config.yaml.j2
     dest: "{{ base_dir }}/agent-config.yaml"
-    mode: '0644'
+    mode: '0660'
 
 - name: Generate install-config.yaml
   ansible.builtin.template:
     src: install-config.yaml.j2
     dest: "{{ base_dir }}/install-config.yaml"
-    mode: '0644'
+    mode: '0660'
 
 - name: Backup agent-config.yaml manifest file
   ansible.builtin.copy:
     src: "{{ base_dir }}/agent-config.yaml"
     dest: "{{ manifest_folder }}/agent-config.yaml"
-    mode: '0644'
+    mode: '0660'
 
 - name: Backup agent-config.yaml manifest file
   ansible.builtin.copy:
     src: "{{ base_dir }}/install-config.yaml"
     dest: "{{ manifest_folder }}/install-config.yaml"
-    mode: '0644'
+    mode: '0660'
 
 - name: Create the bootable ISO or PXE files
   when: generate_iso | bool
