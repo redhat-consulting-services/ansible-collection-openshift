@@ -6,7 +6,7 @@ images:
     platform: linux/amd64
 
 build_arg_defaults:
-  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v --upgrade"
 
 dependencies:
   ansible_core:
