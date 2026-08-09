@@ -1,0 +1,21 @@
+mirror:
+  # enabled: Set to true to enable the mirroring process. When set to false, the role will not perform any actions.
+  enabled: false
+
+  destination:
+    type: registry
+    tls_verify: false
+    registry: host.docker.internal:5000
+    auth_config: "{{ lookup('file', '/opt/oc-mirror/docker_local_pull_secret.json') }}"
+
+  source:
+    type: registry
+    tls_verify: false
+    auth_config: "{{ lookup('file', '/opt/oc-mirror/openshift_pull_secret.json') }}"
+
+image_sets:
+  - name: openshift-additional
+    enabled: true
+    destination: openshift
+    additional_images:
+      - name: registry.redhat.io/ubi9/ubi:latest
