@@ -1,0 +1,91 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/test-refinement"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  openshift-minor-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      openshift_versions: ${{ steps.get-versions.outputs.openshift_versions }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get OpenShift versions
+        id: get-versions
+        run: |
+          echo "openshift_versions=$(jq '[.openshift_versions | group_by(split(".") | .[0:2]) | .[] | max_by(split(".") | map(tonumber))]' -c  .github/openshift-versions.json)" >> $GITHUB_OUTPUT
+
+  mirror-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - openshift-minor-versions
+    strategy:
+      fail-fast: false
+      matrix:
+        openshift_versions: ${{ fromJson(needs.openshift-minor-versions.outputs.openshift_versions) }}
+    env:
+      REGISTRY_USERNAME: mirror
+      REGISTRY_PASSWORD: mirror123
+      CREDENTIALS_FOLDER: credentials
+      OPENSHIFT_PULL_SECRET_NAME: openshift_pull_secret.json
+      DOCKER_LOCAL_PULL_SECRET_NAME: docker_local_pull_secret.json
+      WORKING_DIRECTORY: roles/mirror_images/_tests
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+
+      - name: Set up Ansible and Ansible Navigator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible apache2-utils
+          pip3 install ansible-navigator
+
+      - name: Run mirror registry
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          REGISTRY_AUTH_FOLDER: ./mirror-registry/auth
+          REGISTRY_DATA_FOLDER: ./mirror-registry/data
+        run: |
+          mkdir -p ${REGISTRY_AUTH_FOLDER} ${REGISTRY_DATA_FOLDER}
+          htpasswd -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > ${REGISTRY_AUTH_FOLDER}/htpasswd
+          docker run -d -p 5000:5000 --restart always --name registry \
+            -e REGISTRY_AUTH=htpasswd \
+            -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" \
+            -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+            -v ${REGISTRY_AUTH_FOLDER}:/auth \
+            -v ${REGISTRY_DATA_FOLDER}:/var/lib/registry \
+            registry:3
+
+      - name: Setup credentials file
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          mkdir -p ${{ env.CREDENTIALS_FOLDER }}
+          echo "${{ secrets.OPENSHIFT_IMAGE_PULL_SECRET }}" | jq | > ${{ env.CREDENTIALS_FOLDER }}/${{ env.OPENSHIFT_PULL_SECRET_NAME }}
+          echo "$REGISTRY_PASSWORD" | docker --config ${{ env.CREDENTIALS_FOLDER }}/${{ env.DOCKER_LOCAL_PULL_SECRET_NAME }} login localhost:5000 -u "$REGISTRY_USERNAME" --password-stdin
+          ls -l ${{ env.CREDENTIALS_FOLDER }}
+
+      - name: Run Ansible Navigator
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          OPENSHIFT_VERSION: ${{ matrix.openshift_versions }}
+          VOLUME_AUTH: ${{ env.CREDENTIALS_FOLDER }}
+        run: |
+          make test
