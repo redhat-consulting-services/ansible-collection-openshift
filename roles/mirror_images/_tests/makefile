@@ -8,6 +8,16 @@ SOURCE_AUTH_CONFIG ?= openshift_pull_secret.json
 DESTINATION_AUTH_CONFIG_FILE=${CREDENTIALS_FOLDER}/${DESTINATION_AUTH_CONFIG}
 SOURCE_AUTH_CONFIG_FILE=${CREDENTIALS_FOLDER}/${SOURCE_AUTH_CONFIG}
 
+EE_CREDENTIALS_FILE=${CREDENTIALS_FOLDER}/ee_credentials.yaml
+
+.PHONY: vars
+vars:
+	@echo "mirror:" > ${EE_CREDENTIALS_FILE}
+	@echo "  destination:" >> ${EE_CREDENTIALS_FILE}
+	@echo "    auth_config: '$$(jq -c . ${DESTINATION_AUTH_CONFIG_FILE})'" >> ${EE_CREDENTIALS_FILE}
+	@echo "  source:" >> ${EE_CREDENTIALS_FILE}
+	@echo "    auth_config: '$$(jq -c . ${SOURCE_AUTH_CONFIG_FILE})'" >> ${EE_CREDENTIALS_FILE}
+
 .PHONY: debug
 debug:
 	@echo "BASE_IMAGE: ${BASE_IMAGE}"
@@ -35,8 +45,7 @@ test-basic:
 		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
 		-e @basic/vars.yaml \
 		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e "mirror.destination.auth_config=$$(jq -c . ${DESTINATION_AUTH_CONFIG_FILE})" \
-		-e "mirror.source.auth_config=$$(jq -c . ${SOURCE_AUTH_CONFIG_FILE})"
+		-e @${EE_CREDENTIALS_FILE}
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic/_generated/image-sets ../../../scripts/re-format-yaml.sh
@@ -60,8 +69,7 @@ test-basic-mirror:
 		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
 		-e @basic-mirror/vars.yaml \
 		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e "mirror.destination.auth_config=$$(jq -c . ${DESTINATION_AUTH_CONFIG_FILE})" \
-		-e "mirror.source.auth_config=$$(jq -c . ${SOURCE_AUTH_CONFIG_FILE})"
+		-e @${EE_CREDENTIALS_FILE}
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic-mirror/_generated/image-sets ../../../scripts/re-format-yaml.sh
