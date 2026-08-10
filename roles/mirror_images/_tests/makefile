@@ -1,12 +1,23 @@
 BASE_IMAGE ?= quay.io/redhat-consulting-services/ee-openshift
 OPENSHIFT_VERSION ?= 4.22.6
 LATEST_TAG ?= $(shell git tag --sort=-version:refname | head -n1)
-CREDENTIALS_FOLDER ?= ${CREDENTIALS_FOLDER:-./credentials}
+CREDENTIALS_FOLDER ?= ./credentials
 DESTINATION_AUTH_CONFIG ?= docker_local_pull_secret.json
 SOURCE_AUTH_CONFIG ?= openshift_pull_secret.json
 
-DESTINATION_AUTH_CONFIG_JSON=$(cat ${CREDENTIALS_FOLDER}/${DESTINATION_AUTH_CONFIG})
-SOURCE_AUTH_CONFIG_JSON=$(cat ${CREDENTIALS_FOLDER}/${SOURCE_AUTH_CONFIG})
+DESTINATION_AUTH_CONFIG_FILE=${CREDENTIALS_FOLDER}/${DESTINATION_AUTH_CONFIG}
+SOURCE_AUTH_CONFIG_FILE=${CREDENTIALS_FOLDER}/${SOURCE_AUTH_CONFIG}
+
+.PHONY: debug
+debug:
+	@echo "BASE_IMAGE: ${BASE_IMAGE}"
+	@echo "OPENSHIFT_VERSION: ${OPENSHIFT_VERSION}"
+	@echo "LATEST_TAG: ${LATEST_TAG}"
+	@echo "CREDENTIALS_FOLDER: ${CREDENTIALS_FOLDER}"
+	@echo "DESTINATION_AUTH_CONFIG: ${DESTINATION_AUTH_CONFIG}"
+	@echo "SOURCE_AUTH_CONFIG: ${SOURCE_AUTH_CONFIG}"
+	@echo "DESTINATION_AUTH_CONFIG_JSON: $$(jq -c . ${DESTINATION_AUTH_CONFIG_FILE})"
+	@echo "SOURCE_AUTH_CONFIG_JSON: $$(jq -c . ${SOURCE_AUTH_CONFIG_FILE})"
 
 .PHONY: test
 test: test-basic test-basic-mirror
@@ -24,8 +35,8 @@ test-basic:
 		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
 		-e @basic/vars.yaml \
 		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e 'mirror.destination.auth_config=\"${DESTINATION_AUTH_CONFIG_JSON}\"' \
-		-e 'mirror.source.auth_config=\"${SOURCE_AUTH_CONFIG_JSON}\"'
+		-e "mirror.destination.auth_config=$$(jq -c . ${DESTINATION_AUTH_CONFIG_FILE})" \
+		-e "mirror.source.auth_config=$$(jq -c . ${SOURCE_AUTH_CONFIG_FILE})"
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic/_generated/image-sets ../../../scripts/re-format-yaml.sh
@@ -49,8 +60,8 @@ test-basic-mirror:
 		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
 		-e @basic-mirror/vars.yaml \
 		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e 'mirror.destination.auth_config=\"${DESTINATION_AUTH_CONFIG_JSON}\"' \
-		-e 'mirror.source.auth_config=\"${SOURCE_AUTH_CONFIG_JSON}\"'
+		-e "mirror.destination.auth_config=$$(jq -c . ${DESTINATION_AUTH_CONFIG_FILE})" \
+		-e "mirror.source.auth_config=$$(jq -c . ${SOURCE_AUTH_CONFIG_FILE})"
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic-mirror/_generated/image-sets ../../../scripts/re-format-yaml.sh
