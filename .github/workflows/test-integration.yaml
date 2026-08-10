@@ -87,5 +87,7 @@ jobs:
         env:
           OPENSHIFT_VERSION: ${{ matrix.openshift_versions }}
           VOLUME_AUTH: ${{ env.CREDENTIALS_FOLDER }}
+          DESTINATION_AUTH_CONFIG: ${{ env.CREDENTIALS_FOLDER }}/${{ env.DOCKER_LOCAL_PULL_SECRET_NAME }}
+          SOURCE_AUTH_CONFIG: ${{ env.CREDENTIALS_FOLDER }}/${{ env.OPENSHIFT_PULL_SECRET_NAME }}
         run: |
           make test
