@@ -14,9 +14,8 @@ test-basic:
 	ansible-navigator run basic/playbook.yaml \
 		-m stdout \
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
-		--eev ${VOLUME}:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
 		-e @basic/vars.yaml \
 		-e oc_mirror_base_path=${VOLUME}/_generated \
-		-e mirror.destination.auth_config='$(cat ${DESTINATION_AUTH_CONFIG})' \
-		-e mirror.source.auth_config='$(cat ${SOURCE_AUTH_CONFIG})'
+		-e "mirror.destination.auth_config=$$(tr -d '\n' < ${DESTINATION_AUTH_CONFIG})" \
+		-e "mirror.source.auth_config=$$(tr -d '\n' < ${SOURCE_AUTH_CONFIG})"
