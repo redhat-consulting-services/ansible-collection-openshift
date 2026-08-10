@@ -91,3 +91,12 @@ jobs:
           SOURCE_AUTH_CONFIG: ${{ env.OPENSHIFT_PULL_SECRET_NAME }}
         run: |
           make test
+
+      - name: Cleanup
+        if: always()
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          rm -rf ${{ env.WORKING_DIRECTORY }}/${{ env.CREDENTIALS_FOLDER }}
+          rm -rf ${{ env.WORKING_DIRECTORY }}/mirror-registry
+          docker stop registry
+          docker rm registry
