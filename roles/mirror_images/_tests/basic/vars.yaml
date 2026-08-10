@@ -6,12 +6,12 @@ mirror:
     type: registry
     tls_verify: false
     registry: host.docker.internal:5000
-    auth_config: "{{ lookup('file', '/opt/oc-mirror/docker_local_pull_secret.json') }}"
+    auth_config: "{{ lookup('file', '/opt/oc-mirror/credentials/docker_local_pull_secret.json') }}"
 
   source:
     type: registry
     tls_verify: false
-    auth_config: "{{ lookup('file', '/opt/oc-mirror/openshift_pull_secret.json') }}"
+    auth_config: "{{ lookup('file', '/opt/oc-mirror/credentials/openshift_pull_secret.json') }}"
 
 image_sets:
   - name: openshift-additional
