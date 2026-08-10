@@ -10,12 +10,22 @@ test: test-basic
 
 .PHONY: test-basic
 test-basic:
-	@echo "Running basic tests..."
+	@echo "Executing basic tests..."
 	ansible-navigator run basic/playbook.yaml \
 		-m stdout \
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
+		--eev basic/_generated:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
 		-e @basic/vars.yaml \
-		-e oc_mirror_base_path=${VOLUME}/_generated \
+		-e oc_mirror_base_path=/opt/oc-mirror \
 		-e "mirror.destination.auth_config=$$(tr -d '\n' < ${DESTINATION_AUTH_CONFIG})" \
 		-e "mirror.source.auth_config=$$(tr -d '\n' < ${SOURCE_AUTH_CONFIG})"
+
+	@echo "Reformatting generated files..."
+	SOURCE_DIR=basic/_generated/image-sets ../../../scripts/re-format-yaml.sh
+
+	@echo "Reformatting expected files..."
+	SOURCE_DIR=basic/expected ../../../scripts/re-format-yaml.sh
+
+	@echo "Comparing generated files with expected files..."
+	diff -r basic/_generated/image-sets basic/expected
