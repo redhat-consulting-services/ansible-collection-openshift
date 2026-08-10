@@ -1,7 +1,7 @@
 BASE_IMAGE ?= quay.io/redhat-consulting-services/ee-openshift
 OPENSHIFT_VERSION ?= 4.22.6
 LATEST_TAG ?= $(shell git tag --sort=-version:refname | head -n1)
-VOLUME ?= ./
+CREDENTIALS_FOLDER ?= ${CREDENTIALS_FOLDER:-./credentials}
 DESTINATION_AUTH_CONFIG ?= docker_local_pull_secret.json
 SOURCE_AUTH_CONFIG ?= openshift_pull_secret.json
 
@@ -18,10 +18,11 @@ test-basic:
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
 		--eev basic/_generated:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
+		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
 		-e @basic/vars.yaml \
 		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e "mirror.destination.auth_config=$$(tr -d '\n' < ${DESTINATION_AUTH_CONFIG})" \
-		-e "mirror.source.auth_config=$$(tr -d '\n' < ${SOURCE_AUTH_CONFIG})"
+		-e "mirror.destination.auth_config='\"${{ lookup('file', '/opt/credentials/${DESTINATION_AUTH_CONFIG}') }}\"" \
+		-e "mirror.source.auth_config=\"${{ lookup('file', '/opt/credentials/${SOURCE_AUTH_CONFIG}') }}\""
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic/_generated/image-sets ../../../scripts/re-format-yaml.sh
@@ -42,10 +43,11 @@ test-basic-mirror:
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
 		--eev basic-mirror/_generated:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
+		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
 		-e @basic-mirror/vars.yaml \
 		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e "mirror.destination.auth_config=$$(tr -d '\n' < ${DESTINATION_AUTH_CONFIG})" \
-		-e "mirror.source.auth_config=$$(tr -d '\n' < ${SOURCE_AUTH_CONFIG})"
+		-e "mirror.destination.auth_config='\"${{ lookup('file', '/opt/credentials/${DESTINATION_AUTH_CONFIG}') }}\"" \
+		-e "mirror.source.auth_config=\"${{ lookup('file', '/opt/credentials/${SOURCE_AUTH_CONFIG}') }}\""
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic-mirror/_generated/image-sets ../../../scripts/re-format-yaml.sh
