@@ -19,5 +19,4 @@ test-basic:
 		-e @basic/vars.yaml \
 		-e oc_mirror_base_path=${VOLUME}/_generated \
 		-e mirror.destination.auth_config='$(cat ${DESTINATION_AUTH_CONFIG})' \
-		-e mirror.source.auth_config='$(cat ${SOURCE_AUTH_CONFIG})' \
-		-vvvvv
+		-e mirror.source.auth_config='$(cat ${SOURCE_AUTH_CONFIG})'
