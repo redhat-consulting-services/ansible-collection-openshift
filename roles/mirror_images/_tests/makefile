@@ -30,11 +30,14 @@ debug:
 	@echo "SOURCE_AUTH_CONFIG_JSON: $$(jq -c . ${SOURCE_AUTH_CONFIG_FILE})"
 
 .PHONY: test
-test: test-basic test-basic-mirror
+test: vars test-basic test-basic-mirror
 
 .PHONY: test-basic
-test-basic:
+test-basic: vars
 	mkdir -p basic/_generated
+
+	@echo "Merging ${EE_CREDENTIALS_FILE} with basic/vars.yaml..."
+	yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' ${EE_CREDENTIALS_FILE} basic/vars.yaml > basic/_generated/merged.yaml
 
 	@echo "Executing basic tests..."
 	ansible-navigator run basic/playbook.yaml \
@@ -43,9 +46,8 @@ test-basic:
 		--eev basic/_generated:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
 		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
-		-e @basic/vars.yaml \
-		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e @${EE_CREDENTIALS_FILE}
+		-e @basic/_generated/merged.yaml \
+		-e oc_mirror_base_path=/opt/oc-mirror
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic/_generated/image-sets ../../../scripts/re-format-yaml.sh
@@ -57,8 +59,11 @@ test-basic:
 	diff -r basic/_generated/image-sets basic/expected
 
 .PHONY: test-basic-mirror
-test-basic-mirror:
+test-basic-mirror: vars
 	mkdir -p basic-mirror/_generated
+
+	@echo "Merging ${EE_CREDENTIALS_FILE} with basic/vars.yaml..."
+	yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' ${EE_CREDENTIALS_FILE} basic-mirror/vars.yaml > basic-mirror/_generated/merged.yaml
 
 	@echo "Executing basic-mirror tests..."
 	ansible-navigator run basic-mirror/playbook.yaml \
@@ -67,9 +72,8 @@ test-basic-mirror:
 		--eev basic-mirror/_generated:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
 		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
-		-e @basic-mirror/vars.yaml \
-		-e oc_mirror_base_path=/opt/oc-mirror \
-		-e @${EE_CREDENTIALS_FILE}
+		-e @basic-mirror/_generated/merged.yaml \
+		-e oc_mirror_base_path=/opt/oc-mirror
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=basic-mirror/_generated/image-sets ../../../scripts/re-format-yaml.sh
