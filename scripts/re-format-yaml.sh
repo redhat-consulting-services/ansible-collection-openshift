@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SOURCE_DIR ?= ${SOURCE_DIR:-./}
+SOURCE_DIR=${SOURCE_DIR:-./}
 
-for file in $(find "$SOURCE_DIR" -type f -name "*.yaml" -o -name "*.yml"); do
+while IFS= read -r -d '' file; do
   echo "Reformatting $file"
   yq eval -P . "$file" > "$file.tmp" && mv "$file.tmp" "$file"
-done
+done < <(find "$SOURCE_DIR" -type f \( -name "*.yaml" -o -name "*.yml" \) -print0)
