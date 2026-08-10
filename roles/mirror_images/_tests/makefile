@@ -10,6 +10,8 @@ test: test-basic
 
 .PHONY: test-basic
 test-basic:
+	mkdir -p basic/_generated
+
 	@echo "Executing basic tests..."
 	ansible-navigator run basic/playbook.yaml \
 		-m stdout \
