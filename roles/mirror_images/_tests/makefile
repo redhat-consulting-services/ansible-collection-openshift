@@ -6,7 +6,7 @@ DESTINATION_AUTH_CONFIG ?= docker_local_pull_secret.json
 SOURCE_AUTH_CONFIG ?= openshift_pull_secret.json
 
 .PHONY: test
-test: test-basic
+test: test-basic test-basic-mirror
 
 .PHONY: test-basic
 test-basic:
@@ -31,3 +31,27 @@ test-basic:
 
 	@echo "Comparing generated files with expected files..."
 	diff -r basic/_generated/image-sets basic/expected
+
+.PHONY: test-basic-mirror
+test-basic-mirror:
+	mkdir -p basic-mirror/_generated
+
+	@echo "Executing basic-mirror tests..."
+	ansible-navigator run basic-mirror/playbook.yaml \
+		-m stdout \
+		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
+		--eev basic-mirror/_generated:/opt/oc-mirror:Z \
+		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
+		-e @basic-mirror/vars.yaml \
+		-e oc_mirror_base_path=/opt/oc-mirror \
+		-e "mirror.destination.auth_config=$$(tr -d '\n' < ${DESTINATION_AUTH_CONFIG})" \
+		-e "mirror.source.auth_config=$$(tr -d '\n' < ${SOURCE_AUTH_CONFIG})"
+
+	@echo "Reformatting generated files..."
+	SOURCE_DIR=basic-mirror/_generated/image-sets ../../../scripts/re-format-yaml.sh
+
+	@echo "Reformatting expected files..."
+	SOURCE_DIR=basic-mirror/expected ../../../scripts/re-format-yaml.sh
+
+	@echo "Comparing generated files with expected files..."
+	diff -r basic-mirror/_generated/image-sets basic-mirror/expected

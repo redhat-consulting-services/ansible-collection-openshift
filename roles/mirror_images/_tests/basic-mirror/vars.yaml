@@ -1,5 +1,5 @@
 mirror:
-  enabled: false
+  enabled: true
 
   destination:
     type: registry
