@@ -40,15 +40,15 @@ test: vars
 run-test: vars merge
 	mkdir -p ${TEST_DIR}/_generated
 
-	#@echo "Executing basic tests..."
-	#ansible-navigator run basic/playbook.yaml \
-	#	-m stdout \
-	#	--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
-	#	--eev ${TEST_DIR}/_generated:/opt/oc-mirror:Z \
-	#	--eev ../../mirror_images:/opt/roles/mirror_images:Z \
-	#	--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
-	#	-e @${TEST_DIR}/_generated/merged.yaml \
-	#	-e oc_mirror_base_path=/opt/oc-mirror
+	@echo "Executing basic tests..."
+	ansible-navigator run basic/playbook.yaml \
+		-m stdout \
+		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
+		--eev ${TEST_DIR}/_generated:/opt/oc-mirror:Z \
+		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
+		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
+		-e @${TEST_DIR}/_generated/merged.yaml \
+		-e oc_mirror_base_path=/opt/oc-mirror
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=${TEST_DIR}/_generated/image-sets ../../../scripts/re-format-yaml.sh
