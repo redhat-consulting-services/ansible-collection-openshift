@@ -31,17 +31,15 @@ merge:
 
 .PHONY: test
 test: vars
-	export TEST_DIR=basic
-	$(MAKE) run-test
-	export TEST_DIR=basic-mirror
-	$(MAKE) run-test
+	TEST_DIR=basic $(MAKE) run-test
+	TEST_DIR=basic-mirror $(MAKE) run-test
 
 .PHONY: test-basic
 run-test: vars merge
 	mkdir -p ${TEST_DIR}/_generated
 
-	@echo "Executing basic tests..."
-	ansible-navigator run basic/playbook.yaml \
+	@echo "Executing ${TEST_DIR} tests..."
+	ansible-navigator run ${TEST_DIR}/playbook.yaml \
 		-m stdout \
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
 		--eev ${TEST_DIR}/_generated:/opt/oc-mirror:Z \
