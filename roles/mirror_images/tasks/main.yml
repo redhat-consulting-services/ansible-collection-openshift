@@ -14,21 +14,40 @@
     - "{{ oc_mirror_base_path }}/credentials"
     - "{{ oc_mirror_base_path }}/image-sets"
 
-- name: Generate image set configuration files
+- name: Check registry source and destination types are valid
+  ansible.builtin.assert:
+    that:
+      - mirror.source.type in ['registry', 'disk']
+      - mirror.destination.type in ['registry', 'disk']
+    fail_msg: "Invalid source or destination type. Must be 'registry' or 'disk'."
+
+- name: Check desination registry settings
+  ansible.builtin.assert:
+    that:
+      - mirror.destination.type == 'registry' and mirror.destination.registry is not none
+    fail_msg: "Destination registry is required for registry destination type"
+
+- name: Check source registry settings
+  ansible.builtin.assert:
+    that:
+      - mirror.source.type == 'registry' and mirror.source.auth_config is not none
+    fail_msg: "Source registry auth_config is required for registry source type"
+
+- name: Create image set configuration files
   ansible.builtin.template:
     src: image-set.yaml.j2
     dest: "{{ oc_mirror_base_path }}/image-sets/{{ item.name }}.yaml"
     mode: '0660'
   loop: "{{ image_sets }}"
 
-- name: Generate registry authentication file
+- name: Create registry authentication file
   when: mirror.enabled | bool and (mirror.source.type == 'registry' or mirror.destination.type == 'registry')
   ansible.builtin.template:
     src: plain.txt.j2
     dest: "{{ oc_mirror_base_path }}/credentials/auth.json"
     mode: '0660'
   vars:
-    config: "{{ (mirror.source.auth_config | from_json) | combine(mirror.destination.auth_config | from_json, recursive=True) }}"
+    config: "{{ (mirror.source.auth_config | default('{}') | from_json) | combine(mirror.destination.auth_config | default('{}') | from_json, recursive=True) }}"
 
 - name: Execute oc-mirror to mirror images
   when: mirror.enabled | bool and item.enabled | default(false) | bool
