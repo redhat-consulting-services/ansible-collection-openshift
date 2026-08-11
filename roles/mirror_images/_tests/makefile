@@ -21,7 +21,7 @@ vars:
 	@echo "    auth_config: |" >> ${EE_CREDENTIALS_FILE}
 	@jq . ${SOURCE_AUTH_CONFIG_FILE} | sed 's/^/      /' >> ${EE_CREDENTIALS_FILE}
 
-TEST_DIR = basic
+TEST_DIR ?= basic
 
 .PHONY: merge
 merge:
