@@ -1,3 +1,8 @@
+COLOR_RED := \033[31m
+COLOR_GREEN := \033[32m
+COLOR_BLUE := \033[34m
+COLOR_RESET := \033[0m
+
 BASE_IMAGE ?= quay.io/redhat-consulting-services/ee-openshift
 OPENSHIFT_VERSION ?= 4.22.6
 LATEST_TAG ?= $(shell git tag --sort=-version:refname | head -n1)
@@ -38,7 +43,9 @@ test: vars
 run-test: vars merge
 	mkdir -p ${TEST_DIR}/_generated
 
-	@echo "Executing ${TEST_DIR} tests..."
+	@echo "${COLOR_BLUE}===============================${COLOR_RESET}"
+	@echo "${COLOR_BLUE}Executing ${TEST_DIR} tests...${COLOR_RESET}"
+	@echo "${COLOR_BLUE}===============================${COLOR_RESET}"
 	ansible-navigator run ${TEST_DIR}/playbook.yaml \
 		-m stdout \
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
@@ -46,7 +53,8 @@ run-test: vars merge
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
 		--eev ${CREDENTIALS_FOLDER}:/opt/credentials:Z \
 		-e @${TEST_DIR}/_generated/merged.yaml \
-		-e oc_mirror_base_path=/opt/oc-mirror
+		-e oc_mirror_base_path=/opt/oc-mirror \
+		-vvv
 
 	@echo "Reformatting generated files..."
 	SOURCE_DIR=${TEST_DIR}/_generated/image-sets ../../../scripts/re-format-yaml.sh
@@ -55,4 +63,5 @@ run-test: vars merge
 	SOURCE_DIR=${TEST_DIR}/expected ../../../scripts/re-format-yaml.sh
 
 	@echo "Comparing generated files with expected files..."
-	diff -r ${TEST_DIR}/_generated/image-sets ${TEST_DIR}/expected
+	diff -r ${TEST_DIR}/_generated/image-sets ${TEST_DIR}/expected || \
+		(echo "${COLOR_RED}Executing ${TEST_DIR} failed!${COLOR_RESET}" && exit 1)
