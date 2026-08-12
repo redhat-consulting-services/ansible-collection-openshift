@@ -33,6 +33,20 @@
       - mirror.source.type == 'registry' and mirror.source.auth_config is not none
     fail_msg: "Source registry auth_config is required for registry source type"
 
+- name: Check for valid json in destination auth_config
+  when: mirror.destination.type == 'registry'
+  ansible.builtin.assert:
+    that:
+      - mirror.destination.auth_config | from_json is not none
+    fail_msg: "Destination registry auth_config is not valid JSON"
+
+- name: Check for valid json in source auth_config
+  when: mirror.source.type == 'registry'
+  ansible.builtin.assert:
+    that:
+      - mirror.source.auth_config | from_json is not none
+    fail_msg: "Source registry auth_config is not valid JSON"
+
 - name: Create image set configuration files
   ansible.builtin.template:
     src: image-set.yaml.j2
