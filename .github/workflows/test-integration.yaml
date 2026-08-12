@@ -78,8 +78,11 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
           mkdir -p ${{ env.CREDENTIALS_FOLDER }}
-          echo "${{ secrets.OPENSHIFT_IMAGE_PULL_SECRET }}" | jq | > ${{ env.CREDENTIALS_FOLDER }}/${{ env.OPENSHIFT_PULL_SECRET_NAME }}
-          echo "$REGISTRY_PASSWORD" | docker --config ${{ env.CREDENTIALS_FOLDER }}/${{ env.DOCKER_LOCAL_PULL_SECRET_NAME }} login localhost:5000 -u "$REGISTRY_USERNAME" --password-stdin
+          echo '${{ secrets.OPENSHIFT_IMAGE_PULL_SECRET }}' | jq > ${{ env.CREDENTIALS_FOLDER }}/${{ env.OPENSHIFT_PULL_SECRET_NAME }}
+          mkdir -p "${{ env.CREDENTIALS_FOLDER }}/docker-config"
+          echo "$REGISTRY_PASSWORD" | docker --config "${{ env.CREDENTIALS_FOLDER }}/docker-config" login localhost:5000 -u "$REGISTRY_USERNAME" --password-stdin
+          ls -l "${{ env.CREDENTIALS_FOLDER }}/docker-config"
+          cp "${{ env.CREDENTIALS_FOLDER }}/docker-config/config.json" "${{ env.CREDENTIALS_FOLDER }}/${{ env.DOCKER_LOCAL_PULL_SECRET_NAME }}"
           ls -l ${{ env.CREDENTIALS_FOLDER }}
 
       - name: Run Ansible Navigator
