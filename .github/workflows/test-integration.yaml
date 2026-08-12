@@ -36,12 +36,11 @@ jobs:
       matrix:
         openshift_versions: ${{ fromJson(needs.openshift-minor-versions.outputs.openshift_versions) }}
     env:
-      REGISTRY_USERNAME: mirror
-      REGISTRY_PASSWORD: mirror123
       CREDENTIALS_FOLDER: credentials
       OPENSHIFT_PULL_SECRET_NAME: openshift_pull_secret.json
       DOCKER_LOCAL_PULL_SECRET_NAME: docker_local_pull_secret.json
       WORKING_DIRECTORY: roles/mirror_images/_tests
+      REGISTRY_PORT: 5000
     steps:
       - uses: actions/checkout@v7
         with:
@@ -58,32 +57,26 @@ jobs:
           sudo apt-get install -y ansible apache2-utils
           pip3 install ansible-navigator
 
+      - name: Identify machine IP
+        id: identify-machine-ip
+        run: |
+          echo "MACHINE_IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Map host.docker.internal to localhost
+        run: |
+          echo "${{ steps.identify-machine-ip.outputs.MACHINE_IP }} host.docker.internal" | sudo tee -a /etc/hosts
+
       - name: Run mirror registry
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        env:
-          REGISTRY_AUTH_FOLDER: ./mirror-registry/auth
-          REGISTRY_DATA_FOLDER: ./mirror-registry/data
         run: |
-          mkdir -p ${REGISTRY_AUTH_FOLDER} ${REGISTRY_DATA_FOLDER}
-          htpasswd -Bbn "$REGISTRY_USERNAME" "$REGISTRY_PASSWORD" > ${REGISTRY_AUTH_FOLDER}/htpasswd
-          docker run -d -p 5000:5000 --restart always --name registry \
-            -e REGISTRY_AUTH=htpasswd \
-            -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" \
-            -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
-            -v ${REGISTRY_AUTH_FOLDER}:/auth \
-            -v ${REGISTRY_DATA_FOLDER}:/var/lib/registry \
-            registry:3
+          make registry
 
       - name: Setup credentials file
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
           mkdir -p ${{ env.CREDENTIALS_FOLDER }}
           echo '${{ secrets.OPENSHIFT_IMAGE_PULL_SECRET }}' | jq > ${{ env.CREDENTIALS_FOLDER }}/${{ env.OPENSHIFT_PULL_SECRET_NAME }}
-          mkdir -p "${{ env.CREDENTIALS_FOLDER }}/docker-config"
-          echo "$REGISTRY_PASSWORD" | docker --config "${{ env.CREDENTIALS_FOLDER }}/docker-config" login localhost:5000 -u "$REGISTRY_USERNAME" --password-stdin
-          ls -l "${{ env.CREDENTIALS_FOLDER }}/docker-config"
-          cp "${{ env.CREDENTIALS_FOLDER }}/docker-config/config.json" "${{ env.CREDENTIALS_FOLDER }}/${{ env.DOCKER_LOCAL_PULL_SECRET_NAME }}"
-          ls -l ${{ env.CREDENTIALS_FOLDER }}
+          make registry-credential
 
       - name: Run Ansible Navigator
         working-directory: ${{ env.WORKING_DIRECTORY }}
@@ -99,7 +92,8 @@ jobs:
         if: always()
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
+          sudo sed -i '/host.docker.internal/d' /etc/hosts || true
           rm -rf ${{ env.WORKING_DIRECTORY }}/${{ env.CREDENTIALS_FOLDER }}
           rm -rf ${{ env.WORKING_DIRECTORY }}/mirror-registry
-          docker stop registry
-          docker rm registry
+          make registry-stop
+          make registry-clean

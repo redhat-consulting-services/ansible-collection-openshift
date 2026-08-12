@@ -2,3 +2,4 @@ _generated/
 ansible-navigator.log
 playbook-artifact-*.json
 credentials/
+registry/
