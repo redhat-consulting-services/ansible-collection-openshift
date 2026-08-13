@@ -67,6 +67,7 @@ merge: ## Merge the REGISTRY_AUTH_JSON_FILE and SOURCE_REGISTRY_AUTH_CONFIG_FILE
 test: vars ## Execute all tests.
 	TEST_DIR=basic $(MAKE) run-test
 	TEST_DIR=basic-mirror $(MAKE) run-test
+	TEST_DIR=basic-openshift $(MAKE) run-test
 
 .PHONY: test-basic
 run-test: vars merge ## Execute a single test in the specified TEST_DIR. Usage: TEST_DIR=<test_directory> make run-test

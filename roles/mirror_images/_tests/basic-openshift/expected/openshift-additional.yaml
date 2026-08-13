@@ -1,0 +1,14 @@
+
+---
+# image set name: openshift-additional
+apiVersion: mirror.openshift.io/v2alpha1
+kind: ImageSetConfiguration
+mirror:
+  platform:
+    graph: true
+    architectures:
+      - amd64
+    channels:
+      - name: stable-4.22
+        min_version: 4.22.6
+        max_version: 4.22.6

@@ -1,0 +1,23 @@
+mirror:
+  enabled: true
+
+  destination:
+    type: registry
+    tls_verify: false
+    registry: host.docker.internal:5000
+
+  source:
+    type: registry
+    tls_verify: false
+
+image_sets:
+  - name: openshift
+    enabled: true
+    platform:
+      graph: true
+      architectures:
+        - amd64
+      channels:
+        - name: stable-4.22
+          min_version: 4.22.6
+          max_version: 4.22.6
