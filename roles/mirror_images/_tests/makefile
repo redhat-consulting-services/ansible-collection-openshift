@@ -80,7 +80,7 @@ run-test: vars merge ## Execute a single test in the specified TEST_DIR. Usage: 
 	@echo "${COLOR_BLUE}===============================${COLOR_RESET}"
 	ansible-navigator run ${TEST_DIR}/playbook.yaml \
 		-m stdout \
-		--container-options "--add-host registry.local:host-gateway" \
+		--container-options="--add-host=registry.local:host-gateway" \
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
 		--eev ${TEST_DIR}/_generated:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
@@ -105,7 +105,17 @@ run-test: vars merge ## Execute a single test in the specified TEST_DIR. Usage: 
 registry: ## Start a local registry for testing.
 	mkdir -p ${REGISTRY_VOLUME_FOLDER} ${REGISTRY_AUTH_FOLDER}
 	htpasswd -Bbn "${REGISTRY_USERNAME}" "${REGISTRY_PASSWORD}" > ${REGISTRY_AUTH_FOLDER}/htpasswd
-	$(CONTAINER_RUNTIME) run -d -p ${REGISTRY_PORT}:5000 --restart always --name registry --hostname ${REGISTRY_HOSTNAME} -e REGISTRY_AUTH=htpasswd -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd -v ${REGISTRY_AUTH_FOLDER}:/auth -v ${REGISTRY_VOLUME_FOLDER}:/var/lib/registry registry:3
+	$(CONTAINER_RUNTIME) run -d -p ${REGISTRY_PORT}:5000 \
+		--restart always \
+		--name ${REGISTRY_CONTAINER_NAME} \
+		--hostname ${REGISTRY_HOSTNAME} \
+		-e REGISTRY_AUTH=htpasswd \
+		-e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" \
+		-e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
+		-v ${REGISTRY_AUTH_FOLDER}:/auth \
+		-v ${REGISTRY_VOLUME_FOLDER}:/var/lib/registry \
+		registry:3
+	$(CONTAINER_RUNTIME) ps
 	@echo "Waiting for the registry to be ready..."
 	sleep 5
 	@attempt=0; \
