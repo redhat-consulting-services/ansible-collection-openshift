@@ -57,9 +57,9 @@ jobs:
         run: |
           echo "MACHINE_IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_OUTPUT
 
-      - name: Map host.docker.internal to localhost
+      - name: Map registry.local to localhost
         run: |
-          echo "${{ steps.identify-machine-ip.outputs.MACHINE_IP }} host.docker.internal" | sudo tee -a /etc/hosts
+          echo "${{ steps.identify-machine-ip.outputs.MACHINE_IP }} registry.local" | sudo tee -a /etc/hosts
 
       - name: Run mirror registry
         working-directory: ${{ env.WORKING_DIRECTORY }}

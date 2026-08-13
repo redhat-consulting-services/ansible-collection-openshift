@@ -35,7 +35,8 @@ REGISTRY_CONTAINER_NAME ?= registry
 REGISTRY_USERNAME ?= testuser
 REGISTRY_PASSWORD ?= testpassword
 REGISTRY_PORT ?= 5001
-REGISTRY_HOSTNAME ?= host.docker.internal:${REGISTRY_PORT}
+REGISTRY_HOSTNAME ?= registry.local
+REGISTRY_FQDN ?= ${REGISTRY_HOSTNAME}:${REGISTRY_PORT}
 REGISTRY_MAX_RETRY ?= 30
 
 .PHONY: all
@@ -79,6 +80,7 @@ run-test: vars merge ## Execute a single test in the specified TEST_DIR. Usage: 
 	@echo "${COLOR_BLUE}===============================${COLOR_RESET}"
 	ansible-navigator run ${TEST_DIR}/playbook.yaml \
 		-m stdout \
+		--container-options "--add-host registry.local:host-gateway" \
 		--eei ${BASE_IMAGE}:${LATEST_TAG}-ocp-${OPENSHIFT_VERSION}-latest \
 		--eev ${TEST_DIR}/_generated:/opt/oc-mirror:Z \
 		--eev ../../mirror_images:/opt/roles/mirror_images:Z \
@@ -103,11 +105,11 @@ run-test: vars merge ## Execute a single test in the specified TEST_DIR. Usage: 
 registry: ## Start a local registry for testing.
 	mkdir -p ${REGISTRY_VOLUME_FOLDER} ${REGISTRY_AUTH_FOLDER}
 	htpasswd -Bbn "${REGISTRY_USERNAME}" "${REGISTRY_PASSWORD}" > ${REGISTRY_AUTH_FOLDER}/htpasswd
-	$(CONTAINER_RUNTIME) run -d -p ${REGISTRY_PORT}:5000 --restart always --name registry -e REGISTRY_AUTH=htpasswd -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd -v ${REGISTRY_AUTH_FOLDER}:/auth -v ${REGISTRY_VOLUME_FOLDER}:/var/lib/registry registry:3
+	$(CONTAINER_RUNTIME) run -d -p ${REGISTRY_PORT}:5000 --restart always --name registry --hostname ${REGISTRY_HOSTNAME} -e REGISTRY_AUTH=htpasswd -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd -v ${REGISTRY_AUTH_FOLDER}:/auth -v ${REGISTRY_VOLUME_FOLDER}:/var/lib/registry registry:3
 	@echo "Waiting for the registry to be ready..."
 	sleep 5
 	@attempt=0; \
-	while ! curl -s http://${REGISTRY_HOSTNAME}/v2/ > /dev/null; do \
+	while ! curl -s http://${REGISTRY_FQDN}/v2/ > /dev/null; do \
 		attempt=$$(($${attempt}+1)); \
 		if [ "$${attempt}" -ge "${REGISTRY_MAX_RETRY}" ]; then \
 			echo "Registry did not become ready after ${REGISTRY_MAX_RETRY} attempts" >&2; \
@@ -138,13 +140,13 @@ registry-credential: ## Create registry credential file for the local registry. 
 .PHONY: registry-credential-podman
 registry-credential-podman: ## Create Podman registry credential file for the local registry.
 	mkdir -p ${REGISTRY_AUTH_FOLDER}
-	echo "${REGISTRY_PASSWORD}" | podman login --authfile ${REGISTRY_AUTH_JSON_FILE} -v --tls-verify=false ${REGISTRY_HOSTNAME} -u "${REGISTRY_USERNAME}" --password-stdin
+	echo "${REGISTRY_PASSWORD}" | podman login --authfile ${REGISTRY_AUTH_JSON_FILE} -v --tls-verify=false ${REGISTRY_FQDN} -u "${REGISTRY_USERNAME}" --password-stdin
 
 .PHONY: registry-credential-docker
 registry-credential-docker: ## Create Docker registry credential file for the local registry.
 	mkdir -p ${REGISTRY_AUTH_FOLDER}
 	echo "Using Docker"
-	echo "${REGISTRY_PASSWORD}" | docker login --config "${REGISTRY_AUTH_FOLDER}" -v --tls-verify=false ${REGISTRY_HOSTNAME} -u "${REGISTRY_USERNAME}" --password-stdin
+	echo "${REGISTRY_PASSWORD}" | docker login --config "${REGISTRY_AUTH_FOLDER}" -v --tls-verify=false ${REGISTRY_FQDN} -u "${REGISTRY_USERNAME}" --password-stdin
 	cp "${REGISTRY_AUTH_FOLDER}/config.json" "${REGISTRY_AUTH_JSON_FILE}"
 
 ##@ Other

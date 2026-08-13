@@ -4,7 +4,7 @@ mirror:
   destination:
     type: registry
     tls_verify: false
-    registry: host.docker.internal:5000
+    registry: registry.local:5000
 
   source:
     type: registry
