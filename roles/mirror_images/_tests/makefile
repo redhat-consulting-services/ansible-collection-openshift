@@ -21,7 +21,7 @@ EE_CREDENTIALS_FILE=${CREDENTIALS_FOLDER}/ee_credentials.yaml
 ###########################################
 ### Execution environment specific vars ###
 ###########################################
-CONTAINER_RUNTIME = $(shell basename $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null))
+CONTAINER_RUNTIME ?= $(shell basename $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null))
 
 
 ####################################

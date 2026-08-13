@@ -42,6 +42,7 @@ jobs:
       WORKING_DIRECTORY: roles/mirror_images/_tests
       REGISTRY_PORT: 5000
       REGISTRY_CONTAINER_NAME: registry
+      CONTAINER_RUNTIME: podman
     steps:
       - uses: actions/checkout@v7
         with:
@@ -65,11 +66,6 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
           make registry
-
-      - name: List containers
-        run: |
-          docker ps -a
-          docker logs --tail 100 ${{ env.REGISTRY_CONTAINER_NAME }}
 
       - name: Set up Ansible and Ansible Navigator
         run: |
