@@ -36,6 +36,7 @@ REGISTRY_USERNAME ?= testuser
 REGISTRY_PASSWORD ?= testpassword
 REGISTRY_PORT ?= 5001
 REGISTRY_HOSTNAME ?= host.docker.internal:${REGISTRY_PORT}
+REGISTRY_MAX_RETRY ?= 30
 
 .PHONY: all
 all: help
@@ -43,7 +44,7 @@ all: help
 ##@ Helpers for tests
 
 .PHONY: vars
-vars: ## Create the ee_credentials.yaml file from the source and destination auth config files.
+vars: registry-credential ## Create the ee_credentials.yaml file from the source and destination auth config files.
 	mkdir -p ${CREDENTIALS_FOLDER}
 	@echo "mirror:" > ${EE_CREDENTIALS_FILE}
 	@echo "  destination:" >> ${EE_CREDENTIALS_FILE}
@@ -102,13 +103,20 @@ run-test: vars merge ## Execute a single test in the specified TEST_DIR. Usage: 
 registry: ## Start a local registry for testing.
 	mkdir -p ${REGISTRY_VOLUME_FOLDER} ${REGISTRY_AUTH_FOLDER}
 	htpasswd -Bbn "${REGISTRY_USERNAME}" "${REGISTRY_PASSWORD}" > ${REGISTRY_AUTH_FOLDER}/htpasswd
-		$(CONTAINER_RUNTIME) run -d -p ${REGISTRY_PORT}:5000 --restart always --name registry \
-		-e REGISTRY_AUTH=htpasswd \
-		-e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" \
-		-e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd \
-		-v ${REGISTRY_AUTH_FOLDER}:/auth \
-		-v ${REGISTRY_VOLUME_FOLDER}:/var/lib/registry \
-		registry:3
+	$(CONTAINER_RUNTIME) run -d -p ${REGISTRY_PORT}:5000 --restart always --name registry -e REGISTRY_AUTH=htpasswd -e REGISTRY_AUTH_HTPASSWD_REALM="Registry Realm" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd -v ${REGISTRY_AUTH_FOLDER}:/auth -v ${REGISTRY_VOLUME_FOLDER}:/var/lib/registry registry:3
+	@echo "Waiting for the registry to be ready..."
+	sleep 5
+	@attempt=0; \
+	while ! curl -s http://${REGISTRY_HOSTNAME}/v2/ > /dev/null; do \
+		attempt=$$(($${attempt}+1)); \
+		if [ "$${attempt}" -ge "${REGISTRY_MAX_RETRY}" ]; then \
+			echo "Registry did not become ready after ${REGISTRY_MAX_RETRY} attempts" >&2; \
+			exit 1; \
+		fi; \
+		echo "Waiting for the registry to be ready... ($${attempt}/${REGISTRY_MAX_RETRY})"; \
+		sleep 2; \
+	done
+	@echo "Registry is ready."
 
 .PHONY: registry-stop
 registry-stop: ## Stop and remove the local registry container.

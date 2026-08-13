@@ -41,6 +41,7 @@ jobs:
       DOCKER_LOCAL_PULL_SECRET_NAME: docker_local_pull_secret.json
       WORKING_DIRECTORY: roles/mirror_images/_tests
       REGISTRY_PORT: 5000
+      REGISTRY_CONTAINER_NAME: registry
     steps:
       - uses: actions/checkout@v7
         with:
@@ -50,12 +51,6 @@ jobs:
         uses: actions/setup-python@v7
         with:
           python-version: '3.x'
-
-      - name: Set up Ansible and Ansible Navigator
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ansible apache2-utils
-          pip3 install ansible-navigator
 
       - name: Identify machine IP
         id: identify-machine-ip
@@ -70,6 +65,17 @@ jobs:
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: |
           make registry
+
+      - name: List containers
+        run: |
+          docker ps -a
+          docker logs --tail 100 ${{ env.REGISTRY_CONTAINER_NAME }}
+
+      - name: Set up Ansible and Ansible Navigator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible apache2-utils
+          pip3 install ansible-navigator
 
       - name: Setup credentials file
         working-directory: ${{ env.WORKING_DIRECTORY }}
