@@ -1,14 +1,15 @@
-
 ---
 # image set name: openshift
 apiVersion: mirror.openshift.io/v2alpha1
 kind: ImageSetConfiguration
 mirror:
   platform:
-    graph: true
     architectures:
       - amd64
+    graph: true
     channels:
       - name: stable-4.22
         minVersion: 4.22.6
         maxVersion: 4.22.6
+        shortestPath: False
+        type: ocp
