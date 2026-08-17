@@ -2,6 +2,8 @@ tenant_name: test-tenant
 cluster_name: ocp4-test
 base_domain: ocp4.example.com
 api_vip: 192.168.50.10
+ingress_vip: 192.168.50.11
+lb_type: ""
 generate_iso: false
 iso_output_dir: ./tmp/iso
 image_digest_sources:

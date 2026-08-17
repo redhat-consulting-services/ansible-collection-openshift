@@ -3,6 +3,6 @@
   gather_facts: false
   vars_files:
     - ./vars.yaml
-    - ./secrets.yaml
+    - ./secret.yaml
   roles:
     - ../../../bootstrap_cluster

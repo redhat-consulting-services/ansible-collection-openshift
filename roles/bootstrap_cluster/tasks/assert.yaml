@@ -1,3 +1,4 @@
+---
 - name: Assert type is valid
   ansible.builtin.assert:
     quiet: true
@@ -13,18 +14,18 @@
     fail_msg: "Invalid load balancer type. Must be 'UserManaged' or ''."
 
 - name: Assert that the combination between lb_type and api_vip/ingress_vip is valid
-  when: lb_type | default('') == 'UserManaged'
   ansible.builtin.assert:
     quiet: true
     that:
       - api_vip is not defined
       - ingress_vip is not defined
     fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must not be defined."
+  when: lb_type | default('') == 'UserManaged'
 
 - name: Assert that the combination between api_vip and ingress_vip is valid
-  when: lb_type | default('') != 'UserManaged'
   ansible.builtin.assert:
     quiet: true
     that:
       - api_vip is defined and ingress_vip is defined
     fail_msg: "Invalid combination of api_vip and ingress_vip. Both must be defined when lb_type is not 'UserManaged'"
+  when: lb_type | default('') != 'UserManaged'
