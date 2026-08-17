@@ -5,14 +5,9 @@ additional_ntp_sources:
 worker:
   dns_resolvers:
     - 10.10.10.2
-    - fd2e:6f44:5dd8::2
   routes:
     - destination: 0.0.0.0/0
       gateway: 10.10.10.1
-      interface: bond0.100
-      table_id: 254
-    - destination: ::/0
-      gateway: fd2e:6f44:5dd8::1
       interface: bond0.100
       table_id: 254
   bonds:
@@ -20,11 +15,6 @@ worker:
       mode: 802.3ad
       options:
         miimon: "100"
-  # bridges:
-  #   - name: br0
-  #     type: ovs-bridge
-  #     interfaces:
-  #       - name: bond0.100
   vlans:
     - name: bond0.100
       id: 100
@@ -42,8 +32,6 @@ worker:
           part_of_bond: "bond0"
       bonds:
         - interface: bond0
-      # bridges:
-      #   - interface: br0
       vlans:
         - interface: bond0.100
           ipv4_dhcp: false
@@ -51,8 +39,6 @@ worker:
           addresses:
             - ip: 10.10.10.10
               subnet_length: 24
-            - ip: fd2e:6f44:5dd8::10
-              subnet_length: 64
     - hostname: worker-2.ocp4-test.example.com
       root_device:
         name: "/dev/sda"
@@ -65,8 +51,6 @@ worker:
           part_of_bond: "bond0"
       bonds:
         - interface: bond0
-      # bridges:
-      #   - interface: br0
       vlans:
         - interface: bond0.100
           ipv4_dhcp: false
@@ -74,8 +58,6 @@ worker:
           addresses:
             - ip: 10.10.10.11
               subnet_length: 24
-            - ip: fd2e:6f44:5dd8::11
-              subnet_length: 64
     - hostname: worker-3.ocp4-test.example.com
       root_device:
         name: "/dev/sda"
@@ -88,8 +70,6 @@ worker:
           part_of_bond: "bond0"
       bonds:
         - interface: bond0
-      # bridges:
-      #   - interface: br0
       vlans:
         - interface: bond0.100
           ipv4_dhcp: false
@@ -97,5 +77,3 @@ worker:
           addresses:
             - ip: 10.10.10.12
               subnet_length: 24
-            - ip: fd2e:6f44:5dd8::12
-              subnet_length: 64
