@@ -4,4 +4,4 @@
   vars_files:
     - ./vars.yaml
   roles:
-    - ../../../ansible-role-cluster-bootstrap
+    - ../../../bootstrap_cluster
