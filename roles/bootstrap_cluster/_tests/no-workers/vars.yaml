@@ -44,9 +44,6 @@ agent_config:
       - name: vlan0
         id: 100
         base_interface: bond0
-        addresses:
-          - start_ip: 192.168.255.10
-            subnet_length: 24
     hosts:
       - hostname: master-abcd-0
         root_device:
@@ -61,10 +58,10 @@ agent_config:
             mac_address: "00:00:00:00:00:01"
             part_of_bond: "bond0"
         vlans:
-        - interface: vlan0
-          addresses:
-            - ip: 192.168.10.222
-              subnet_length: 24
+          - interface: vlan0
+            addresses:
+              - ip: 192.168.10.222
+                subnet_length: 24
 
       - hostname: master-abcd-1
         root_device:
@@ -78,6 +75,12 @@ agent_config:
           - name: enp0s1
             mac_address: "00:00:00:00:01:01"
             part_of_bond: "bond0"
+        vlans:
+          - interface: vlan0
+            addresses:
+              - ip: 192.168.10.223
+                subnet_length: 24
+
       - hostname: master-abcd-2
         root_device:
           name: "/dev/sda"
@@ -90,3 +93,8 @@ agent_config:
           - name: enp0s1
             mac_address: "00:00:00:00:02:01"
             part_of_bond: "bond0"
+        vlans:
+          - interface: vlan0
+            addresses:
+              - ip: 192.168.10.224
+                subnet_length: 24

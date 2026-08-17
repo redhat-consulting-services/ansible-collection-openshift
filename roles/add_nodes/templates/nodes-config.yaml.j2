@@ -5,17 +5,11 @@ additionalNTPSources: {{ additional_ntp_sources }}
 {% endif %}
 
 hosts:
-{% for hosts in worker.hosts %}
-{% set host_index = loop %}
-  - role: "worker"
-{# identify hostname use either the defined hostname or generate it #}
-{% if hosts.hostname is defined %}
-    hostname: {{ hosts.hostname }}
-{% else %}
-    hostname: {{ worker.hostname_prefix }}{{ host_index.index0 }}
-{% endif %}
+{%- for hosts in worker.get('hosts', []) %}
+  {%- set host_index = loop %}
 
-{#- root device identification #}
+  - role: worker
+    hostname: {{ hosts.hostname | mandatory }}
     rootDeviceHints:
 {% if hosts.root_device.name is defined %}
       deviceName: {{ hosts.root_device.name }}

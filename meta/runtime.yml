@@ -1,8 +1,8 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
 ---
 # Collections must specify a minimum required ansible version to upload
 # to galaxy
-requires_ansible: '>=2.18'
+requires_ansible: '>=2.18.0'
 
 # Content that Ansible needs to load from another location or that has
 # been deprecated/removed
