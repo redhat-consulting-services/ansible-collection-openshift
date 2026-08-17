@@ -1,4 +1,3 @@
-
 ---
 # image set name: openshift-additional
 apiVersion: mirror.openshift.io/v2alpha1
