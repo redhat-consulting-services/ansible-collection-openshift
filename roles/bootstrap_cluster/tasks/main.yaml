@@ -15,6 +15,8 @@
     worker_node_count: "{{ agent_config.worker.hosts | length | default(0) }}"
     total_node_count: "{{ agent_config.master.hosts | length + agent_config.worker.hosts | length | default(0) }}"
 
+- include_tasks: assert.yaml
+
 - name: Create output directory structure
   ansible.builtin.file:
     path: "{{ manifest_folder }}"
