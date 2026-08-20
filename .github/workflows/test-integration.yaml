@@ -25,12 +25,19 @@ jobs:
         run: |
           echo "openshift_versions=$(jq '[.openshift_versions | group_by(split(".") | .[0:2]) | .[] | max_by(split(".") | map(tonumber))]' -c  .github/openshift-versions.json)" >> $GITHUB_OUTPUT
 
+  check-mirror-images:
+    uses: ./.github/workflows/check-changes.yaml
+    with:
+      path: "roles/mirror_images"
+
   mirror-images:
     runs-on: ubuntu-latest
+    if: needs.check-mirror-images.outputs.changed == 'true'
     permissions:
       contents: read
     needs:
       - openshift-minor-versions
+      - check-mirror-images
     strategy:
       fail-fast: false
       matrix:
