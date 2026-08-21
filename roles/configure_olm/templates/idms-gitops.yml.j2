@@ -5,17 +5,13 @@ metadata:
   name: idms-gitops
 spec:
   imageDigestMirrors:
-    - source: registry.redhat.io/openshift-gitops-1
+{% set images = ['openshift-gitops-1', 'rhel9']  %}
+{% for item in images %}
+    - source: registry.redhat.io/"{{ item }}"
       mirrors:
 {% if registry.repository is not defined or registry.repository == "" %}
-        - "{{ registry.url }}/openshift-gitops-1"
+        - "{{ registry.url }}/{{ item }}"
 {% else %}
-        - "{{ registry.url }}/{{ registry.repository }}/openshift-gitops-1"
+        - "{{ registry.url }}/{{ registry.repository }}/{{ item }}"
 {% endif %}
-    - source: registry.redhat.io/rhel9
-      mirrors:
-{% if registry.repository is not defined or registry.repository == "" %}
-        - "{{ registry.url }}/rhel9"
-{% else %}
-        - "{{ registry.url }}/{{ registry.repository }}/rhel9"
-{% endif %}
+{% endfor %}
