@@ -17,9 +17,9 @@
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vip is not defined
-      - ingress_vip is not defined
-    fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must not be defined."
+      - api_vip is defined
+      - ingress_vip is defined
+    fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must be defined."
   when: lb_type | default('') == 'UserManaged'
 
 - name: Assert that the combination between api_vip and ingress_vip is valid

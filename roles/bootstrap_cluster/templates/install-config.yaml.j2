@@ -37,6 +37,10 @@ platform:
 {% if (lb_type | default("")) == "UserManaged"  %}
     loadBalancer:
       type: UserManaged
+    apiVIPs:
+      - {{ api_vip }}
+    ingressVIPs:
+      - {{ ingress_vip }}
 {% else %}
     apiVIP: {{ api_vip }}
     ingressVIP: {{ ingress_vip }}
