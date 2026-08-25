@@ -61,14 +61,13 @@
   when: lb_type in ['UserManaged']
   ansible.builtin.command: >
     openshift-install agent create cluster-manifests --dir {{ base_dir }} --log-level=debug
-  vars:
-    iso_command: "{{ 'image' if iso_type == 'iso' else 'pxe-files' if iso_type == 'pxe' else '' }}"
 
-- name: Add property to LoadBalancer config in cluster-manifests/agent-cluster-install.yaml
-  changed_when: true
+- name: Add loadBalancer type to agent-cluster-install.yaml
   when: lb_type in ['UserManaged']
-  ansible.builtin.command: >
-    yq -i '.spec.loadBalancer.type = "UserManaged"' {{ base_dir }}/cluster-manifests/agent-cluster-install.yaml
+  ansible.builtin.lineinfile:
+    path: "{{ base_dir }}/cluster-manifests/agent-cluster-install.yaml"
+    insertafter: "^spec:"
+    line: "  loadBalancer:\n    type: UserManaged"
 
 - name: Backup cluster-manifests folder
   when: lb_type in ['UserManaged']
