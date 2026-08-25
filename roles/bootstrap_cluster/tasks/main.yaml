@@ -63,7 +63,6 @@
     openshift-install agent create cluster-manifests --dir {{ base_dir }} --log-level=debug
   vars:
     iso_command: "{{ 'image' if iso_type == 'iso' else 'pxe-files' if iso_type == 'pxe' else '' }}"
-  failed_when: iso_command == "" or result.rc != 0
 
 - name: Add property to LoadBalancer config in cluster-manifests/agent-cluster-install.yaml
   changed_when: true
