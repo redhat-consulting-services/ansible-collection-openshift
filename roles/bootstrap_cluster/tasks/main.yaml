@@ -58,6 +58,7 @@
 # --- BEGIN WORKAROUND ---
 - name: Create cluster manifests
   changed_when: true
+  when: lb_type in ['UserManaged']
   ansible.builtin.command: >
     openshift-install agent create cluster-manifests --dir {{ base_dir }} --log-level=debug
   vars:
@@ -71,6 +72,7 @@
     yq -i '.spec.loadBalancer.type = "UserManaged"' {{ base_dir }}/cluster-manifests/agent-cluster-install.yaml
 
 - name: Backup cluster-manifests folder
+  when: lb_type in ['UserManaged']
   ansible.builtin.copy:
     src: "{{ base_dir }}/cluster-manifests"
     dest: "{{ manifest_folder }}/cluster-manifests"
@@ -78,6 +80,7 @@
     remote_src: true
 
 - name: Backup mirror folder
+  when: lb_type in ['UserManaged']
   ansible.builtin.copy:
     src: "{{ base_dir }}/mirror"
     dest: "{{ manifest_folder }}/mirror"
