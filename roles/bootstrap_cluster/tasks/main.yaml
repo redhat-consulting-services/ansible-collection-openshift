@@ -55,7 +55,7 @@
 #### This causes the installation to fail with the following error:
 #### - api vips "10.x.x.2" is already in use in cidr 10.x.x.0/24
 #### - ingress vips 10.x.x.3 is already in use in cidr 10.x.x.0/24
-#--- BEGIN WORKAROUND ---
+# --- BEGIN WORKAROUND ---
 - name: Create cluster manifests
   changed_when: true
   ansible.builtin.command: >
@@ -65,6 +65,7 @@
   failed_when: iso_command == "" or result.rc != 0
 
 - name: Add property to LoadBalancer config in cluster-manifests/agent-cluster-install.yaml
+  changed_when: true
   when: lb_type in ['UserManaged']
   ansible.builtin.command: >
     yq -i '.spec.loadBalancer.type = "UserManaged"' {{ base_dir }}/cluster-manifests/agent-cluster-install.yaml
@@ -82,7 +83,7 @@
     dest: "{{ manifest_folder }}/mirror"
     mode: '0660'
     remote_src: true
-#--- END WORKAROUND ---
+# --- END WORKAROUND ---
 
 - name: Create the bootable ISO or PXE files
   when: generate_iso | bool
