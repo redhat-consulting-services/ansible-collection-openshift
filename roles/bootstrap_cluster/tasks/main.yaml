@@ -48,6 +48,44 @@
     dest: "{{ manifest_folder }}/install-config.yaml"
     mode: '0660'
 
+#### TODO: remove workaround for https://redhat.atlassian.net/browse/AGENT-626?focusedCommentId=16999187
+#### Issue: https://github.com/redhat-consulting-services/ansible-collection-openshift/issues/99
+#### Problem:
+#### The openshift-install agent create image command does not create the .spec.loadBalancer.type property in the cluster-manifests/agent-cluster-install.yaml file when lb_type is UserManaged.
+#### This causes the installation to fail with the following error:
+#### - api vips "10.x.x.2" is already in use in cidr 10.x.x.0/24
+#### - ingress vips 10.x.x.3 is already in use in cidr 10.x.x.0/24
+# --- BEGIN WORKAROUND ---
+- name: Create cluster manifests
+  changed_when: true
+  when: lb_type in ['UserManaged']
+  ansible.builtin.command: >
+    openshift-install agent create cluster-manifests --dir {{ base_dir }} --log-level=debug
+
+- name: Add loadBalancer type to agent-cluster-install.yaml
+  when: lb_type in ['UserManaged']
+  ansible.builtin.lineinfile:
+    path: "{{ base_dir }}/cluster-manifests/agent-cluster-install.yaml"
+    insertafter: "^spec:"
+    line: "  loadBalancer:\n    type: UserManaged"
+
+- name: Backup cluster-manifests folder
+  when: lb_type in ['UserManaged']
+  ansible.builtin.copy:
+    src: "{{ base_dir }}/cluster-manifests"
+    dest: "{{ manifest_folder }}"
+    mode: '0660'
+    remote_src: true
+
+- name: Backup mirror folder
+  when: lb_type in ['UserManaged']
+  ansible.builtin.copy:
+    src: "{{ base_dir }}/mirror"
+    dest: "{{ manifest_folder }}"
+    mode: '0660'
+    remote_src: true
+# --- END WORKAROUND ---
+
 - name: Create the bootable ISO or PXE files
   when: generate_iso | bool
   changed_when: true
