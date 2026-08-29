@@ -10,7 +10,7 @@
     kubeconfig_path: "{{ iso_output_dir }}/{{ cluster_name }}/auth/kubeconfig"
     kubeadmin_password_path: "{{ iso_output_dir }}/{{ cluster_name }}/auth/kubeadmin-password"
     bootfile_path: >-
-      {%- if iso_type == 'pxe' -%} {{ iso_output_dir }}/{{ cluster_name }}/boot-artifacts/agent.{{ arch }}-*{%- else -%} {{ iso_output_dir }}/{{ cluster_name }}/agent.{{ arch }}.iso{%- endif -%}
+      {%- if iso_type == 'pxe' -%} {{ iso_output_dir }}/{{ cluster_name }}/boot-artifacts/agent.{{ arch }}*{%- else -%} {{ iso_output_dir }}/{{ cluster_name }}/agent.{{ arch }}.iso{%- endif -%}
     master_node_count: "{{ (agent_config.master | default({})).hosts | default([]) | length }}"
     worker_node_count: "{{ (agent_config.worker | default({})).hosts | default([]) | length }}"
     total_node_count: >-
