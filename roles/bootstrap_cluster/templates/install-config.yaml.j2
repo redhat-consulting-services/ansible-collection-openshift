@@ -30,7 +30,7 @@ fips: {{ enable_fips }}
 pullSecret: |
   {{ pull_secret }}
 sshKey: |
-  {{ ssh_public_key }}
+  {{ ssh_public_key | indent(2) -}}
 platform:
 {% if type == "baremetal" %}
   baremetal:
