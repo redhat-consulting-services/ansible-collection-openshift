@@ -6,11 +6,11 @@ baseDomain: {{ base_domain }}
 compute:
 - hyperthreading: Enabled
   name: worker
-  replicas: {{ agent_config.worker.hosts | length | default(0) }}
+  replicas: {{ (agent_config.worker | default({})).hosts | default([]) | length }}
 controlPlane:
   hyperthreading: Enabled
   name: master
-  replicas: {{ agent_config.master.hosts | length }}
+  replicas: {{ (agent_config.master | default({})).hosts | default([]) | length }}
 networking:
   clusterNetwork:
 {% for cluster_network in networking.cluster_networks %}
