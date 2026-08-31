@@ -6,11 +6,11 @@ baseDomain: {{ base_domain }}
 compute:
 - hyperthreading: Enabled
   name: worker
-  replicas: {{ agent_config.worker.hosts | length | default(0) }}
+  replicas: {{ worker_node_count }}
 controlPlane:
   hyperthreading: Enabled
   name: master
-  replicas: {{ agent_config.master.hosts | length }}
+  replicas: {{ master_node_count }}
 networking:
   clusterNetwork:
 {% for cluster_network in networking.cluster_networks %}
@@ -30,7 +30,7 @@ fips: {{ enable_fips }}
 pullSecret: |
   {{ pull_secret }}
 sshKey: |
-  {{ ssh_public_key }}
+  {{ ssh_public_key | indent(2) -}}
 platform:
 {% if type == "baremetal" %}
   baremetal:
