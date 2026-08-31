@@ -10,32 +10,18 @@ mirror:
   # source registry configuration
   source:
     # type determines if the source is a remote registry or disk
-    type: registry
+    type: null
     # define the source registry authentication configuration (docker config.json). Only required if the source is a remote registry
-    auth_config: |
-      {
-        "auths": {
-          "registry.redhat.io": {
-            "auth": "username:password"
-          }
-        }
-      }
+    auth_config: null
 
   # destination registry configuration
   destination:
     # type determines if the destination is a remote registry (registry-to-registry) or disk (registry-to-disk)
     type: registry
     # define the destination registry url (e.g., registry.example.com). Only required if the destination is a remote registry
-    registry: registry.redhat.io
+    registry: null
     # define the destination registry authentication configuration (docker config.json). Only required if the destination is a remote registry
-    auth_config: |
-      {
-        "auths": {
-          "registry.redhat.io": {
-            "auth": "username:password"
-          }
-        }
-      }
+    auth_config: null
 
 image_sets: []
   # - name: openshift-additional
