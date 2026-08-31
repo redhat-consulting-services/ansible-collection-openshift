@@ -2,11 +2,12 @@ version: 3
 
 images:
   base_image:
-    name: registry.redhat.io/ubi9:latest
+    name: registry.fedoraproject.org/fedora:44
+    # name: registry.redhat.io/ubi9:latest
     platform: linux/amd64
 
 build_arg_defaults:
-  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v"
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v --upgrade"
 
 dependencies:
   ansible_core:
