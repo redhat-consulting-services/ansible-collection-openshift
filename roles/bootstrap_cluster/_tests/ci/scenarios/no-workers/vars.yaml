@@ -1,0 +1,80 @@
+---
+api_vip: 192.168.50.10
+ingress_vip: 192.168.50.11
+agent_config:
+  master:
+    hostname_prefix: master-
+    root_device_name: /dev/sda
+    bonds:
+      - name: bond0
+        mode: 802.3ad
+        options:
+          miimon: "100"
+    vlans:
+      - name: bond0.100
+        id: 100
+        base_interface: bond0
+    hosts:
+      - hostname: master-0
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:01"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:02"
+            part_of_bond: bond0
+        vlans:
+          - interface: bond0.100
+            ipv4_dhcp: false
+            ipv6_dhcp: false
+            addresses:
+              - ip: 192.168.50.20
+                subnet_length: 24
+      - hostname: master-1
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:03"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:04"
+            part_of_bond: bond0
+        vlans:
+          - interface: bond0.100
+            ipv4_dhcp: false
+            ipv6_dhcp: false
+            addresses:
+              - ip: 192.168.50.21
+                subnet_length: 24
+      - hostname: master-2
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:05"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:06"
+            part_of_bond: bond0
+        vlans:
+          - interface: bond0.100
+            ipv4_dhcp: false
+            ipv6_dhcp: false
+            addresses:
+              - ip: 192.168.50.22
+                subnet_length: 24
+  worker:
+    hosts: []
+test_expectations:
+  facts:
+    master_node_count: 3
+    worker_node_count: 0
+    total_node_count: 3
+    cluster_domain: ocp4-test.ocp4.example.com
+    base_dir: "{{ scenario_output_dir }}/ocp4-test"
+    manifest_folder: "{{ scenario_output_dir }}/ocp4-test/manifests"
+    kubeconfig_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeconfig"
+    kubeadmin_password_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeadmin-password"

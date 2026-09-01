@@ -1,0 +1,20 @@
+---
+tenant_name: test-tenant
+cluster_name: ocp4-test
+base_domain: ocp4.example.com
+lb_type: ""
+generate_iso: false
+iso_type: iso
+pull_secret: '{"auths":{}}'
+ssh_public_key: |
+  ssh-ed25519 AAAAtest bootstrap-cluster-tests
+
+networking:
+  cluster_networks:
+    - cidr: "10.128.0.0/14"
+      host_prefix: 23
+  service_networks:
+    - 172.30.0.0/16
+  network_type: OVNKubernetes
+  machine_network:
+    - cidr: 192.168.50.0/24

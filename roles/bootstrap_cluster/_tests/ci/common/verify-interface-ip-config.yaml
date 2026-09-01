@@ -1,0 +1,28 @@
+---
+- name: Verify each expected interface IP configuration
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - _bootstrap_cluster_interface is defined
+      - (_bootstrap_cluster_interface.ipv4.enabled | default(false)) == (_bootstrap_cluster_expected.ipv4_enabled | default(false))
+      - (_bootstrap_cluster_interface.ipv4.dhcp | default(false)) == (_bootstrap_cluster_expected.ipv4_dhcp | default(false))
+      - (_bootstrap_cluster_interface.ipv6.enabled | default(false)) == (_bootstrap_cluster_expected.ipv6_enabled | default(false))
+      - (_bootstrap_cluster_interface.ipv6.dhcp | default(false)) == (_bootstrap_cluster_expected.ipv6_dhcp | default(false))
+      - (_bootstrap_cluster_interface.ipv4.address | default([]) | map(attribute='ip') | map('string') | list) == (_bootstrap_cluster_expected.ipv4_addresses | default([]) | map('string') | list)
+      - (_bootstrap_cluster_interface.ipv6.address | default([]) | map(attribute='ip') | map('string') | list) == (_bootstrap_cluster_expected.ipv6_addresses | default([]) | map('string') | list)
+      - (_bootstrap_cluster_interface.ipv4.address | default([]) | map(attribute='prefix-length') | list) == (_bootstrap_cluster_expected.ipv4_prefix_lengths | default([]) | list)
+      - (_bootstrap_cluster_interface.ipv6.address | default([]) | map(attribute='prefix-length') | list) == (_bootstrap_cluster_expected.ipv6_prefix_lengths | default([]) | list)
+    fail_msg: >-
+      Interface {{ _bootstrap_cluster_expected.name }} IP configuration does not match expectations.
+      Actual={{ _bootstrap_cluster_interface | default('not found') }}
+  loop: "{{ _bootstrap_cluster_expected_interfaces }}"
+  loop_control:
+    loop_var: _bootstrap_cluster_expected
+    label: "{{ _bootstrap_cluster_expected.name }}"
+  vars:
+    _bootstrap_cluster_interface: >-
+      {{
+        _bootstrap_cluster_actual_interfaces
+        | selectattr('name', 'equalto', _bootstrap_cluster_expected.name)
+        | first
+      }}

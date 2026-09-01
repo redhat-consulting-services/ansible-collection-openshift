@@ -1,0 +1,110 @@
+---
+api_vip: 192.168.50.10
+ingress_vip: 192.168.50.11
+agent_config:
+  master:
+    hostname_prefix: master-
+    root_device_name: /dev/sda
+    dns_resolvers:
+      - 192.168.50.1
+      - 2001:db8::1
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 192.168.50.1
+        interface: bond0.100
+        table_id: 254
+      - destination: "::/0"
+        gateway: 2001:db8::1
+        interface: bond0.100
+        table_id: 254
+    bonds:
+      - name: bond0
+        mode: 802.3ad
+        options:
+          miimon: "100"
+    vlans:
+      - name: bond0.100
+        id: 100
+        base_interface: bond0
+    hosts:
+      - hostname: master-0
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:01"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:02"
+            part_of_bond: bond0
+        bonds:
+          - interface: bond0
+            ipv4_dhcp: false
+            ipv6_dhcp: false
+            addresses:
+              - ip: 192.168.50.20
+                subnet_length: 24
+              - ip: 2001:db8::20
+                subnet_length: 64
+        vlans:
+          - interface: bond0.100
+            ipv4_dhcp: false
+            ipv6_dhcp: false
+            addresses:
+              - ip: 192.168.50.21
+                subnet_length: 24
+              - ip: 2001:db8::21
+                subnet_length: 64
+  worker:
+    hosts: []
+test_expectations:
+  install_config:
+    api_vips:
+      - 192.168.50.10
+    ingress_vips:
+      - 192.168.50.11
+  facts:
+    master_node_count: 1
+    worker_node_count: 0
+    total_node_count: 1
+    cluster_domain: ocp4-test.ocp4.example.com
+    base_dir: "{{ scenario_output_dir }}/ocp4-test"
+    manifest_folder: "{{ scenario_output_dir }}/ocp4-test/manifests"
+    kubeconfig_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeconfig"
+    kubeadmin_password_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeadmin-password"
+  agent_config:
+    dns_resolvers:
+      - 192.168.50.1
+      - 2001:db8::1
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 192.168.50.1
+      - destination: "::/0"
+        gateway: 2001:db8::1
+    interfaces:
+      - name: bond0
+        ipv4_enabled: true
+        ipv4_dhcp: false
+        ipv6_enabled: true
+        ipv6_dhcp: false
+        ipv4_addresses:
+          - 192.168.50.20
+        ipv6_addresses:
+          - 2001:db8::20
+        ipv4_prefix_lengths:
+          - 24
+        ipv6_prefix_lengths:
+          - 64
+      - name: bond0.100
+        ipv4_enabled: true
+        ipv4_dhcp: false
+        ipv6_enabled: true
+        ipv6_dhcp: false
+        ipv4_addresses:
+          - 192.168.50.21
+        ipv6_addresses:
+          - 2001:db8::21
+        ipv4_prefix_lengths:
+          - 24
+        ipv6_prefix_lengths:
+          - 64

@@ -1,0 +1,21 @@
+---
+- name: Run bootstrap_cluster scenario
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - base-vars.yaml
+  vars:
+    iso_output_dir: "{{ scenario_output_dir }}"
+  roles:
+    - ../../../../bootstrap_cluster
+
+- name: Verify bootstrap_cluster scenario output
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - base-vars.yaml
+  vars:
+    iso_output_dir: "{{ scenario_output_dir }}"
+  tasks:
+    - name: Import verification tasks
+      ansible.builtin.import_tasks: verify-generated-configs.yaml

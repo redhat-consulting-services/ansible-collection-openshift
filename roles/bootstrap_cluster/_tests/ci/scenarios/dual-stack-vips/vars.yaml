@@ -1,0 +1,37 @@
+---
+api_vip:
+  - 192.168.50.10
+  - 2001:db8::2
+ingress_vip:
+  - 192.168.50.11
+  - 2001:db8::3
+agent_config:
+  master:
+    hostname_prefix: master-
+    root_device_name: /dev/sda
+    hosts:
+      - hostname: master-0
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:01"
+  worker:
+    hosts: []
+test_expectations:
+  install_config:
+    api_vips:
+      - 192.168.50.10
+      - 2001:db8::2
+    ingress_vips:
+      - 192.168.50.11
+      - 2001:db8::3
+  facts:
+    master_node_count: 1
+    worker_node_count: 0
+    total_node_count: 1
+    cluster_domain: ocp4-test.ocp4.example.com
+    base_dir: "{{ scenario_output_dir }}/ocp4-test"
+    manifest_folder: "{{ scenario_output_dir }}/ocp4-test/manifests"
+    kubeconfig_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeconfig"
+    kubeadmin_password_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeadmin-password"

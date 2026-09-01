@@ -1,0 +1,46 @@
+---
+api_vip: 192.168.50.10
+ingress_vip: 192.168.50.11
+agent_config:
+  master:
+    hostname_prefix: master-
+    root_device_name: /dev/sda
+    hosts:
+      - hostname: master-0
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:01"
+            addresses:
+              - ip: 192.168.50.20
+                subnet_length: 24
+              - ip: 2001:db8::20
+                subnet_length: 64
+  worker:
+    hosts: []
+test_expectations:
+  facts:
+    master_node_count: 1
+    worker_node_count: 0
+    total_node_count: 1
+    cluster_domain: ocp4-test.ocp4.example.com
+    base_dir: "{{ scenario_output_dir }}/ocp4-test"
+    manifest_folder: "{{ scenario_output_dir }}/ocp4-test/manifests"
+    kubeconfig_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeconfig"
+    kubeadmin_password_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeadmin-password"
+  agent_config:
+    interfaces:
+      - name: enp0s0
+        ipv4_enabled: true
+        ipv4_dhcp: false
+        ipv6_enabled: true
+        ipv6_dhcp: false
+        ipv4_addresses:
+          - 192.168.50.20
+        ipv6_addresses:
+          - 2001:db8::20
+        ipv4_prefix_lengths:
+          - 24
+        ipv6_prefix_lengths:
+          - 64
