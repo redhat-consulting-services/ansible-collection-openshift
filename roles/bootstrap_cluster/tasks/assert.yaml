@@ -17,15 +17,41 @@
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vip is not defined
-      - ingress_vip is not defined
+      - api_vip | default('') == ''
+      - ingress_vip | default('') == ''
     fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must not be defined."
   when: lb_type | default('') == 'UserManaged'
+
+- name: Normalize api_vip and ingress_vip to lists
+  ansible.builtin.set_fact:
+    api_vips: >-
+      {{
+        [] if api_vip | default('') == ''
+        else ([api_vip | string] if (api_vip is string or api_vip is number) else api_vip)
+      }}
+    ingress_vips: >-
+      {{
+        [] if ingress_vip | default('') == ''
+        else ([ingress_vip | string] if (ingress_vip is string or ingress_vip is number) else ingress_vip)
+      }}
+  when: lb_type | default('') != 'UserManaged'
 
 - name: Assert that the combination between api_vip and ingress_vip is valid
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vip is defined and ingress_vip is defined
+      - api_vips | length >= 1
+      - ingress_vips | length >= 1
     fail_msg: "Invalid combination of api_vip and ingress_vip. Both must be defined when lb_type is not 'UserManaged'"
+  when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that the defined api_vip and ingress_vip are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - api_vips | length <= 2
+      - ingress_vips | length <= 2
+      - api_vips | reject('equalto', '') | list | length == (api_vips | length)
+      - ingress_vips | reject('equalto', '') | list | length == (ingress_vips | length)
+    fail_msg: "api_vip and ingress_vip must each contain 1 or 2 non-empty IP addresses"
   when: lb_type | default('') != 'UserManaged'
