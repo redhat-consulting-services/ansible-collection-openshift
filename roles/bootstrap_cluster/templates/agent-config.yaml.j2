@@ -107,12 +107,12 @@ hosts:
       dns-resolver:
         config:
           server:
-{% for resolver in host_value.dns_resolvers %}
+{% for resolver in host_value.dns_resolvers | default([]) %}
             - {{ resolver }}
 {% endfor %}
       routes:
         config:
-{% for route in host_value.routes %}
+{% for route in host_value.routes | default([]) %}
           - destination: {{ route.destination }}
             next-hop-address: {{ route.gateway }}
             next-hop-interface: {{ route.interface }}
