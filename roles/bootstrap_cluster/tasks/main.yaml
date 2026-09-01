@@ -63,19 +63,25 @@
 # --- BEGIN WORKAROUND ---
 - name: Create cluster manifests
   changed_when: true
-  when: lb_type in ['UserManaged']
+  when:
+    - lb_type in ['UserManaged']
+    - generate_iso | bool
   ansible.builtin.command: >
     openshift-install agent create cluster-manifests --dir {{ base_dir }} --log-level=debug
 
 - name: Add loadBalancer type to agent-cluster-install.yaml
-  when: lb_type in ['UserManaged']
+  when:
+    - lb_type in ['UserManaged']
+    - generate_iso | bool
   ansible.builtin.lineinfile:
     path: "{{ base_dir }}/cluster-manifests/agent-cluster-install.yaml"
     insertafter: "^spec:"
     line: "  loadBalancer:\n    type: UserManaged"
 
 - name: Backup cluster-manifests folder
-  when: lb_type in ['UserManaged']
+  when:
+    - lb_type in ['UserManaged']
+    - generate_iso | bool
   ansible.builtin.copy:
     src: "{{ base_dir }}/cluster-manifests"
     dest: "{{ manifest_folder }}"
@@ -83,7 +89,9 @@
     remote_src: true
 
 - name: Backup mirror folder
-  when: lb_type in ['UserManaged']
+  when:
+    - lb_type in ['UserManaged']
+    - generate_iso | bool
   ansible.builtin.copy:
     src: "{{ base_dir }}/mirror"
     dest: "{{ manifest_folder }}"
