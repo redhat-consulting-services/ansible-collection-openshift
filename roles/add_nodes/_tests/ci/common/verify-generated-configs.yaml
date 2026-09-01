@@ -1,0 +1,89 @@
+---
+- name: Load generated nodes-config.yaml
+  ansible.builtin.set_fact:
+    trusted_nodes_config: "{{ lookup('file', base_dir + '/nodes-config.yaml') | from_yaml }}"
+
+- name: Verify role facts
+  when: test_expectations.facts is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - additional_node_count | int == test_expectations.facts.additional_node_count | int
+      - manifest_folder == test_expectations.facts.manifest_folder
+      - credentials_folder == test_expectations.facts.credentials_folder
+      - iso_location == test_expectations.facts.iso_location
+    fail_msg: Role facts do not match expectations for scenario {{ scenario_name | default('unknown') }}.
+
+- name: Verify nodes-config CPU architecture
+  when: test_expectations.nodes_config.cpu_architecture is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - trusted_nodes_config.cpuArchitecture == test_expectations.nodes_config.cpu_architecture
+    fail_msg: nodes-config cpuArchitecture does not match expectations.
+
+- name: Verify nodes-config NTP sources
+  when: test_expectations.nodes_config.additional_ntp_sources is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - trusted_nodes_config.additionalNTPSources == test_expectations.nodes_config.additional_ntp_sources
+    fail_msg: nodes-config additionalNTPSources do not match expectations.
+
+- name: Verify nodes-config DNS resolvers
+  when:
+    - test_expectations.nodes_config is defined
+    - test_expectations.nodes_config.dns_resolvers is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - >-
+        (trusted_nodes_config.hosts[0].networkConfig['dns-resolver'].config.server | map('string') | list)
+        ==
+        (test_expectations.nodes_config.dns_resolvers | map('string') | list)
+    fail_msg: nodes-config DNS resolvers do not match expectations.
+
+- name: Assert nodes-config route count
+  when:
+    - test_expectations.nodes_config is defined
+    - test_expectations.nodes_config.routes is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - trusted_nodes_config.hosts[0].networkConfig.routes.config | length == test_expectations.nodes_config.routes | length
+    fail_msg: nodes-config route count does not match expectations.
+
+- name: Assert each nodes-config route
+  when:
+    - test_expectations.nodes_config is defined
+    - test_expectations.nodes_config.routes is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - trusted_nodes_config.hosts[0].networkConfig.routes.config[idx].destination == item.destination
+      - trusted_nodes_config.hosts[0].networkConfig.routes.config[idx]['next-hop-address'] == item.gateway
+    fail_msg: >-
+      Route at index {{ idx }} does not match expectations.
+      Actual={{ trusted_nodes_config.hosts[0].networkConfig.routes.config[idx] }},
+      Expected={{ item }}
+  loop: "{{ test_expectations.nodes_config.routes }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.destination }}"
+
+- name: Verify nodes-config interface IP configuration
+  when:
+    - test_expectations.nodes_config is defined
+    - test_expectations.nodes_config.interfaces is defined
+  ansible.builtin.include_tasks: verify-interface-ip-config.yaml
+  vars:
+    _add_nodes_expected_interfaces: "{{ test_expectations.nodes_config.interfaces }}"
+    _add_nodes_actual_interfaces: "{{ trusted_nodes_config.hosts[0].networkConfig.interfaces }}"
+
+- name: Verify auth.json was generated
+  when: test_expectations.auth_json is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - lookup('file', credentials_folder + '/auth.json') == test_expectations.auth_json
+    fail_msg: auth.json does not match expectations.

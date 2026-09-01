@@ -1,0 +1,64 @@
+---
+worker:
+  hostname_prefix: worker-
+  root_device_name: /dev/sda
+  dns_resolvers:
+    - 10.10.10.2
+  routes:
+    - destination: 0.0.0.0/0
+      gateway: 10.10.10.1
+      interface: bond0.100
+      table_id: 254
+  bonds:
+    - name: bond0
+      mode: 802.3ad
+      options:
+        miimon: "100"
+  vlans:
+    - name: bond0.100
+      id: 100
+      base_interface: bond0
+  hosts:
+    - hostname: worker-1.example.com
+      root_device:
+        name: /dev/sda
+      interfaces:
+        - name: eth0
+          mac_address: "00:aa:aa:aa:aa:01"
+          part_of_bond: bond0
+        - name: eth1
+          mac_address: "00:aa:aa:aa:aa:02"
+          part_of_bond: bond0
+      bonds:
+        - interface: bond0
+      vlans:
+        - interface: bond0.100
+          ipv4_dhcp: false
+          ipv6_dhcp: false
+          addresses:
+            - ip: 10.10.10.10
+              subnet_length: 24
+test_expectations:
+  facts:
+    additional_node_count: 1
+    manifest_folder: "{{ scenario_output_dir }}/manifests"
+    credentials_folder: "{{ scenario_output_dir }}/credentials"
+    iso_location: "{{ scenario_output_dir }}/agent.iso"
+  nodes_config:
+    cpu_architecture: amd64
+    dns_resolvers:
+      - 10.10.10.2
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 10.10.10.1
+    interfaces:
+      - name: bond0.100
+        ipv4_enabled: true
+        ipv4_dhcp: false
+        ipv6_enabled: false
+        ipv6_dhcp: false
+        ipv4_addresses:
+          - 10.10.10.10
+        ipv4_prefix_lengths:
+          - 24
+  auth_json: '{"auths":{"example.com":{"auth":"dGVzdDo="}}}'

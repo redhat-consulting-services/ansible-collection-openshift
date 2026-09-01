@@ -1,0 +1,21 @@
+---
+- name: Run add_nodes scenario
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - base-vars.yaml
+  vars:
+    base_dir: "{{ scenario_output_dir }}"
+  roles:
+    - ../../../../add_nodes
+
+- name: Verify add_nodes scenario output
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - base-vars.yaml
+  vars:
+    base_dir: "{{ scenario_output_dir }}"
+  tasks:
+    - name: Import verification tasks
+      ansible.builtin.import_tasks: verify-generated-configs.yaml
