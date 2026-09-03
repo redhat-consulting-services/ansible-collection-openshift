@@ -69,8 +69,8 @@
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vips | map('ipaddr') | list | length == (api_vips | length)
-      - ingress_vips | map('ipaddr') | list | length == (ingress_vips | length)
+      - api_vips | map('ansible.utils.ipaddr') | list | length == (api_vips | length)
+      - ingress_vips | map('ansible.utils.ipaddr') | list | length == (ingress_vips | length)
     fail_msg: "api_vip and ingress_vip must each contain valid IPv4 or IPv6 addresses"
   when: lb_type | default('') != 'UserManaged'
 
@@ -80,7 +80,7 @@
     that:
       - networking.cluster_networks | length >= 1
       - networking.cluster_networks | selectattr('cidr', 'defined') | list | length == (networking.cluster_networks | length)
-      - networking.cluster_networks | map(attribute='cidr') | select('ipaddr') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | map(attribute='cidr') | map('ansible.utils.ipaddr') | reject('equalto', false) | list | length == (networking.cluster_networks | length)
       - networking.cluster_networks | selectattr('host_prefix', 'defined') | list | length == (networking.cluster_networks | length)
       - networking.cluster_networks | map(attribute='host_prefix') | select('number') | list | length == (networking.cluster_networks | length)
       - networking.cluster_networks | map(attribute='host_prefix') | min > 0
@@ -91,7 +91,7 @@
     quiet: true
     that:
       - networking.service_networks | length >= 1
-      - networking.service_networks | select('ipaddr') | list | length == (networking.service_networks | length)
+      - networking.service_networks | map('ansible.utils.ipaddr') | reject('equalto', false) | list | length == (networking.service_networks | length)
     fail_msg: "networking.service_networks must each contain valid IPv4 or IPv6 CIDRs"
 
 - name: Assert that machine network CIDRs are valid
@@ -100,5 +100,5 @@
     that:
       - networking.machine_network | length >= 1
       - networking.machine_network | selectattr('cidr', 'defined') | list | length == (networking.machine_network | length)
-      - networking.machine_network | map(attribute='cidr') | select('ipaddr') | list | length == (networking.machine_network | length)
+      - networking.machine_network | map(attribute='cidr') | map('ansible.utils.ipaddr') | reject('equalto', false) | list | length == (networking.machine_network | length)
     fail_msg: "networking.machine_network must be a non-empty list of entries with valid cidr values"
