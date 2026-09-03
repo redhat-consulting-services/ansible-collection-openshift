@@ -55,3 +55,50 @@
       - ingress_vips | reject('equalto', '') | list | length == (ingress_vips | length)
     fail_msg: "api_vip and ingress_vip must each contain 1 or 2 non-empty IP addresses"
   when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that the api_vip and ingress_vip are unique
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - api_vips | unique | length == (api_vips | length)
+      - ingress_vips | unique | length == (ingress_vips | length)
+    fail_msg: "api_vip and ingress_vip must each contain unique IP addresses"
+  when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that api_vip and ingress_vip are valid IPv4 or IPv6 addresses
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - api_vips | map('ipaddr') | list | length == (api_vips | length)
+      - ingress_vips | map('ipaddr') | list | length == (ingress_vips | length)
+    fail_msg: "api_vip and ingress_vip must each contain valid IPv4 or IPv6 addresses"
+  when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that cluster network CIDRs are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - networking.cluster_networks | length >= 1
+      - networking.cluster_networks | selectattr('cidr', 'defined') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | map(attribute='cidr') | select('ipaddr') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | selectattr('host_prefix', 'defined') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | map(attribute='host_prefix') | select('number') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | map(attribute='host_prefix') | min > 0
+    fail_msg: "networking.cluster_networks must be a non-empty list of entries with valid cidr and host_prefix values"
+
+- name: Assert that service network CIDRs are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - networking.service_networks | length >= 1
+      - networking.service_networks | select('ipaddr') | list | length == (networking.service_networks | length)
+    fail_msg: "networking.service_networks must each contain valid IPv4 or IPv6 CIDRs"
+
+- name: Assert that machine network CIDRs are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - networking.machine_network | length >= 1
+      - networking.machine_network | selectattr('cidr', 'defined') | list | length == (networking.machine_network | length)
+      - networking.machine_network | map(attribute='cidr') | select('ipaddr') | list | length == (networking.machine_network | length)
+    fail_msg: "networking.machine_network must be a non-empty list of entries with valid cidr values"
