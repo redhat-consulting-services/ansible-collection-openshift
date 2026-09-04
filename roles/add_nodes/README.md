@@ -27,6 +27,13 @@ cpu_architecture: amd64
 # kubeconfig_path defines the path to the kubeconfig file used to access the OpenShift cluster. It is required to generate the ISO image if `generate_iso` is set to true.
 kubeconfig_path: ""
 
+# cluster_name is a variable that specifies the name of the cluster. The cluster_name together with the base_domain determines the cluster's API and ingress domain names.
+# It is required to be set.
+cluster_name: "my-cluster"
+# base_domain is the base domain for the cluster. It is required to be set.
+# It is used to generate the cluster's API and ingress domain names.
+base_domain: "example.com"
+
 # additional_ntp_sources is optional, if not provided, it will not be included in the agent-config.yaml
 # additional_ntp_sources:
 #   - "0.pool.ntp.org"
