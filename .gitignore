@@ -4,3 +4,5 @@ Containerfile
 collections/
 
 !.devcontainer/Containerfile
+
+.envrc

@@ -74,14 +74,7 @@ hosts:
 {# identify the role of the node #}
 {% if host_type == "master" or host_type == "worker" %}
   - role: {{ host_type }}
-{# identify hostname use either the defined hostname or generate it #}
-{% if hosts.hostname is defined %}
-    hostname: {{ hosts.hostname }}
-{% else %}
-    hostname: {{ host_value.hostname_prefix }}{{ host_index.index0 }}
-{% endif %}
-
-{#- root device identification #}
+    hostname: {{ hosts.hostname | mandatory }}.{{ cluster_name | mandatory }}.{{ base_domain | mandatory }}
     rootDeviceHints:
 {% if hosts.root_device.name is defined %}
       deviceName: {{ hosts.root_device.name }}

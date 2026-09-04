@@ -154,10 +154,6 @@ proxy:
 agent_config:
   # master|worker defines the configuration for either the master or worker nodes. In both cases, the configuration is the same.
   <master|worker>:
-    # hostname_prefix is the prefix for the hostnames of the nodes. It is used to generate the hostnames using the prefix and the node id.
-    # If the hosts[].hostname variable is set, this prefix is ignored and the hostname is used instead.
-    # Example: If the hostname_prefix is `master-` and the node id is `0`, the generated hostname is `master-0`.
-    hostname_prefix: "master-"
     # root_device_name is the name of the root device for the nodes.
     # This option only applies if `hosts[].root_device.name`, `hosts[].root_device.serial_number`, `hosts[].root_device.wwn` are not set.
     root_device_name: "/dev/sda"
@@ -214,6 +210,8 @@ agent_config:
       # master / worker: 0
       -
         # hostname explicitly defines the hostname of the host.
+        # The value defined here will be concatenated with the cluster name and base domain name to form the fully qualified domain name (FQDN) of the host.
+        # Example: if the cluster name is "mycluster" and the base domain is "example.com", the FQDN for this host will be "master-0.mycluster.example.com"
         hostname: "master-0"
         # root_device defines the root device RHCOS will be installed on.
         root_device:

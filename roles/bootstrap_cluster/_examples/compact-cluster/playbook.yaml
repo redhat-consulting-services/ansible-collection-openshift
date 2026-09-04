@@ -3,5 +3,8 @@
   gather_facts: false
   vars_files:
     - ./vars.yaml
+  vars:
+    pull_secret: '{{ lookup("ansible.builtin.env", "PULL_SECRET") }}'
+    ssh_public_key: '{{ lookup("ansible.builtin.env", "SSH_PUBLIC_KEY") }}'
   roles:
     - ../../../bootstrap_cluster
