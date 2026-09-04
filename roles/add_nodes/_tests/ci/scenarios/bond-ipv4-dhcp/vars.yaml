@@ -1,0 +1,35 @@
+---
+worker:
+  hostname_prefix: worker-
+  root_device_name: /dev/sda
+  bonds:
+    - name: bond0
+      mode: 802.3ad
+      options:
+        miimon: "100"
+  hosts:
+    - hostname: worker-1.example.com
+      root_device:
+        name: /dev/sda
+      interfaces:
+        - name: eth0
+          mac_address: "00:00:00:00:00:01"
+          part_of_bond: bond0
+        - name: eth1
+          mac_address: "00:00:00:00:00:02"
+          part_of_bond: bond0
+test_expectations:
+  facts:
+    additional_node_count: 1
+    manifest_folder: "{{ scenario_output_dir }}/manifests"
+    credentials_folder: "{{ scenario_output_dir }}/credentials"
+    iso_location: "{{ scenario_output_dir }}/agent.iso"
+  nodes_config:
+    cpu_architecture: amd64
+    interfaces:
+      - name: bond0
+        ipv4_enabled: true
+        ipv4_dhcp: true
+        ipv6_enabled: false
+        ipv6_dhcp: false
+  auth_json: '{"auths":{"example.com":{"auth":"dGVzdDo="}}}'

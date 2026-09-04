@@ -1,0 +1,17 @@
+---
+api_vip: ""
+ingress_vip: ""
+expected_failure_substring: Both must be defined when lb_type is not 'UserManaged'
+agent_config:
+  master:
+    hostname_prefix: master-
+    root_device_name: /dev/sda
+    hosts:
+      - hostname: master-0
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:01"
+  worker:
+    hosts: []

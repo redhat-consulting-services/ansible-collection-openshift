@@ -30,7 +30,8 @@ fips: {{ enable_fips }}
 pullSecret: |
   {{ pull_secret }}
 sshKey: |
-  {{ ssh_public_key | indent(2) -}}
+  {{ ssh_public_key | indent(2) }}
+
 platform:
 {% if type == "baremetal" %}
   baremetal:
@@ -38,8 +39,14 @@ platform:
     loadBalancer:
       type: UserManaged
 {% else %}
-    apiVIP: {{ api_vip }}
-    ingressVIP: {{ ingress_vip }}
+    apiVIPs:
+{% for vip in api_vips %}
+    - {{ vip | quote }}
+{% endfor %}
+    ingressVIPs:
+{% for vip in ingress_vips %}
+    - {{ vip | quote }}
+{% endfor %}
 {% endif %}
 {% else %}
   none: {}

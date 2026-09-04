@@ -1,0 +1,39 @@
+---
+worker:
+  hostname_prefix: worker-
+  root_device_name: /dev/sda
+  hosts:
+    - hostname: worker-1.example.com
+      root_device:
+        name: /dev/sda
+      interfaces:
+        - name: enp0s0
+          mac_address: "00:00:00:00:00:01"
+          addresses:
+            - ip: 192.168.50.20
+              subnet_length: 24
+            - ip: 2001:db8::20
+              subnet_length: 64
+test_expectations:
+  facts:
+    additional_node_count: 1
+    manifest_folder: "{{ scenario_output_dir }}/manifests"
+    credentials_folder: "{{ scenario_output_dir }}/credentials"
+    iso_location: "{{ scenario_output_dir }}/agent.iso"
+  nodes_config:
+    cpu_architecture: amd64
+    interfaces:
+      - name: enp0s0
+        ipv4_enabled: true
+        ipv4_dhcp: false
+        ipv6_enabled: true
+        ipv6_dhcp: false
+        ipv4_addresses:
+          - 192.168.50.20
+        ipv6_addresses:
+          - 2001:db8::20
+        ipv4_prefix_lengths:
+          - 24
+        ipv6_prefix_lengths:
+          - 64
+  auth_json: '{"auths":{"example.com":{"auth":"dGVzdDo="}}}'

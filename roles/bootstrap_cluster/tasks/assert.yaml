@@ -17,15 +17,88 @@
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vip is not defined
-      - ingress_vip is not defined
+      - api_vip | default('') == ''
+      - ingress_vip | default('') == ''
     fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must not be defined."
   when: lb_type | default('') == 'UserManaged'
+
+- name: Normalize api_vip and ingress_vip to lists
+  ansible.builtin.set_fact:
+    api_vips: >-
+      {{
+        [] if api_vip | default('') == ''
+        else ([api_vip | string] if (api_vip is string or api_vip is number) else api_vip)
+      }}
+    ingress_vips: >-
+      {{
+        [] if ingress_vip | default('') == ''
+        else ([ingress_vip | string] if (ingress_vip is string or ingress_vip is number) else ingress_vip)
+      }}
+  when: lb_type | default('') != 'UserManaged'
 
 - name: Assert that the combination between api_vip and ingress_vip is valid
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vip is defined and ingress_vip is defined
+      - api_vips | length >= 1
+      - ingress_vips | length >= 1
     fail_msg: "Invalid combination of api_vip and ingress_vip. Both must be defined when lb_type is not 'UserManaged'"
   when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that the defined api_vip and ingress_vip are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - api_vips | length <= 2
+      - ingress_vips | length <= 2
+      - api_vips | reject('equalto', '') | list | length == (api_vips | length)
+      - ingress_vips | reject('equalto', '') | list | length == (ingress_vips | length)
+    fail_msg: "api_vip and ingress_vip must each contain 1 or 2 non-empty IP addresses"
+  when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that the api_vip and ingress_vip are unique
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - api_vips | unique | length == (api_vips | length)
+      - ingress_vips | unique | length == (ingress_vips | length)
+    fail_msg: "api_vip and ingress_vip must each contain unique IP addresses"
+  when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that api_vip and ingress_vip are valid IPv4 or IPv6 addresses
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - api_vips | map('ansible.utils.ipaddr') | list | length == (api_vips | length)
+      - ingress_vips | map('ansible.utils.ipaddr') | list | length == (ingress_vips | length)
+    fail_msg: "api_vip and ingress_vip must each contain valid IPv4 or IPv6 addresses"
+  when: lb_type | default('') != 'UserManaged'
+
+- name: Assert that cluster network CIDRs are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - networking.cluster_networks | length >= 1
+      - networking.cluster_networks | selectattr('cidr', 'defined') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | map(attribute='cidr') | map('ansible.utils.ipaddr') | reject('equalto', false) | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | selectattr('host_prefix', 'defined') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | map(attribute='host_prefix') | select('number') | list | length == (networking.cluster_networks | length)
+      - networking.cluster_networks | map(attribute='host_prefix') | min > 0
+    fail_msg: "networking.cluster_networks must be a non-empty list of entries with valid cidr and host_prefix values"
+
+- name: Assert that service network CIDRs are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - networking.service_networks | length >= 1
+      - networking.service_networks | map('ansible.utils.ipaddr') | reject('equalto', false) | list | length == (networking.service_networks | length)
+    fail_msg: "networking.service_networks must each contain valid IPv4 or IPv6 CIDRs"
+
+- name: Assert that machine network CIDRs are valid
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - networking.machine_network | length >= 1
+      - networking.machine_network | selectattr('cidr', 'defined') | list | length == (networking.machine_network | length)
+      - networking.machine_network | map(attribute='cidr') | map('ansible.utils.ipaddr') | reject('equalto', false) | list | length == (networking.machine_network | length)
+    fail_msg: "networking.machine_network must be a non-empty list of entries with valid cidr values"

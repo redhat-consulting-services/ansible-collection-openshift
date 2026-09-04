@@ -1,0 +1,35 @@
+---
+- name: Run bootstrap_cluster scenario expecting failure
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - base-vars.yaml
+  vars:
+    iso_output_dir: "{{ scenario_output_dir }}"
+  tasks:
+    - name: Execute bootstrap_cluster role
+      block:
+        - name: Include bootstrap_cluster role
+          ansible.builtin.include_role:
+            name: ../../../../bootstrap_cluster
+      rescue:
+        - name: Mark scenario as failed in the expected way
+          ansible.builtin.set_fact:
+            _bootstrap_cluster_expected_failure: true
+
+        - name: Assert expected validation failure
+          ansible.builtin.assert:
+            quiet: true
+            that:
+              - expected_failure_substring in (ansible_failed_result.msg | default(''))
+            fail_msg: >-
+              Scenario {{ scenario_name }} failed with an unexpected error:
+              {{ ansible_failed_result.msg | default('no message') }}
+
+    - name: Ensure the scenario failed during role execution
+      ansible.builtin.assert:
+        quiet: true
+        that:
+          - _bootstrap_cluster_expected_failure | default(false)
+        fail_msg: >-
+          Scenario {{ scenario_name }} succeeded but was expected to fail validation.

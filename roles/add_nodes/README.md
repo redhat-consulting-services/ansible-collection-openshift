@@ -32,6 +32,20 @@ worker:
   hostname_prefix: "worker-"
   # root_device_name is the name of the root device for the worker nodes. It is used to configure the root device for the worker nodes. This option only applies if `agent_config.worker.hosts[].root_device.name`, `agent_config.worker.hosts[].root_device.serial_number`, `agent_config.worker.hosts[].root_device.wwn` are not set.
   root_device_name: "/dev/sda"
+  # dns_resolvers defines DNS servers for the worker nodes. IPv4 and IPv6 addresses are supported.
+  dns_resolvers:
+    - 172.16.11.1
+    - 2001:db8::1
+  # routes defines static routes for the worker nodes. IPv4 and IPv6 destinations and gateways are supported.
+  routes:
+    - destination: 0.0.0.0/0
+      gateway: 172.16.11.1
+      interface: bond0.100
+      table_id: 254
+    - destination: "::/0"
+      gateway: 2001:db8::1
+      interface: bond0.100
+      table_id: 254
   # bonds defines the bonding configuration for the worker nodes. It is used to configure the network bonding for the worker nodes.
   bonds:
     -
@@ -111,14 +125,18 @@ worker:
           # interface is the name of the VLAN interface to which an IP address should be assigned.
           # This interface must match the name of the VLAN interface defined in `agent_config.worker.vlans[].name`.
           interface: vlan0
-          # addresses defines the IP addresses for the VLAN interface. It is used to configure the IP addresses for the VLAN interface.
-          # If the `agent_config.master.vlans[].addresses[].start_ip` is set, this field takes precedence over the `agent_config.worker.vlans[].addresses[].start_ip`.
+          # addresses defines static IP addresses for the VLAN interface. IPv4 and IPv6 addresses can be mixed in the same list.
           addresses:
             -
-              # ip is the IPv4 or IPv6 address to assign to the VLAN interface.
               ip: 192.168.10.222
-              # subnet_length is the subnet length for the VLAN interface. It is used to configure the subnet length for the VLAN interface.
               subnet_length: 24
+            -
+              ip: 2001:db8::10
+              subnet_length: 64
+          # ipv4_dhcp (optional) enables DHCP for IPv4 when no static IPv4 addresses are defined.
+          ipv4_dhcp: false
+          # ipv6_dhcp (optional) enables DHCP for IPv6 when no static IPv6 addresses are defined.
+          ipv6_dhcp: false
 ```
 
 ## Role facts

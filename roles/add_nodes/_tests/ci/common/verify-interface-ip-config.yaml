@@ -1,0 +1,28 @@
+---
+- name: Verify each expected interface IP configuration
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - _add_nodes_interface is defined
+      - (_add_nodes_interface.ipv4.enabled | default(false)) == (_add_nodes_expected.ipv4_enabled | default(false))
+      - (_add_nodes_interface.ipv4.dhcp | default(false)) == (_add_nodes_expected.ipv4_dhcp | default(false))
+      - (_add_nodes_interface.ipv6.enabled | default(false)) == (_add_nodes_expected.ipv6_enabled | default(false))
+      - (_add_nodes_interface.ipv6.dhcp | default(false)) == (_add_nodes_expected.ipv6_dhcp | default(false))
+      - (_add_nodes_interface.ipv4.address | default([]) | map(attribute='ip') | map('string') | list) == (_add_nodes_expected.ipv4_addresses | default([]) | map('string') | list)
+      - (_add_nodes_interface.ipv6.address | default([]) | map(attribute='ip') | map('string') | list) == (_add_nodes_expected.ipv6_addresses | default([]) | map('string') | list)
+      - (_add_nodes_interface.ipv4.address | default([]) | map(attribute='prefix-length') | list) == (_add_nodes_expected.ipv4_prefix_lengths | default([]) | list)
+      - (_add_nodes_interface.ipv6.address | default([]) | map(attribute='prefix-length') | list) == (_add_nodes_expected.ipv6_prefix_lengths | default([]) | list)
+    fail_msg: >-
+      Interface {{ _add_nodes_expected.name }} IP configuration does not match expectations.
+      Actual={{ _add_nodes_interface | default('not found') }}
+  loop: "{{ _add_nodes_expected_interfaces }}"
+  loop_control:
+    loop_var: _add_nodes_expected
+    label: "{{ _add_nodes_expected.name }}"
+  vars:
+    _add_nodes_interface: >-
+      {{
+        _add_nodes_actual_interfaces
+        | selectattr('name', 'equalto', _add_nodes_expected.name)
+        | first
+      }}

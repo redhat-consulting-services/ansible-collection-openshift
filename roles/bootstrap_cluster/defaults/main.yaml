@@ -13,6 +13,19 @@ arch: "x86_64"
 
 lb_type: ""
 
+# In dual-stack clusters, provide both the IPv4 and IPv6 VIPs as a list, for example:
+# api_vip:
+#   - "192.168.10.2"
+#   - "2001:db8::2"
+api_vip: ""
+
+# It is used to access the cluster's ingress. Therefore, it is required to be set.
+# In dual-stack clusters, provide both the IPv4 and IPv6 VIPs as a list, for example:
+# ingress_vip:
+#   - "192.168.10.3"
+#   - "2001:db8::3"
+ingress_vip: ""
+
 # boot_artifacts_base_url is optional, if not provided, it will not be included in the agent-config.yaml
 # boot_artifacts_base_url: "http://example.com/boot-artifacts"
 

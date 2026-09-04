@@ -1,0 +1,99 @@
+---
+api_vip: 192.168.50.10
+ingress_vip: 192.168.50.11
+agent_config:
+  master:
+    hostname_prefix: master-
+    root_device_name: /dev/sda
+    bonds:
+      - name: bond0
+        mode: 802.3ad
+        options:
+          miimon: "100"
+    hosts:
+      - hostname: master-0
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:01"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:02"
+            part_of_bond: bond0
+      - hostname: master-1
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:03"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:04"
+            part_of_bond: bond0
+      - hostname: master-2
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:05"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:06"
+            part_of_bond: bond0
+  worker:
+    hostname_prefix: worker-
+    root_device_name: /dev/sda
+    bonds:
+      - name: bond0
+        mode: 802.3ad
+        options:
+          miimon: "100"
+    hosts:
+      - hostname: worker-0
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:07"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:08"
+            part_of_bond: bond0
+      - hostname: worker-1
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:09"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:0a"
+            part_of_bond: bond0
+      - hostname: worker-2
+        root_device:
+          name: /dev/sda
+        interfaces:
+          - name: enp0s0
+            mac_address: "00:00:00:00:00:0b"
+            part_of_bond: bond0
+          - name: enp0s1
+            mac_address: "00:00:00:00:00:0c"
+            part_of_bond: bond0
+test_expectations:
+  facts:
+    master_node_count: 3
+    worker_node_count: 3
+    total_node_count: 6
+    cluster_domain: ocp4-test.ocp4.example.com
+    base_dir: "{{ scenario_output_dir }}/ocp4-test"
+    manifest_folder: "{{ scenario_output_dir }}/ocp4-test/manifests"
+    kubeconfig_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeconfig"
+    kubeadmin_password_path: "{{ scenario_output_dir }}/ocp4-test/auth/kubeadmin-password"
+  agent_config:
+    interfaces:
+      - name: bond0
+        ipv4_enabled: true
+        ipv4_dhcp: true
+        ipv6_enabled: false
+        ipv6_dhcp: false

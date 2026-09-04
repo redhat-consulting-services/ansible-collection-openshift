@@ -24,3 +24,21 @@ jobs:
     with:
       exclude-paths: "examples"
       collections: "redhat_consulting_services.openshift dellemc.openmanage"
+
+  integration-tests:
+    name: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Run bootstrap_cluster scenario tests
+        run: roles/bootstrap_cluster/_tests/ci/run-tests.sh
+
+      - name: Run add_nodes scenario tests
+        run: roles/add_nodes/_tests/ci/run-tests.sh

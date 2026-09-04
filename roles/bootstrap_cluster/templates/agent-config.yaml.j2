@@ -1,3 +1,53 @@
+{% macro render_ipv4_block(addresses, dhcp) %}
+          ipv4:
+{% set ipv4_ns = namespace(found=false) %}
+{% for address in addresses | default([]) %}
+{% if ':' not in (address.ip | string) %}
+{% if not ipv4_ns.found %}
+{% set ipv4_ns.found = true %}
+            enabled: true
+            dhcp: false
+            address:
+{% endif %}
+              - ip: {{ address.ip }}
+                prefix-length: {{ address.subnet_length }}
+{% endif %}
+{% endfor %}
+{% if not ipv4_ns.found %}
+{% if dhcp | default(false) %}
+            enabled: true
+            dhcp: true
+{% else %}
+            enabled: false
+{% endif %}
+{% endif %}
+{% endmacro %}
+
+{% macro render_ipv6_block(addresses, dhcp) %}
+          ipv6:
+{% set ipv6_ns = namespace(found=false) %}
+{% for address in addresses | default([]) %}
+{% if ':' in (address.ip | string) %}
+{% if not ipv6_ns.found %}
+{% set ipv6_ns.found = true %}
+            enabled: true
+            dhcp: false
+            autoconf: false
+            address:
+{% endif %}
+              - ip: {{ address.ip }}
+                prefix-length: {{ address.subnet_length }}
+{% endif %}
+{% endfor %}
+{% if not ipv6_ns.found %}
+{% if dhcp | default(false) %}
+            enabled: true
+            dhcp: true
+{% else %}
+            enabled: false
+{% endif %}
+{% endif %}
+{% endmacro %}
 apiVersion: v1beta1
 kind: AgentConfig
 metadata:
@@ -57,12 +107,12 @@ hosts:
       dns-resolver:
         config:
           server:
-{% for resolver in host_value.dns_resolvers %}
+{% for resolver in host_value.dns_resolvers | default([]) %}
             - {{ resolver }}
 {% endfor %}
       routes:
         config:
-{% for route in host_value.routes %}
+{% for route in host_value.routes | default([]) %}
           - destination: {{ route.destination }}
             next-hop-address: {{ route.gateway }}
             next-hop-interface: {{ route.interface }}
@@ -77,22 +127,8 @@ hosts:
           mtu: {{ interface.mtu }}
 {% endif %}
           state: up
-{% if interface.addresses is defined and interface.addresses | length > 0 %}
-          ipv4:
-            enabled: true
-            dhcp: false
-            address:
-{% for address in interface.addresses %}
-              - ip: {{ address.ip }}
-                prefix-length: {{ address.subnet_length }}
-{% endfor %}
-{% else %}
-          ipv4:
-            enabled: false
-
-{% endif %}
-
-
+{{ render_ipv4_block(interface.addresses, interface.ipv4_dhcp) }}
+{{ render_ipv6_block(interface.addresses, interface.ipv6_dhcp) }}
 {% endfor %}
 {# ------------------------------------ #}
 {#       generate bond interface        #}
@@ -114,34 +150,28 @@ hosts:
             options:
               {{ bond.options | to_nice_yaml(indent=14) | indent(14) -}}
 {% endif %}
-          ipv4:
 {% if hosts.bonds is not defined %}
 {# agent_config.<master/worker>.bonds is defined but not agent_config.<master/worker>.hosts.bonds #}
 {# if that is the case, we want want to use DHCP for bond ipv4 assignment #}
-            enabled: true
-            dhcp: true
+{{ render_ipv4_block([], true) }}
+{{ render_ipv6_block([], false) }}
 {% else %}
 {# agent_config.<master/worker>.bonds is defined and agent_config.<master/worker>.hosts.bonds is defined #}
 {# if that is the case, we want to take control over ipv4 assignments (manually configure ip addresses) #}
-            enabled: true
-            dhcp: false
+{% set bond_ns = namespace(configured=false) %}
 {% for hbond in hosts.bonds %}
 {% if bond.name == hbond.interface %}
-            address:
-{% for address in hbond.addresses %}
-              - ip: {{ address.ip }}
-                prefix-length: {{ address.subnet_length }}
-{# endfor for address in hbond.addresses #}
-{% endfor %}
-{# endif for bond.name == hbond.name #}
+{% set bond_ns.configured = true %}
+{{ render_ipv4_block(hbond.addresses, hbond.ipv4_dhcp | default(false)) }}
+{{ render_ipv6_block(hbond.addresses, hbond.ipv6_dhcp | default(false)) }}
 {% endif %}
-{# endfor for hbond in hosts.bond #}
 {% endfor %}
-{# endif for hosts.bond is not defined #}
+{% if not bond_ns.configured %}
+{{ render_ipv4_block([], false) }}
+{{ render_ipv6_block([], false) }}
 {% endif %}
-{# endfor for bond in host_value.bonds #}
+{% endif %}
 {% endfor %}
-{# endif for check if bonds are defined #}
 {% endif %}
 {# ------------------------------------ #}
 {#      generate bridge interface       #}
@@ -175,33 +205,24 @@ hosts:
             base-iface: {{ vlan.base_interface }}
             id: {{ vlan.id }}
 {% if hosts.vlans is defined %}
-          ipv4:
-            enabled: true
-            dhcp: false
+{% set vlan_ns = namespace(hvlan=none) %}
 {% for hvlan in hosts.vlans %}
 {% if vlan.name == hvlan.interface %}
-            address:
-{% for address in hvlan.addresses %}
-              - ip: {{ address.ip }}
-                prefix-length: {{ address.subnet_length }}
-{# endfor for address in hvlan.addresses #}
-{% endfor %}
-{# endif for vlan.name == hvlan.name #}
+{% set vlan_ns.hvlan = hvlan %}
 {% endif %}
-{# endfor for hvlan in hosts.vlan #}
 {% endfor %}
-{# endif hosts.vlans is defined #}
+{% if vlan_ns.hvlan %}
+{{ render_ipv4_block(vlan_ns.hvlan.addresses, vlan_ns.hvlan.ipv4_dhcp | default(false)) }}
+{{ render_ipv6_block(vlan_ns.hvlan.addresses, vlan_ns.hvlan.ipv6_dhcp | default(false)) }}
+{% else %}
+{{ render_ipv4_block([], false) }}
+{{ render_ipv6_block([], false) }}
 {% endif %}
-{# endfor vlan in host_value.vlans #}
+{% endif %}
 {% endfor %}
-{# endif for check if vlan is defined #}
 {% endif %}
 
-{# endif for host_type check #}
 {% endif %}
-{# endfor for host_value.hosts #}
 {% endfor %}
-{# endif for host_value.hosts is defined and host_value.hosts | length > 0 #}
 {% endif %}
-{# endfor for agent_config.items() #}
 {% endfor %}

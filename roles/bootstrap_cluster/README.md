@@ -66,11 +66,17 @@ ssh_public_key: |
 # If not provided, the first masters IP address will be used as the rendezvous server.
 rendezvous_ip: 172.16.11.20
 
-# api_vip is the virtual IP address pointing to the cluster's API load balancer.
+# In dual-stack clusters, provide both the IPv4 and IPv6 VIPs as a list, for example:
+# api_vip:
+#   - "192.168.10.2"
+#   - "2001:db8::2"
 api_vip: ""
 
-# ingress_vip is the virtual IP address pointing to the cluster's ingress load balancer.
-# It is used to access the cluster's ingress. Therefore, it is required to be set
+# It is used to access the cluster's ingress. Therefore, it is required to be set.
+# In dual-stack clusters, provide both the IPv4 and IPv6 VIPs as a list, for example:
+# ingress_vip:
+#   - "192.168.10.3"
+#   - "2001:db8::3"
 ingress_vip: ""
 
 # enable_fips is a boolean variable that specifies whether FIPS mode should be enabled for the cluster.
@@ -140,6 +146,20 @@ agent_config:
     # root_device_name is the name of the root device for the nodes.
     # This option only applies if `hosts[].root_device.name`, `hosts[].root_device.serial_number`, `hosts[].root_device.wwn` are not set.
     root_device_name: "/dev/sda"
+    # dns_resolvers defines DNS servers for the nodes. IPv4 and IPv6 addresses are supported.
+    dns_resolvers:
+      - 172.16.11.1
+      - 2001:db8::1
+    # routes defines static routes for the nodes. IPv4 and IPv6 destinations and gateways are supported.
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 172.16.11.1
+        interface: bond0.100
+        table_id: 254
+      - destination: "::/0"
+        gateway: 2001:db8::1
+        interface: bond0.100
+        table_id: 254
     # bonds defines the bonding configuration for the nodes.
     bonds:
       -
@@ -199,7 +219,8 @@ agent_config:
             part_of_bond: "bond0"
             # mtu (optional) is the MTU of the interface. If not set, the default MTU of the hardware will be used.
             mtu: 1500
-            # addresses (optional) defines the IP addresses for the interface.
+            # addresses (optional) defines static IP addresses for the interface.
+            # IPv4 and IPv6 addresses can be mixed in the same list; each address is applied to the matching stack.
             # This section should only be used if bonds, bridges or vlans are not used.
             # If bonds, bridges or vlans are used, the IP addresses must be defined in the respective section.
             addresses:
@@ -208,32 +229,51 @@ agent_config:
                 ip: 192.168.10.222
                 # subnet_length is the subnet length for the interface.
                 subnet_length: 24
+              -
+                ip: 2001:db8::10
+                subnet_length: 64
+            # ipv4_dhcp (optional) enables DHCP for IPv4 when no static IPv4 addresses are defined.
+            ipv4_dhcp: false
+            # ipv6_dhcp (optional) enables DHCP for IPv6 when no static IPv6 addresses are defined.
+            ipv6_dhcp: false
         # bonds defines the host specific bond configuration.
         bonds:
           -
             # interface is the name of the bond interface to which an IP address should be assigned.
             # This interface must match the name of the bond interface defined in `bonds[].name`.
             interface: bond0
-            # addresses defines the IP addresses for the interface.
+            # addresses defines static IP addresses for the interface.
+            # IPv4 and IPv6 addresses can be mixed in the same list.
             addresses:
               -
-                # ip is the IPv4 or IPv6 address to assign to the interface.
                 ip: 192.168.10.222
-                # subnet_length is the subnet length for the interface.
                 subnet_length: 24
+              -
+                ip: 2001:db8::10
+                subnet_length: 64
+            # ipv4_dhcp (optional) enables DHCP for IPv4 when no static IPv4 addresses are defined.
+            ipv4_dhcp: false
+            # ipv6_dhcp (optional) enables DHCP for IPv6 when no static IPv6 addresses are defined.
+            ipv6_dhcp: false
         # vlans defines the host specific bond configuration.
         vlans:
           -
             # interface is the name of the bond interface to which an IP address should be assigned.
             # This interface must match the name of the bond interface defined in `vlans[].name`.
             interface: bond0.100
-            # addresses defines the IP addresses for the interface.
+            # addresses defines static IP addresses for the interface.
+            # IPv4 and IPv6 addresses can be mixed in the same list.
             addresses:
               -
-                # ip is the IPv4 or IPv6 address to assign to the interface.
                 ip: 192.168.10.222
-                # subnet_length is the subnet length for the interface.
                 subnet_length: 24
+              -
+                ip: 2001:db8::10
+                subnet_length: 64
+            # ipv4_dhcp (optional) enables DHCP for IPv4 when no static IPv4 addresses are defined.
+            ipv4_dhcp: false
+            # ipv6_dhcp (optional) enables DHCP for IPv6 when no static IPv6 addresses are defined.
+            ipv6_dhcp: false
 ```
 
 ## Role facts

@@ -1,0 +1,105 @@
+---
+- name: Load generated install-config.yaml
+  ansible.builtin.set_fact:
+    trusted_install_config: "{{ lookup('file', base_dir + '/install-config.yaml') | from_yaml }}"
+
+- name: Load generated agent-config.yaml
+  ansible.builtin.set_fact:
+    trusted_agent_config: "{{ lookup('file', base_dir + '/agent-config.yaml') | from_yaml }}"
+
+- name: Verify install-config VIP lists
+  when:
+    - test_expectations.install_config is defined
+    - test_expectations.install_config.api_vips is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - >-
+        (trusted_install_config.platform.baremetal.apiVIPs | map('string') | list)
+        ==
+        (test_expectations.install_config.api_vips | map('string') | list)
+      - >-
+        (trusted_install_config.platform.baremetal.ingressVIPs | map('string') | list)
+        ==
+        (test_expectations.install_config.ingress_vips | map('string') | list)
+    fail_msg: >-
+      install-config VIPs do not match expectations.
+      apiVIPs={{ trusted_install_config.platform.baremetal.apiVIPs | default('missing') }},
+      ingressVIPs={{ trusted_install_config.platform.baremetal.ingressVIPs | default('missing') }}
+
+- name: Verify install-config UserManaged load balancer
+  when:
+    - test_expectations.install_config is defined
+    - test_expectations.install_config.load_balancer_type is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - trusted_install_config.platform.baremetal.loadBalancer.type == test_expectations.install_config.load_balancer_type
+      - trusted_install_config.platform.baremetal.apiVIPs is not defined
+      - trusted_install_config.platform.baremetal.ingressVIPs is not defined
+    fail_msg: UserManaged install-config platform section does not match expectations.
+
+- name: Verify role facts
+  when: test_expectations.facts is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - master_node_count | int == test_expectations.facts.master_node_count | int
+      - worker_node_count | int == test_expectations.facts.worker_node_count | int
+      - total_node_count | int == test_expectations.facts.total_node_count | int
+      - cluster_domain == test_expectations.facts.cluster_domain
+      - base_dir == test_expectations.facts.base_dir
+      - manifest_folder == test_expectations.facts.manifest_folder
+      - kubeconfig_path == test_expectations.facts.kubeconfig_path
+      - kubeadmin_password_path == test_expectations.facts.kubeadmin_password_path
+    fail_msg: Role facts do not match expectations for scenario {{ scenario_name | default('unknown') }}.
+
+- name: Verify agent-config DNS resolvers
+  when:
+    - test_expectations.agent_config is defined
+    - test_expectations.agent_config.dns_resolvers is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - >-
+        (trusted_agent_config.hosts[0].networkConfig['dns-resolver'].config.server | map('string') | list)
+        ==
+        (test_expectations.agent_config.dns_resolvers | map('string') | list)
+    fail_msg: agent-config DNS resolvers do not match expectations.
+
+- name: Assert agent-config route count
+  when:
+    - test_expectations.agent_config is defined
+    - test_expectations.agent_config.routes is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - trusted_agent_config.hosts[0].networkConfig.routes.config | length == test_expectations.agent_config.routes | length
+    fail_msg: agent-config route count does not match expectations.
+
+- name: Assert each agent-config route
+  when:
+    - test_expectations.agent_config is defined
+    - test_expectations.agent_config.routes is defined
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - trusted_agent_config.hosts[0].networkConfig.routes.config[idx].destination == item.destination
+      - trusted_agent_config.hosts[0].networkConfig.routes.config[idx]['next-hop-address'] == item.gateway
+    fail_msg: >-
+      Route at index {{ idx }} does not match expectations.
+      Actual={{ trusted_agent_config.hosts[0].networkConfig.routes.config[idx] }},
+      Expected={{ item }}
+  loop: "{{ test_expectations.agent_config.routes }}"
+  loop_control:
+    index_var: idx
+    label: "{{ item.destination }}"
+
+- name: Verify agent-config interface IP configuration
+  when:
+    - test_expectations.agent_config is defined
+    - test_expectations.agent_config.interfaces is defined
+  ansible.builtin.include_tasks: verify-interface-ip-config.yaml
+  vars:
+    _bootstrap_cluster_expected_interfaces: "{{ test_expectations.agent_config.interfaces }}"
+    _bootstrap_cluster_actual_interfaces: "{{ trusted_agent_config.hosts[0].networkConfig.interfaces }}"
