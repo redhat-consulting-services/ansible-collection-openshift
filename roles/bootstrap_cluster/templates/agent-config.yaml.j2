@@ -75,8 +75,6 @@ hosts:
 {% if host_type == "master" or host_type == "worker" %}
   - role: {{ host_type }}
     hostname: {{ hosts.hostname | mandatory }}.{{ cluster_name | mandatory }}.{{ base_domain | mandatory }}
-
-{#- root device identification #}
     rootDeviceHints:
 {% if hosts.root_device.name is defined %}
       deviceName: {{ hosts.root_device.name }}
