@@ -1,6 +1,21 @@
-# Ansible role cluster_bootstrap
+# bootstrap_cluster
 
-An Ansible role for booting an OpenShift cluster. This role uses the agent-based installation method.
+An Ansible role to bootstrap and install an OpenShift cluster using the agent-based installation workflow.
+
+## How to use
+
+```yaml
+---
+- name: Bootstrap OpenShift Cluster
+  hosts: localhost
+  gather_facts: false
+  connection: local
+  vars_files:
+    - ./cluster_config.yaml
+
+  roles:
+    - redhat_consulting_services.openshift.bootstrap_cluster
+```
 
 ## Role Variables
 

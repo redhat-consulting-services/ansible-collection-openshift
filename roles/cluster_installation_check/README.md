@@ -1,6 +1,19 @@
 # cluster_installation_check
 
-An Ansible role to ensure the OpenShift cluster is healthy and ready for further configuration. This role performs various checks and validations on the cluster components. Usually this role is executed as part of a larger playbook that bootstraps and installs an OpenShift cluster.
+An Ansible role to validate that an OpenShift cluster installation has completed and that the cluster is healthy enough for follow-up configuration.
+
+## How to use
+
+```yaml
+---
+- name: Validate OpenShift installation state
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  roles:
+    - redhat_consulting_services.openshift.cluster_installation_check
+```
 
 ## Role Variables
 

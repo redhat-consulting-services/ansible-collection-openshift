@@ -1,13 +1,19 @@
 # configure_olm
 
-A role to configure the Operator Life Cycle Management of a disconnected OpenShift Cluster.
+An Ansible role to configure OLM on disconnected OpenShift clusters by setting custom CatalogSources and mirror-related configuration. This role strictly applies the OLM config for platform and OpenShift GitOps related configuration. All other OLM configurations must be managed separately.
 
-It does the following:
+## How to use
 
-* Disable default catalogsources
-* Deploy a custom catalogsource
-* Deploy a ImageDigestMirrorSet for the GitOps Operator
-* Checks and waits until the changes has rolled out
+```yaml
+---
+- name: Configure OLM on disconnected cluster
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  roles:
+    - redhat_consulting_services.openshift.configure_olm
+```
 
 ## Role Variables
 
@@ -29,59 +35,42 @@ registry:
   index: "redhat/redhat-operator-index"
 
 catalog_source:
-  # The specific OpenShift version tag to use for the CatalogSource index image (e.g., 4.20).
+  # OpenShift version tag appended to index image (for example 4.20)
   ocp_version: "4.20"
-  # The name given to the CatalogSource resource deployed on the cluster.
+  # CatalogSource resource name
   name: "redhat-operators"
 
-# OperatorHub management
 operator_hub:
-  # Whether Ansible should manage the OperatorHub configuration (true/false).
+  # manage OperatorHub object from this role
   manage: true
-  # Whether to disable all default/upstream operator sources (e.g., Red Hat, Certified) when applying configuration.
+  # disable default operator sources when true
   disable_default_sources: true
 
-# Operator marketplace configuration
 olm:
-  # The namespace where Operator Lifecycle Manager components and CatalogSources reside.
+  # namespace containing OLM marketplace resources
   marketplace_namespace: "openshift-marketplace"
   pods:
-    # Whether to delete and restart the CatalogSource index pods after configuration changes.
+    # restart catalog pods after applying OLM configuration
     restart: true
-    # Whether to wait for the restarted CatalogSource pods to enter the 'Ready' state.
+    # wait for restarted pods to become Ready
     wait_for_ready: true
-    # The maximum time (in seconds) to wait for a restarted CatalogSource pod to become ready.
+    # timeout in seconds when waiting for pod readiness
     restart_timeout: 300
-    # Pod label selectors for catalog sources
+    # label selectors used to identify catalog pods
     label_selectors:
-      # Standard label used by OLM for identifying CatalogSource index pods.
       - "olm.catalogSource"
 
-# MachineConfigPool monitoring
 machine_config_pool:
-  # Whether to monitor the status of MachineConfigPools (MCPs) after applying MirrorSets (IDMS/ITMS).
+  # monitor MCP status after IDMS/ITMS changes
   watch_updates: true
-  # Whether to wait until the MCPs report 'Updated: True' (i.e., nodes have finished rebooting/reconfiguring).
+  # wait until targeted MCPs report Updated=True
   wait_for_completion: true
-  # The maximum total time (in seconds) to wait for MCP completion (e.g., 30 minutes).
+  # overall MCP wait timeout in seconds
   timeout: 1800
-  # The interval (in seconds) between checks for MCP status during the wait period.
+  # polling interval in seconds while waiting
   interval: 30
-  # List of MCP names to monitor for updates (typically 'master' and 'worker').
+  # MCP names to watch
   pool_names:
     - master
     - worker
-```
-
-## Example Playbook
-
-```yaml
----
-- name: Configure OLM
-  hosts: localhost
-  gather_facts: false
-  connection: local
-
-  roles:
-    - redhat_consulting_services.openshift.configure_olm
 ```
