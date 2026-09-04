@@ -214,6 +214,8 @@ agent_config:
       # master / worker: 0
       -
         # hostname explicitly defines the hostname of the host.
+        # The value defined here will be concatenated with the cluster name and base domain name to form the fully qualified domain name (FQDN) of the host.
+        # Example: if the cluster name is "mycluster" and the base domain is "example.com", the FQDN for this host will be "master-0.mycluster.example.com"
         hostname: "master-0"
         # root_device defines the root device RHCOS will be installed on.
         root_device:
