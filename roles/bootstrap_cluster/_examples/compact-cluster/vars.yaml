@@ -1,18 +1,14 @@
 tenant_name: test-tenant
-cluster_name: ocp4-test
+cluster_name: ocp01
 base_domain: example.com
 
-api_vip: 10.10.10.4
-ingress_vip: 10.10.10.5
+# api_vip: 10.10.10.4
+# ingress_vip: 10.10.10.5
+lb_type: UserManaged
 
 generate_iso: true
 iso_type: "iso"
 iso_output_dir: ./iso
-
-pull_secret: |
-   {"auths":{"cloud.openshift.com":{"auth":"...
-ssh_public_key: |
-  ssh-ed25519 AAAA...
 
 networking:
   cluster_networks:
