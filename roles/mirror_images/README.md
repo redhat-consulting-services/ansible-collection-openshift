@@ -1,45 +1,59 @@
-# Mirror Images
+# mirror_images
 
-An ansible role to mirror container images from one registry to another or to a local directory.
+An Ansible role to run oc-mirror workflows for registry-to-registry and registry-to-disk image mirroring.
+
+## How to use
+
+```yaml
+---
+- name: Mirror OpenShift images
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  roles:
+    - redhat_consulting_services.openshift.mirror_images
+```
 
 ## Role Variables
 
 ```yaml
-# oc_mirror_base_path is the base path where the workspace, cache, mirror, credentials and image-sets directories will be created.
-oc_mirror_base_path: /path/to/mirror
+---
+# base path used to store oc-mirror workspace, cache, credentials, and output
+oc_mirror_base_path: /tmp/oc-mirror
 
 mirror:
-  # enabled: Set to true to enable the mirroring process. When set to false, the role will not perform any actions.
-  enabled: false
+  # enable or disable mirroring execution
+  enabled: true
 
   source:
-    # type: The type of source for the images. Can be 'registry' or 'disk'.
+    # source type: can be either `registry` or `disk`
     type: registry
-    # tls_verify: Set to false to skip TLS verification for the destination registry (optional).
-    tls_verify: false
-    # auth_config: The authentication configuration for the source registry.
+    # optional TLS verification flag for source access
+    tls_verify: true
+    # source auth configuration in docker config.json format
     auth_config: |
       {
         "auths": {
-          "source-registry.example.com": {
-            "auth": "base64-encoded-auth"
+          "registry.example.com": {
+            "auth": "username:password"
           }
         }
       }
 
   destination:
-    # type: The type of destination for the images. Can be 'registry' or 'disk'.
-    type: disk
-    # registry: The destination registry URL if the type is 'registry'.
-    registry: destination-registry.example.com
-    # tls_verify: Set to false to skip TLS verification for the destination registry (optional).
-    tls_verify: false
-    # auth_config: The authentication configuration for the destination registry.
+    # destination type: can be either `registry` or `disk`
+    type: registry
+    # destination registry host when type is registry
+    registry: registry.example.com
+    # optional TLS verification flag for destination access
+    tls_verify: true
+    # destination auth configuration in docker config.json format
     auth_config: |
       {
         "auths": {
-          "destination-registry.example.com": {
-            "auth": "base64-encoded-auth"
+          "registry.example.com": {
+            "auth": "username:password"
           }
         }
       }

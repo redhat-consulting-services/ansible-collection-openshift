@@ -1,10 +1,22 @@
-# ansible-role-cluster-node
+# add_nodes
 
-A role to add a cluster node to OpenShift.
+An Ansible role to add additional worker nodes to an existing OpenShift cluster using agent-based node join artifacts.
 
-## Requirements
+## Example Playbook
 
-- `oc` installed and configured to access the OpenShift cluster.
+```yaml
+- name: Add OpenShift Nodes to Cluster
+  hosts: localhost
+  gather_facts: false
+  become: false
+  vars_files:
+    - ./node_config.yaml
+
+  roles:
+    - redhat_consulting_services.openshift.add_nodes
+```
+
+For a more detailed example, please refer to the `examples/dell_hardware/playbook.yaml` file in this collection.
 
 ## Role Variables
 
@@ -149,18 +161,3 @@ When this role is executed, it will set the following facts automatically:
 | credentials_folder      | The generated directory where the pull secret (auth.json) file is stored. |
 | iso_location            | The generated path to the bootable ISO file. |
 | additional_node_count   | The number of nodes defined in `worker.hosts` |
-
-## Example Playbook
-
-```yaml
-- name: Add OpenShift Nodes to Cluster
-  hosts: localhost
-  gather_facts: false
-  become: false
-  vars_files:
-    - ./node_config.yaml
-  roles:
-    - redhat_consulting_services.openshift.add_nodes
-```
-
-For a more detailed example, please refer to the `examples/dell_hardware/playbook.yaml` file in this collection.

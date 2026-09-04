@@ -1,6 +1,19 @@
-# ansible-role-argocd-installation
+# bootstrap_gitops
 
-An Ansible role for the installation of OpenShift GitOps on an existing cluster.
+An Ansible role to install and configure OpenShift GitOps (Argo CD), including optional App of Apps bootstrap and repository registration.
+
+## How to use
+
+```yaml
+---
+- name: Bootstrap OpenShift GitOps
+  hosts: localhost
+  gather_facts: false
+  connection: local
+
+  roles:
+    - redhat_consulting_services.openshift.bootstrap_gitops
+```
 
 ## Role Variables
 
@@ -8,8 +21,10 @@ An Ansible role for the installation of OpenShift GitOps on an existing cluster.
 ---
 argocd:
   placement:
+    # node selector used for Argo CD workload placement
     node_selector:
       node-role.kubernetes.io/infra: ""
+    # tolerations applied to Argo CD workload placement
     tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/infra
@@ -17,8 +32,11 @@ argocd:
       - effect: NoExecute
         key: node-role.kubernetes.io/infra
         operator: Exists
+
   operator:
-    channel: gitops-1.16
+    # GitOps operator channel
+    channel: gitops-1.21
+    # install plan approval policy
     install_plan_approval: Automatic
     metadata:
       name: openshift-gitops-operator
@@ -27,17 +45,19 @@ argocd:
       name: openshift-gitops-operator
       source: redhat-operators
       source_namespace: openshift-marketplace
-      # Optional: Pin to specific CSV version. If empty/undefined, uses latest from channel
-      starting_csv: openshift-gitops-operators.v1.16.0
+      # optional CSV pinning (empty to use latest from channel)
+      starting_csv: openshift-gitops-operators.v1.21.4
 
-  # Instance configuration
   instance:
+    # Argo CD instance name and namespace
     name: openshift-gitops
     namespace: openshift-gitops
     # host defines the ArgoCD server host address; if empty, a default will be generated
     # If using a custom host, ensure it is part of the cluster's *.apps domain.
     host: ""
+    # enable high availability settings
     ha_enabled: false
+    # Argo CD RBAC policy.csv content
     rbac_policy: |
       g, system:cluster-admins, role:admin
       g, cluster-admins, role:admin
@@ -70,7 +90,7 @@ app_of_apps:
 repositories: []
   # - name: app-of-apps
   #   type: git
-  #   url: https://gitlab.example/openshift/openshift-configurations.git
+  #   url: https://gitlab.example.com/openshift/openshift-configurations.git
   #   enableOCI: false
   #   authentication:
   #     username: ""
@@ -80,7 +100,7 @@ repositories: []
 
 # certificate authority bundle for repository trust
 ca_bundle:
-  # name of the config map to create for user CA bundle
+  # name of the ConfigMap to create for user CA bundle
   name: user-ca-bundle
   # the key within the config map that contains the CA bundle data
   ca_key: ca-bundle.crt
