@@ -38,16 +38,15 @@ platform:
 {% if (lb_type | default("")) == "UserManaged"  %}
     loadBalancer:
       type: UserManaged
-{% else %}
+{% endif %}
     apiVIPs:
-{% for vip in api_vips %}
+{% for vip in ([api_vip] if api_vip is string else (api_vip | default([]))) %}
     - {{ vip | quote }}
 {% endfor %}
     ingressVIPs:
-{% for vip in ingress_vips %}
+{% for vip in ([ingress_vip] if ingress_vip is string else (ingress_vip | default([]))) %}
     - {{ vip | quote }}
 {% endfor %}
-{% endif %}
 {% else %}
   none: {}
 {% endif %}
