@@ -1,5 +1,12 @@
 ---
 lb_type: UserManaged
+type: baremetal
+api_vip:
+  - 10.10.10.5
+  - 2001:db8::5
+ingress_vip:
+  - 10.10.10.6
+  - 2001:db8::6
 agent_config:
   master:
     hostname_prefix: master-
@@ -16,6 +23,12 @@ agent_config:
 test_expectations:
   install_config:
     load_balancer_type: UserManaged
+    api_vips:
+      - 10.10.10.5
+      - 2001:db8::5
+    ingress_vips:
+      - 10.10.10.6
+      - 2001:db8::6
   facts:
     master_node_count: 1
     worker_node_count: 0

@@ -17,9 +17,9 @@
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vip | default('') == ''
-      - ingress_vip | default('') == ''
-    fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must not be defined."
+      - api_vip | default('') != ''
+      - ingress_vip | default('') != ''
+    fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must be defined."
   when: lb_type | default('') == 'UserManaged'
 
 - name: Normalize api_vip and ingress_vip to lists

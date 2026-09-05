@@ -86,7 +86,6 @@
     src: "{{ base_dir }}/cluster-manifests"
     dest: "{{ manifest_folder }}"
     mode: '0660'
-    remote_src: true
 
 - name: Backup mirror folder
   when:
@@ -96,7 +95,6 @@
     src: "{{ base_dir }}/mirror"
     dest: "{{ manifest_folder }}"
     mode: '0660'
-    remote_src: true
 # --- END WORKAROUND ---
 
 - name: Create the bootable ISO or PXE files
