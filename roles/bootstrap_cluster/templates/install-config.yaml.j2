@@ -50,7 +50,7 @@ platform:
 {% else %}
   none: {}
 {% endif %}
-{% if image_digest_sources is defined %}
+{% if image_digest_sources and (image_digest_sources | default([])) | length > 0 %}
 imageDigestSources:
 {% for ids in image_digest_sources %}
   - source: {{ ids.source }}
@@ -73,7 +73,7 @@ proxy:
   noProxy: {{ proxy.no_proxy }}
 {% endif %}
 {% endif %}
-{% if additional_trust_bundle %}
+{% if additional_trust_bundle and (additional_trust_bundle | default("")) != ""  %}
 additionalTrustBundle: |
   {{ additional_trust_bundle | indent(2) }}
 {% endif %}
