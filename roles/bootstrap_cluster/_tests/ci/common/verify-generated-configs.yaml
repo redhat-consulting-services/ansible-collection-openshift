@@ -35,8 +35,8 @@
     quiet: true
     that:
       - trusted_install_config.platform.baremetal.loadBalancer.type == test_expectations.install_config.load_balancer_type
-      - trusted_install_config.platform.baremetal.apiVIPs is not defined
-      - trusted_install_config.platform.baremetal.ingressVIPs is not defined
+      - trusted_install_config.platform.baremetal.apiVIPs is defined
+      - trusted_install_config.platform.baremetal.ingressVIPs is defined
     fail_msg: UserManaged install-config platform section does not match expectations.
 
 - name: Verify role facts

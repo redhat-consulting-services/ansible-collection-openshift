@@ -1,5 +1,6 @@
 ---
 lb_type: UserManaged
+type: baremetal
 api_vip:
   - 10.10.10.5
   - 2001:db8::5
