@@ -59,7 +59,7 @@ hosts:
   {%- set host_index = loop %}
 
   - role: worker
-    hostname: {{ hosts.hostname | mandatory }}
+    hostname: {{ hosts.hostname | mandatory }}.{{ cluster_name | mandatory }}.{{ base_domain | mandatory }}
     rootDeviceHints:
 {% if hosts.root_device.name is defined %}
       deviceName: {{ hosts.root_device.name }}
