@@ -17,9 +17,9 @@
   ansible.builtin.assert:
     quiet: true
     that:
-      - api_vip | default('') == ''
-      - ingress_vip | default('') == ''
-    fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must not be defined."
+      - api_vip | default('') != ''
+      - ingress_vip | default('') != ''
+    fail_msg: "Invalid combination of lb_type, api_vip and ingress_vip. If lb_type is 'UserManaged', api_vip and ingress_vip must be defined."
   when: lb_type | default('') == 'UserManaged'
 
 - name: Normalize api_vip and ingress_vip to lists
@@ -102,3 +102,11 @@
       - networking.machine_network | selectattr('cidr', 'defined') | list | length == (networking.machine_network | length)
       - networking.machine_network | map(attribute='cidr') | map('ansible.utils.ipaddr') | reject('equalto', false) | list | length == (networking.machine_network | length)
     fail_msg: "networking.machine_network must be a non-empty list of entries with valid cidr values"
+
+- name: Assert that single stack networking is used together with UserManaged lb
+  ansible.builtin.assert:
+    quiet: true
+    that:
+      - networking.cluster_networks | length == 1
+    fail_msg: "Multi stack networking is not allowed with UserManaged load balancer"
+  when: lb_type | default('') == 'UserManaged'

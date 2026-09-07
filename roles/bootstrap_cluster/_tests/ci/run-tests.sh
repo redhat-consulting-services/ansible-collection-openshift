@@ -18,7 +18,6 @@ POSITIVE_SCENARIOS=(
 )
 
 NEGATIVE_SCENARIOS=(
-  invalid-user-managed-with-vips
   invalid-missing-vips
   invalid-too-many-vips
 )

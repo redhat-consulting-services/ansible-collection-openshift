@@ -1,0 +1,66 @@
+tenant_name: test-tenant
+cluster_name: ocp4-test
+base_domain: example.com
+
+lb_type: UserManaged
+api_vip:
+  - 2001:db8::5
+ingress_vip:
+  - 2001:db8::6
+
+generate_iso: true
+iso_type: "iso"
+iso_output_dir: ./iso
+
+additional_ntp_sources:
+  - one.ntp.example.com
+  - two.ntp.example.com
+  - three.ntp.example.com
+
+networking:
+  cluster_networks:
+    - cidr: "fd01::/48"
+      host_prefix: 64
+  service_networks:
+    - fd02::/112
+  network_type: "OVNKubernetes"
+  machine_network:
+    - cidr: 2001:db8::/64
+
+agent_config:
+  master:
+    dns_resolvers:
+      - 2001:db8::1
+    routes:
+      - destination: 0.0.0.0/0
+        gateway: 2001:db8::1
+        interface: eth0
+        table_id: 254
+    hosts:
+      - hostname: master-01.hcp1.example.com
+        root_device:
+          serial_number: "aaaaaaaaaaaaaaaa"
+        interfaces:
+          - name: eth0
+            mac_address: "aa:aa:aa:aa:aa:01"
+            addresses:
+              - ip: 2001:db8::11
+                subnet_length: 64
+      - hostname: master-02.hcp1.example.com
+        root_device:
+          serial_number: "aaaaaaaaaaaaaaaa"
+        interfaces:
+          - name: eth0
+            mac_address: "aa:aa:aa:aa:aa:02"
+            addresses:
+              - ip: 2001:db8::12
+                subnet_length: 64
+      - hostname: master-03.hcp1.example.com
+        root_device:
+          serial_number: "aaaaaaaaaaaaaaaa"
+        interfaces:
+          - name: eth0
+            mac_address: "aa:aa:aa:aa:aa:03"
+            addresses:
+              - ip: 2001:db8::13
+                subnet_length: 64
