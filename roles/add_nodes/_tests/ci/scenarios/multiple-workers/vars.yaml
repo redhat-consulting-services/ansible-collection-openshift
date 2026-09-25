@@ -1,4 +1,6 @@
 ---
+cluster_name: ocp01
+base_domain: example.com
 worker:
   hostname_prefix: worker-
   root_device_name: /dev/sda

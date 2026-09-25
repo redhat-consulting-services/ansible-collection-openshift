@@ -1,4 +1,6 @@
 ---
+cluster_name: ocp01
+base_domain: example.com
 additional_ntp_sources:
   - 0.pool.ntp.org
   - 1.pool.ntp.org
