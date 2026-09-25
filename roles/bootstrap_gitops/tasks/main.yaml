@@ -73,6 +73,10 @@
   retries: 60
   delay: 10
 
+- name: Validate repository configuration
+  ansible.builtin.include_tasks: assert.yaml
+  when: repositories | length > 0
+
 - name: Set up the repo secrets
   kubernetes.core.k8s:
     kubeconfig: "{{ kubeconfig_path }}"

@@ -57,16 +57,32 @@ app_of_apps:
     sync_options:
       - Validate=false
 
-# repositories is a list of git/helm repositories to add to ArgoCD
+# repositories is a list of git/helm/oci repositories to add to ArgoCD
 repositories: []
   # - name: app-of-apps
-  #   type: git
+  #   type: git                        # git, helm, or oci
   #   url: https://gitlab.example/openshift/openshift-configurations.git
-  #   branch: main
-  #   enableOCI: false
+  #   secret_type: repository          # repository, repo-creds, or repo-write-creds
+  #   project: ""                      # restrict credential to an ArgoCD AppProject
+  #   enableOCI: false                 # set true for OCI-hosted Helm charts (type: helm)
   #   authentication:
   #     username: ""
   #     password: ""
+  #     private_key: ""                # SSH private key (git only)
+  #     github:                        # GitHub App authentication (git only)
+  #       app_id: ""
+  #       app_installation_id: ""
+  #       private_key: ""
+  #       enterprise_base_url: ""      # GitHub Enterprise API URL (optional)
+  #     azure:                         # Azure Service Principal (git only)
+  #       client_id: ""
+  #       tenant_id: ""
+  #       client_secret: ""
+  #     gcp:                           # GCP Service Account (git only)
+  #       service_account_key: ""
+  #     tls_client_cert:               # Mutual TLS (helm/oci)
+  #       cert_data: ""
+  #       cert_key: ""
   #   insecure: false
   #   forceHttpBasicAuth: false
 
