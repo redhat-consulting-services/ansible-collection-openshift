@@ -71,6 +71,8 @@ worker:
       # mode is the bonding mode. It is used to configure the bonding mode for the worker nodes.
       # Available modes: balance-rr, active-backup, balance-xor, broadcast, 802.3ad, balance-tlb, balance-alb
       mode: "802.3ad"
+      # mtu (optional) is the MTU of the bond interface. If not set, the default MTU will be used.
+      mtu: 9000
       # options defines the bonding options. It is used to configure the bonding options for the worker nodes. Any options can be set here as a key-value pair.
       options:
         miimon: "100"
@@ -83,6 +85,8 @@ worker:
       # type is the type of the bridge interface. It is used to configure the bridge interface for the worker nodes.
       # Available types: ovs-bridge, linux-bridge
       type: ovs-bridge
+      # mtu (optional) is the MTU of the bridge interface. If not set, the default MTU will be used.
+      mtu: 9000
       # interfaces defines the interfaces that are part of the bridge. It is used to configure the interfaces for the bridge.
       interfaces:
         -
@@ -97,6 +101,8 @@ worker:
       id: 100
       # base_interface is the base interface for the VLAN. It is used to configure the base interface for the VLAN.
       base_interface: bond0
+      # mtu (optional) is the MTU of the VLAN interface. If not set, the default MTU will be used.
+      mtu: 9000
       # addresses defines the IP addresses for the VLAN interface. It is used to configure the IP addresses for the VLAN interface.
       addresses:
         -
