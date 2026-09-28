@@ -131,6 +131,9 @@ hosts:
         - name: {{ bond.name }}
           type: bond
           state: up
+{% if bond.mtu is defined %}
+          mtu: {{ bond.mtu }}
+{% endif %}
           link-aggregation:
             mode: {{ bond.mode }}
             port:
@@ -174,6 +177,9 @@ hosts:
         - name: {{ bridge.name }}
           state: up
           type: {{ bridge.type }}
+{% if bridge.mtu is defined %}
+          mtu: {{ bridge.mtu }}
+{% endif %}
           port:
 {% for interface in bridge.interfaces %}
             - name: {{ interface.name }}
@@ -194,6 +200,9 @@ hosts:
         - name: {{ vlan.name }}
           type: vlan
           state: up
+{% if vlan.mtu is defined %}
+          mtu: {{ vlan.mtu }}
+{% endif %}
           vlan:
             base-iface: {{ vlan.base_interface }}
             id: {{ vlan.id }}
