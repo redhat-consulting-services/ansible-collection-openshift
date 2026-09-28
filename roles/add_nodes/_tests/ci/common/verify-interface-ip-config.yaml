@@ -12,6 +12,7 @@
       - (_add_nodes_interface.ipv6.address | default([]) | map(attribute='ip') | map('string') | list) == (_add_nodes_expected.ipv6_addresses | default([]) | map('string') | list)
       - (_add_nodes_interface.ipv4.address | default([]) | map(attribute='prefix-length') | list) == (_add_nodes_expected.ipv4_prefix_lengths | default([]) | list)
       - (_add_nodes_interface.ipv6.address | default([]) | map(attribute='prefix-length') | list) == (_add_nodes_expected.ipv6_prefix_lengths | default([]) | list)
+      - (_add_nodes_interface.mtu | default(0) | int) == (_add_nodes_expected.mtu | default(0) | int)
     fail_msg: >-
       Interface {{ _add_nodes_expected.name }} IP configuration does not match expectations.
       Actual={{ _add_nodes_interface | default('not found') }}

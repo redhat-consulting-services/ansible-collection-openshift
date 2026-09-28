@@ -12,6 +12,7 @@
       - (_bootstrap_cluster_interface.ipv6.address | default([]) | map(attribute='ip') | map('string') | list) == (_bootstrap_cluster_expected.ipv6_addresses | default([]) | map('string') | list)
       - (_bootstrap_cluster_interface.ipv4.address | default([]) | map(attribute='prefix-length') | list) == (_bootstrap_cluster_expected.ipv4_prefix_lengths | default([]) | list)
       - (_bootstrap_cluster_interface.ipv6.address | default([]) | map(attribute='prefix-length') | list) == (_bootstrap_cluster_expected.ipv6_prefix_lengths | default([]) | list)
+      - (_bootstrap_cluster_interface.mtu | default(0) | int) == (_bootstrap_cluster_expected.mtu | default(0) | int)
     fail_msg: >-
       Interface {{ _bootstrap_cluster_expected.name }} IP configuration does not match expectations.
       Actual={{ _bootstrap_cluster_interface | default('not found') }}
