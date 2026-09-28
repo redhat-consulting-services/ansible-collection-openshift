@@ -1,0 +1,83 @@
+---
+- name: Validate repository type
+  ansible.builtin.assert:
+    that:
+      - item.type is defined
+      - item.type in ["git", "helm", "oci"]
+    fail_msg: "Repository '{{ item.name }}': type must be 'git', 'helm', or 'oci'."
+  loop: "{{ repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate secret_type
+  ansible.builtin.assert:
+    that:
+      - item.secret_type | default('repository') in ["repository", "repo-creds", "repo-write-creds"]
+    fail_msg: "Repository '{{ item.name }}': secret_type must be 'repository', 'repo-creds', or 'repo-write-creds'."
+  loop: "{{ repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate repo-write-creds is only used with git type
+  ansible.builtin.assert:
+    that:
+      - item.type == "git"
+    fail_msg: "Repository '{{ item.name }}': repo-write-creds is only valid for type 'git'."
+  loop: "{{ repositories | selectattr('secret_type', 'defined') | selectattr('secret_type', 'equalto', 'repo-write-creds') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate enableOCI is only used with helm type
+  ansible.builtin.assert:
+    that:
+      - item.type == "helm"
+    fail_msg: "Repository '{{ item.name }}': enableOCI is only valid for type 'helm'."
+  loop: "{{ repositories | selectattr('enableOCI', 'defined') | selectattr('enableOCI', 'equalto', true) | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate SSH private key is only used with git type
+  ansible.builtin.assert:
+    that:
+      - item.type == "git"
+    fail_msg: "Repository '{{ item.name }}': SSH private key authentication is only valid for type 'git'."
+  loop: "{{ repositories | selectattr('authentication.private_key', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.authentication.private_key | default('') != ''
+
+- name: Validate GitHub App authentication is only used with git type
+  ansible.builtin.assert:
+    that:
+      - item.type == "git"
+    fail_msg: "Repository '{{ item.name }}': GitHub App authentication is only valid for type 'git'."
+  loop: "{{ repositories | selectattr('authentication.github', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate Azure Service Principal authentication is only used with git type
+  ansible.builtin.assert:
+    that:
+      - item.type == "git"
+    fail_msg: "Repository '{{ item.name }}': Azure Service Principal authentication is only valid for type 'git'."
+  loop: "{{ repositories | selectattr('authentication.azure', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate GCP Service Account authentication is only used with git type
+  ansible.builtin.assert:
+    that:
+      - item.type == "git"
+    fail_msg: "Repository '{{ item.name }}': GCP Service Account authentication is only valid for type 'git'."
+  loop: "{{ repositories | selectattr('authentication.gcp', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Validate TLS client certificate is not used with git type
+  ansible.builtin.assert:
+    that:
+      - item.type in ["helm", "oci"]
+    fail_msg: "Repository '{{ item.name }}': TLS client certificate authentication is only valid for type 'helm' or 'oci'."
+  loop: "{{ repositories | selectattr('authentication.tls_client_cert', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"

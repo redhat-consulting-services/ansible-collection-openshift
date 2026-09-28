@@ -30,10 +30,52 @@ repositories:
       username: "a-username"
       password: "a-password"
 
-  - name: app-of-apps-oci-repo
+  - name: app-of-apps-ssh-repo
+    type: git
+    url: git@gitlab.example.com:openshift/openshift-configurations.git
+    authentication:
+      private_key: "a-private-key"
+
+  - name: app-of-apps-github-app
+    type: git
+    url: https://github.com/openshift/openshift-configurations.git
+    authentication:
+      github:
+        app_id: "12345"
+        app_installation_id: "67890"
+        private_key: "a-github-app-private-key"
+
+  - name: app-of-apps-github-enterprise
+    type: git
+    url: https://github.example.com/openshift/openshift-configurations.git
+    authentication:
+      github:
+        app_id: "12345"
+        app_installation_id: "67890"
+        private_key: "a-ghe-app-private-key"
+        enterprise_base_url: https://github.example.com/api/v3
+
+  - name: app-of-apps-helm-oci-repo
     type: helm
     url: https://registry.example.com/openshift/helm-charts
     enableOCI: true
     authentication:
       username: "a-username"
       password: "a-password"
+
+  - name: app-of-apps-helm-tls
+    type: helm
+    url: https://helm.internal.example.com/
+    authentication:
+      tls_client_cert:
+        cert_data: "<|cert_data|>"
+        cert_key: "<|cert_key|>"
+
+  - name: team-b-creds
+    type: git
+    url: https://git.example.com/team-b/
+    secret_type: repo-creds
+    project: team-b
+    authentication:
+      username: deploy-token
+      password: "<|password|>"
