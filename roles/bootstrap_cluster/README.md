@@ -179,6 +179,8 @@ agent_config:
         # mode defines the bonding mode.
         # Available modes: balance-rr, active-backup, balance-xor, broadcast, 802.3ad, balance-tlb, balance-alb
         mode: "balance-rr"
+        # mtu (optional) is the MTU of the bond interface. If not set, the default MTU will be used.
+        mtu: 9000
         # options defines the bonding options. Any options can be set here as a key-value pair.
         options:
           miimon: "100"
@@ -191,6 +193,8 @@ agent_config:
         # type is the type of the bridge interface.
         # Available types: ovs-bridge, linux-bridge
         type: ovs-bridge
+        # mtu (optional) is the MTU of the bridge interface. If not set, the default MTU will be used.
+        mtu: 9000
         # interfaces defines the interfaces that are part of the bridge.
         interfaces:
           -
@@ -205,6 +209,8 @@ agent_config:
         id: 100
         # base_interface is the reference to the interface that the VLAN interface is based on.
         base_interface: bond0
+        # mtu (optional) is the MTU of the VLAN interface. If not set, the default MTU will be used.
+        mtu: 9000
     # hosts defines all the hosts part of the node group (master / worker).
     hosts:
       # master / worker: 0

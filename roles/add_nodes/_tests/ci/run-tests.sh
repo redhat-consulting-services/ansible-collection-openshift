@@ -11,6 +11,7 @@ POSITIVE_SCENARIOS=(
   interface-dual-stack
   bond-ipv4-dhcp
   multiple-workers
+  bond-vlan-bridge-mtu
 )
 
 run_positive_scenario() {

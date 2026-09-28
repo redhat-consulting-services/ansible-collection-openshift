@@ -15,6 +15,7 @@ POSITIVE_SCENARIOS=(
   interface-dual-stack
   no-workers
   bond-ipv4-dhcp
+  bond-vlan-bridge-mtu
 )
 
 NEGATIVE_SCENARIOS=(
