@@ -34,8 +34,15 @@ agent_config:
     routes:
       - destination: 0.0.0.0/0
         gateway: 10.10.10.1
-        interface: eth0
+        interface: bond0
         table_id: 254
+    bonds:
+      - name: bond0
+        mode: 802.3ad
+        mtu: 9000
+        options:
+          miimon: "100"
+          lacp_rate: "fast"
     hosts:
       - hostname: master-01.hcp1.example.com
         root_device:
@@ -43,24 +50,45 @@ agent_config:
         interfaces:
           - name: eth0
             mac_address: "aa:aa:aa:aa:aa:01"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            ipv4_dhcp: false
+            ipv6_dhcp: false
             addresses:
-              - ip: 10.10.10.11
+              - ip: 192.168.10.222
                 subnet_length: 24
+              - ip: 2001:db8::10
+                subnet_length: 64
       - hostname: master-02.hcp1.example.com
         root_device:
           serial_number: "aaaaaaaaaaaaaaaa"
         interfaces:
           - name: eth0
             mac_address: "aa:aa:aa:aa:aa:02"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            ipv4_dhcp: false
+            ipv6_dhcp: false
             addresses:
-              - ip: 10.10.10.12
+              - ip: 192.168.10.222
                 subnet_length: 24
+              - ip: 2001:db8::10
+                subnet_length: 64
       - hostname: master-03.hcp1.example.com
         root_device:
           serial_number: "aaaaaaaaaaaaaaaa"
         interfaces:
           - name: eth0
             mac_address: "aa:aa:aa:aa:aa:03"
+            part_of_bond: "bond0"
+        bonds:
+          - interface: bond0
+            ipv4_dhcp: false
+            ipv6_dhcp: false
             addresses:
-              - ip: 10.10.10.13
+              - ip: 192.168.10.222
                 subnet_length: 24
+              - ip: 2001:db8::10
+                subnet_length: 64
