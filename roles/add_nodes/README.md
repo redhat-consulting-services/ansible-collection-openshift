@@ -39,10 +39,20 @@ base_domain: "example.com"
 #   - "0.pool.ntp.org"
 #   - "1.pool.ntp.org"
 
-# generate_iso defines whether to generate an ISO image for the cluster nodes. If set to true, the role will generate an ISO image with the OpenShift cluster boot artifacts.
+# generate_iso is a boolean variable that specifies whether an ISO file should be generated for the OpenShift installation.
+# If set to true, the role will generate an ISO file with the OpenShift installation configs.
+# The ISO file will be stored in the `iso_output_dir` directory.
 generate_iso: true
-# base_dir defines the output directory for the generated ISO image. This directory is used to store the generated ISO image and its contents.
-base_dir: /iso
+
+# iso_type determines whether an ISO file or PXE bootable artifacts should be generated.
+# Valid values are "iso" or "pxe".
+# Default is "iso".
+iso_type: "iso"
+
+# iso_output_dir is the directory where the OpenShift installation configs and ISO files will be stored.
+# It is required to be set.
+iso_output_dir: "/iso"
+
 # pull_secret is the pull secret used to access the OpenShift container images. It is required to generate the ISO image if `generate_iso` is set to true.
 pull_secret: ""
 # worker defines the configuration for the worker nodes in the OpenShift cluster. It is used to configure the worker nodes, including their hostnames, root devices, network interfaces, and VLANs.
@@ -169,7 +179,10 @@ When this role is executed, it will set the following facts automatically:
 
 | Fact Name               | Description                                      |
 |-------------------------|--------------------------------------------------|
+| cluster_name            | The name of the OpenShift cluster.               |
+| base_domain             | The base domain of the OpenShift cluster.        |
+| base_dir                | The generated base directory in which the ISO and installation configs are stored. |
 | manifest_folder         | The generated directory where the nodes-config.yaml file is backed up. |
 | credentials_folder      | The generated directory where the pull secret (auth.json) file is stored. |
-| iso_location            | The generated path to the bootable ISO file. |
+| bootfile_path           | The generated path to the bootable ISO file or PXE artifacts. |
 | additional_node_count   | The number of nodes defined in `worker.hosts` |
