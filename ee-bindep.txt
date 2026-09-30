@@ -1,8 +1,11 @@
 vim [platform:rpm]
 unzip [platform:rpm]
 jq [platform:rpm]
+yq [platform:rpm]
 python3-cairo [platform:rpm]
 cairo [platform:rpm]
+rsync [platform:rpm]
+procps-ng [platform:rpm]
 
 glib2-devel [platform:rpm]
 gobject-introspection [platform:rpm]
