@@ -7,7 +7,7 @@ spec:
   imageDigestMirrors:
 {% set images = ['openshift-gitops-1', 'rhel9']  %}
 {% for item in images %}
-    - source: registry.redhat.io/"{{ item }}"
+    - source: "registry.redhat.io/{{ item }}"
       mirrors:
 {% if registry.repository is not defined or registry.repository == "" %}
         - "{{ registry.url }}/{{ item }}"
