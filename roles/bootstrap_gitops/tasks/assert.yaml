@@ -8,6 +8,7 @@
   loop: "{{ repositories }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate secret_type
   ansible.builtin.assert:
@@ -17,6 +18,7 @@
   loop: "{{ repositories }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate repo-write-creds is only used with git type
   ansible.builtin.assert:
