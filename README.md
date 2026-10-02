@@ -5,6 +5,7 @@ A collection that bundles roles for the management of OpenShift clusters
 ## Roles
 
 - **add_nodes**: A role to add nodes to an OpenShift cluster
+- **approve_nodes**: A role to approve CSRs for new nodes added to an OpenShift cluster
 - **bootstrap_cluster**: A role to bootstrap an OpenShift cluster
 - **cluster_installation_check**: A role to check the installation status of an OpenShift cluster
 - **configure_olm**: A role to configure the operator hub and add custom CatalogSources on a OpenShift cluster
