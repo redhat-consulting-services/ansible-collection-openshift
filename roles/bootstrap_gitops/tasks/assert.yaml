@@ -8,6 +8,7 @@
   loop: "{{ repositories }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate secret_type
   ansible.builtin.assert:
@@ -17,6 +18,7 @@
   loop: "{{ repositories }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate repo-write-creds is only used with git type
   ansible.builtin.assert:
@@ -26,6 +28,7 @@
   loop: "{{ repositories | selectattr('secret_type', 'defined') | selectattr('secret_type', 'equalto', 'repo-write-creds') | list }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate enableOCI is only used with helm type
   ansible.builtin.assert:
@@ -35,6 +38,7 @@
   loop: "{{ repositories | selectattr('enableOCI', 'defined') | selectattr('enableOCI', 'equalto', true) | list }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate SSH private key is only used with git type
   ansible.builtin.assert:
@@ -54,6 +58,7 @@
   loop: "{{ repositories | selectattr('authentication.github', 'defined') | list }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate Azure Service Principal authentication is only used with git type
   ansible.builtin.assert:
@@ -63,6 +68,7 @@
   loop: "{{ repositories | selectattr('authentication.azure', 'defined') | list }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate GCP Service Account authentication is only used with git type
   ansible.builtin.assert:
@@ -72,6 +78,7 @@
   loop: "{{ repositories | selectattr('authentication.gcp', 'defined') | list }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
 
 - name: Validate TLS client certificate is not used with git type
   ansible.builtin.assert:
@@ -81,3 +88,4 @@
   loop: "{{ repositories | selectattr('authentication.tls_client_cert', 'defined') | list }}"
   loop_control:
     label: "{{ item.name }}"
+  no_log: true
