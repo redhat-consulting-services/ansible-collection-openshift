@@ -85,6 +85,7 @@
   loop: "{{ repositories }}"
   loop_control:
     loop_var: item
+  no_log: true
 
 - name: Set up App of Apps pattern
   when: app_of_apps.enabled | default(false)
