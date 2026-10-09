@@ -26,6 +26,12 @@ api_vip: ""
 #   - "2001:db8::3"
 ingress_vip: ""
 
+# The following parameter can optionally be enabled to allow the cluster to use link-local IPv6 addresses for BGP peering only.
+# This still works, even if the cluster is not completely dual-stack.
+# It is not meant to be used for general IPv6 connectivity. If you want to use link-local IPv6 addresses for BGP peering only, set this parameter to true.
+# The default is false to preserve backwards compatibility for existing deployments
+link_local_ipv6: false
+
 # boot_artifacts_base_url is optional, if not provided, it will not be included in the agent-config.yaml
 # boot_artifacts_base_url: "http://example.com/boot-artifacts"
 

@@ -3,6 +3,7 @@ kubeconfig_path: "~/.kube/config"
 generate_iso: false
 base_dir: "/iso"
 pull_secret: ""
+link_local_ipv6: false
 worker:
   root_device_name: "/dev/sda"
   bonds: []

@@ -94,6 +94,12 @@ api_vip: ""
 #   - "2001:db8::3"
 ingress_vip: ""
 
+# The following parameter can optionally be enabled to allow the cluster to use link-local IPv6 addresses for BGP peering only.
+# This still works, even if the cluster is not completely dual-stack.
+# It is not meant to be used for general IPv6 connectivity. If you want to use link-local IPv6 addresses for BGP peering only, set this parameter to true.
+# The default is false to preserve backwards compatibility for existing deployments
+link_local_ipv6: false
+
 # enable_fips is a boolean variable that specifies whether FIPS mode should be enabled for the cluster.
 # https://docs.redhat.com/en/documentation/openshift_container_platform/4.10/html/installing/installing-on-bare-metal#installation-configuration-parameters-optional_installing-bare-metal --> fips
 enable_fips: false

@@ -45,6 +45,11 @@ generate_iso: true
 base_dir: /iso
 # pull_secret is the pull secret used to access the OpenShift container images. It is required to generate the ISO image if `generate_iso` is set to true.
 pull_secret: ""
+# The following parameter can optionally be enabled to allow the cluster to use link-local IPv6 addresses for BGP peering only.
+# This still works, even if the cluster is not completely dual-stack.
+# It is not meant to be used for general IPv6 connectivity. If you want to use link-local IPv6 addresses for BGP peering only, set this parameter to true.
+# The default is false to preserve backwards compatibility for existing deployments
+link_local_ipv6: false
 # worker defines the configuration for the worker nodes in the OpenShift cluster. It is used to configure the worker nodes, including their hostnames, root devices, network interfaces, and VLANs.
 worker:
   # root_device_name is the name of the root device for the worker nodes. It is used to configure the root device for the worker nodes. This option only applies if `agent_config.worker.hosts[].root_device.name`, `agent_config.worker.hosts[].root_device.serial_number`, `agent_config.worker.hosts[].root_device.wwn` are not set.
