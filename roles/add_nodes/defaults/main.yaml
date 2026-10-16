@@ -1,4 +1,5 @@
 cpu_architecture: amd64
+arch: "x86_64"
 kubeconfig_path: "~/.kube/config"
 generate_iso: false
 base_dir: "/iso"

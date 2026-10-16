@@ -2,10 +2,13 @@
 - name: Set facts for manifest generation
   ansible.builtin.set_fact:
     cacheable: true
-    manifest_folder: "{{ base_dir }}/manifests"
-    credentials_folder: "{{ base_dir }}/credentials"
-    iso_location: "{{ base_dir }}/agent.iso"
+    cluster_name: "{{ cluster_name }}"
+    base_dir: "{{ iso_output_dir }}/{{ cluster_name }}"
+    manifest_folder: "{{ iso_output_dir }}/{{ cluster_name }}/manifests"
+    credentials_folder: "{{ iso_output_dir }}/{{ cluster_name }}/credentials"
     additional_node_count: "{{ worker.hosts | length }}"
+    bootfile_path: >-
+      {%- if iso_type == 'pxe' -%} {{ iso_output_dir }}/{{ cluster_name }}/boot-artifacts/node.{{ arch }}*{%- else -%} {{ iso_output_dir }}/{{ cluster_name }}/node.{{ arch }}.iso{%- endif -%}
 
 - name: Create output directory for credentials files
   ansible.builtin.file:
@@ -37,11 +40,45 @@
     dest: "{{ manifest_folder }}/nodes-config.yaml"
     mode: '0660'
 
-- name: Create the bootable ISO
+- name: Create the bootable ISO or PXE files
   when: generate_iso | bool
+  register: result
   ansible.builtin.command: >
-    oc adm node-image create --registry-config={{ credentials_folder }}/auth.json --dir {{ base_dir }}/
+    oc adm node-image create --registry-config={{ credentials_folder }}/auth.json --dir {{ base_dir }} {{ '--pxe' if iso_type == 'pxe' else '' }}
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
   args:
-    creates: "{{ iso_location }}"
+    creates: "{{ bootfile_path if iso_type != 'pxe' else '' }}"
+
+- name: Clean up nodes-config.yaml manifest file
+  ansible.builtin.file:
+    path: "{{ base_dir }}/nodes-config.yaml"
+    state: absent
+
+- name: Move PXE files to boot-artifacts directory
+  when:
+    - generate_iso | bool
+    - iso_type == 'pxe'
+    - result is succeeded
+  block:
+    - name: Create output directory for PXE boot artifacts
+      ansible.builtin.file:
+        path: "{{ base_dir }}/boot-artifacts"
+        state: directory
+        mode: '2770'
+
+    - name: Move generated PXE files to boot-artifacts directory
+      ansible.builtin.shell: >-
+        mv -- node.{{ arch }}* boot-artifacts/
+      args:
+        chdir: "{{ base_dir }}"
+      changed_when: true
+
+    - name: Create node.{{ arch }}.ipxe
+      ansible.builtin.copy:
+        dest: "{{ base_dir }}/boot-artifacts/node.{{ arch }}.ipxe"
+        content: |
+          #!ipxe
+          initrd --name initrd {{ boot_artifacts_base_url }}/node.{{ arch }}-initrd.img
+          kernel {{ boot_artifacts_base_url }}/node.{{ arch }}-vmlinuz initrd=initrd coreos.live.rootfs_url={{ boot_artifacts_base_url }}/node.{{ arch }}-rootfs.img rw  ignition.firstboot ignition.platform.id=metal
+          boot
