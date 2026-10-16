@@ -1,0 +1,127 @@
+---
+- name: Extract node IP addresses
+  ansible.builtin.shell: |
+    set -o pipefail
+    printf '%s' {{ worker | to_json | quote }} | yq -r '
+      [
+        .hosts[]
+        | ..
+        | select(type == "!!map" and has("ip"))
+        | .ip
+      ]
+      | .[]
+    '
+  args:
+    executable: /bin/bash
+  register: node_ip_result
+  changed_when: false
+
+- name: Set node ip and hostname facts
+  ansible.builtin.set_fact:
+    node_ips: "{{ node_ip_result.stdout_lines }}"
+    node_hostnames: >-
+      {%- set hostnames = [] -%}
+      {%- for hosts in worker.hosts -%}
+      {%- set host_name = hosts.hostname | mandatory -%}
+      {%- set appended = hostnames.append(host_name if '.' in host_name else host_name ~ '.' ~ (cluster_name | mandatory) ~ '.' ~ (base_domain | mandatory)) -%}
+      {%- endfor -%}
+      {{ hostnames }}
+
+- name: Start node image monitor
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  ansible.builtin.command: |
+    oc adm node-image monitor --ip-addresses="{{ node_ips | join(',') }}"
+  async: 10800
+  poll: 0
+  register: wait_job
+  changed_when: false
+
+- name: Approve pending node CSRs
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    while ps -p {{ wait_job.ansible_job_id }} >/dev/null 2>&1 || pgrep -f '^oc adm node-image monitor' >/dev/null 2>&1; do
+
+      # csr is pending when its status conditions is empty
+      if ! pending_csrs=$(oc get csr -o json 2>/dev/null | jq -r '
+        .items[]
+        | select((.status.conditions // []) | length == 0)
+        | select(
+            .spec.username == "system:serviceaccount:openshift-machine-config-operator:node-bootstrapper"
+            or (.spec.username | startswith("system:node:"))
+          )
+        | [.metadata.name, .spec.request]
+        | @tsv
+      '); then
+        sleep 10
+        continue
+      fi
+
+      while IFS=$'\t' read -r csr csr_request; do
+        [[ -n "$csr" ]] || continue
+
+        # bootstrap and node csr share the same requester, so we match the subject cn to the node hostname
+        if ! csr_hostname=$(printf '%s' "$csr_request" \
+          | base64 --decode \
+          | openssl req -inform PEM -noout -subject -nameopt RFC2253 2>/dev/null \
+          | sed -nE 's/.*CN=system:node:([^,]+).*/\1/p'); then
+          continue
+        fi
+
+        [[ -n "$csr_hostname" ]] || continue
+
+        if jq -ne \
+          --arg hostname "$csr_hostname" \
+          --argjson hostnames {{ node_hostnames | to_json | quote }} \
+          '$hostnames | index($hostname) != null' >/dev/null; then
+          oc adm certificate approve "$csr"
+          echo "approved"
+        fi
+      done <<< "$pending_csrs"
+
+      sleep 10
+    done
+  args:
+    executable: /bin/bash
+  register: csr_loop
+  changed_when: csr_loop.stdout is search("approved")
+
+- name: Wait for node image monitor to finish
+  ansible.builtin.async_status:
+    jid: "{{ wait_job.ansible_job_id }}"
+  register: monitor_result
+  changed_when: false
+  until: monitor_result.finished
+  retries: 1080
+  delay: 10
+  failed_when: >-
+    monitor_result.failed | default(false)
+    or monitor_result.rc | default(0) != 0
+
+- name: Check nodes are Ready and schedulable
+  environment:
+    KUBECONFIG: "{{ kubeconfig_path }}"
+  ansible.builtin.command: >
+    oc get node {{ node_hostnames | map('quote') | join(' ') }}
+    --ignore-not-found
+    -o jsonpath='{range .items[*]}ready={.status.conditions[?(@.type=="Ready")].status}{" "}unschedulable={.spec.unschedulable}{"\n"}{end}'
+  register: node_status
+  changed_when: false
+  failed_when: >-
+    node_status.rc != 0
+    or node_status.stdout_lines | length != (node_hostnames | length)
+    or node_status.stdout | lower | regex_findall('ready=true') | length != (node_hostnames | length)
+    or 'unschedulable=true' in (node_status.stdout | lower)
+
+- name: Get all nodes
+  kubernetes.core.k8s_info:
+    kubeconfig: "{{ kubeconfig_path }}"
+    kind: Node
+  register: node_info
+
+- name: Set cluster node count fact
+  ansible.builtin.set_fact:
+    cluster_node_count: "{{ node_info.resources | length }}"
