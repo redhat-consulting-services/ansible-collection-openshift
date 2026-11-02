@@ -29,6 +29,13 @@
     state: directory
     mode: '2770'
 
+- name: Remove possible old base_dir
+  ansible.builtin.file:
+    path: "{{ base_dir }}"
+    state: absent
+  failed_when: false
+  when: generate_iso | bool
+
 - name: Generate agent-config.yaml
   ansible.builtin.template:
     src: agent-config.yaml.j2
