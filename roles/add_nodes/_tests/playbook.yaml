@@ -7,5 +7,6 @@
     pull_secret: "{{ lookup('env', 'OPENSHIFT_PULL_SECRET') }}"
     kubeconfig_path: "{{ lookup('env', 'OPENSHIFT_KUBECONFIG') }}"
     iso_output_dir: ./iso
+    iso_type: "iso"
   roles:
     - ../../add_nodes

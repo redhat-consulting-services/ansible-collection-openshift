@@ -1,14 +1,17 @@
 ---
+- name: Set base directory for manifest generation
+  ansible.builtin.set_fact:
+    base_dir: "{{ iso_output_dir ~ '/' ~ cluster_name }}"
+
 - name: Set facts for manifest generation
   ansible.builtin.set_fact:
     cacheable: true
     cluster_name: "{{ cluster_name }}"
-    base_dir: "{{ iso_output_dir }}/{{ cluster_name }}"
-    manifest_folder: "{{ iso_output_dir }}/{{ cluster_name }}/manifests"
-    credentials_folder: "{{ iso_output_dir }}/{{ cluster_name }}/credentials"
+    manifest_folder: "{{ base_dir }}/manifests"
+    credentials_folder: "{{ base_dir }}/credentials"
     additional_node_count: "{{ worker.hosts | length }}"
     bootfile_path: >-
-      {%- if iso_type == 'pxe' -%} {{ iso_output_dir }}/{{ cluster_name }}/boot-artifacts/node.{{ arch }}*{%- else -%} {{ iso_output_dir }}/{{ cluster_name }}/node.{{ arch }}.iso{%- endif -%}
+      {%- if iso_type == 'pxe' -%} {{ base_dir }}/boot-artifacts/node.{{ arch }}*{%- else -%} {{ base_dir }}/node.{{ arch }}.iso{%- endif -%}
 
 - name: Create output directory for credentials files
   ansible.builtin.file:

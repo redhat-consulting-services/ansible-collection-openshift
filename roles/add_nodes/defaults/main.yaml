@@ -2,7 +2,8 @@ cpu_architecture: amd64
 arch: "x86_64"
 kubeconfig_path: "~/.kube/config"
 generate_iso: false
-base_dir: "/iso"
+iso_output_dir: "/iso"
+iso_type: "iso"
 pull_secret: ""
 link_local_ipv6: false
 worker:

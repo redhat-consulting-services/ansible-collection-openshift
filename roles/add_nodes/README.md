@@ -186,7 +186,7 @@ When this role is executed, it will set the following facts automatically:
 |-------------------------|--------------------------------------------------|
 | cluster_name            | The name of the OpenShift cluster.               |
 | base_domain             | The base domain of the OpenShift cluster.        |
-| base_dir                | The generated base directory in which the ISO and installation configs are stored. |
+| iso_output_dir          | The generated base directory in which the ISO and installation configs are stored. |
 | manifest_folder         | The generated directory where the nodes-config.yaml file is backed up. |
 | credentials_folder      | The generated directory where the pull secret (auth.json) file is stored. |
 | bootfile_path           | The generated path to the bootable ISO file or PXE artifacts. |
