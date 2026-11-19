@@ -74,7 +74,7 @@
         chdir: "{{ base_dir }}"
       changed_when: true
 
-    - name: Create node.{{ arch }}.ipxe
+    - name: Create node ipxe file for {{ arch }}
       ansible.builtin.copy:
         dest: "{{ base_dir }}/boot-artifacts/node.{{ arch }}.ipxe"
         content: |
@@ -82,3 +82,4 @@
           initrd --name initrd {{ boot_artifacts_base_url }}/node.{{ arch }}-initrd.img
           kernel {{ boot_artifacts_base_url }}/node.{{ arch }}-vmlinuz initrd=initrd coreos.live.rootfs_url={{ boot_artifacts_base_url }}/node.{{ arch }}-rootfs.img rw  ignition.firstboot ignition.platform.id=metal
           boot
+        mode: '0640'
