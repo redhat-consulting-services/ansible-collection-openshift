@@ -36,7 +36,11 @@ additional_build_steps:
         tar -xzf openshift-client-linux.tar.gz --strip-components=0 -C /usr/local/bin oc kubectl && \
         chmod +x /usr/local/bin/oc /usr/local/bin/kubectl
 
-    RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/oc-mirror.tar.gz && \
+    RUN case "${OPENSHIFT_VERSION}" in \
+          5.*) url="https://mirror.openshift.com/pub/cgw/oc-mirror/latest/oc-mirror-rhel9-linux-amd64.tar.gz" ;; \
+          *) url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/oc-mirror.tar.gz" ;; \
+        esac && \
+        curl -fL -o oc-mirror.tar.gz "${url}" && \
         tar -xzf oc-mirror.tar.gz --strip-components=0 -C /usr/local/bin oc-mirror && \
         chmod +x /usr/local/bin/oc-mirror
 

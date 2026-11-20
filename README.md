@@ -76,6 +76,8 @@ To build the execution environment locally:
 ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=4.19.15
 ```
 
+For OpenShift 5.x, the build uses the latest RHEL 9 AMD64 `oc-mirror` download rather than a version-pinned archive.
+
 ### Usage
 
 Instructions on how to use the execution environment and the collection can be found in the [examples/dell_hardware](./examples/dell_hardware/README.md) directory.
