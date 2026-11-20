@@ -82,6 +82,7 @@
         fi
       done <<< "$pending_csrs"
 
+      # Polling interval (in seconds) before checking the API for pending CSRs again 
       sleep 10
     done
   args:
