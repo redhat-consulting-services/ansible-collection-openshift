@@ -19,9 +19,9 @@ worker:
 test_expectations:
   facts:
     additional_node_count: 1
-    manifest_folder: "{{ scenario_output_dir }}/manifests"
-    credentials_folder: "{{ scenario_output_dir }}/credentials"
-    iso_location: "{{ scenario_output_dir }}/agent.iso"
+    manifest_folder: "{{ base_dir }}/manifests"
+    credentials_folder: "{{ base_dir }}/credentials"
+    iso_location: "{{ base_dir }}/node.{{ arch }}.iso"
   nodes_config:
     cpu_architecture: amd64
     interfaces:

@@ -5,6 +5,7 @@ yq [platform:rpm]
 python3-cairo [platform:rpm]
 cairo [platform:rpm]
 openssl [platform:rpm]
+rsync [platform:rpm]
 procps-ng [platform:rpm]
 
 glib2-devel [platform:rpm]

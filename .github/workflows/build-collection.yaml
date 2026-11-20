@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - "**"
-    tags: [v*]
+    tags: [ v* ]
 
 env:
   ANSIBLE_COLLECTION_VERSION: ${{ github.ref_name }}
@@ -86,7 +86,7 @@ jobs:
       push: ${{ needs.tag-lookup.outputs.push == 'true' }}
       version: ${{ needs.tag-lookup.outputs.repo_tag }}
       ee_registry_url: quay.io
-      ee_image_repo: "redhat-consulting-services/ee-openshift"
+      ee_image_repo: ${{ vars.QUAY_IO_REPO }}
     secrets:
       registry_redhat_io_username: ${{ secrets.REGISTRY_REDHAT_IO_USERNAME }}
       registry_redhat_io_password: ${{ secrets.REGISTRY_REDHAT_IO_PASSWORD }}

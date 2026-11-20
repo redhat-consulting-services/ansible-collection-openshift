@@ -1,5 +1,6 @@
 ---
 cpu_architecture: amd64
+arch: x86_64
 kubeconfig_path: /tmp/add-nodes-test-kubeconfig
 generate_iso: false
 pull_secret: '{"auths":{"example.com":{"auth":"dGVzdDo="}}}'
