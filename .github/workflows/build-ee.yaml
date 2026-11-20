@@ -44,7 +44,7 @@ on:
         value: ${{ jobs.aggregate.outputs.combined_latest_tags }}
 
 env:
-  IMAGE_NAME: quay.io/redhat-consulting-services/ee-openshift
+  IMAGE_NAME: quay.io/${{ vars.QUAY_IO_REPO }}
 
 jobs:
   generate-timestamp:
