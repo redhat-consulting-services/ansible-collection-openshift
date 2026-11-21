@@ -1,0 +1,41 @@
+version: 3
+
+images:
+  base_image:
+    name: registry.fedoraproject.org/fedora:44
+    # name: registry.redhat.io/ubi9:latest
+
+build_arg_defaults:
+  ANSIBLE_GALAXY_CLI_COLLECTION_OPTS: "-v --upgrade"
+
+dependencies:
+  ansible_core:
+    package_pip: ansible-core
+  ansible_runner:
+    package_pip: ansible-runner
+  galaxy: ee-requirements.local.yml
+  python: ee-requirements.txt
+  system: ee-bindep.txt
+
+# Custom package manager path for the RHEL based images
+options:
+  package_manager_path: /usr/bin/dnf
+
+additional_build_files:
+  - src: scripts/install-openshift-tools.sh
+    dest: ee
+
+additional_build_steps:
+  prepend_base: |
+    ARG OPENSHIFT_VERSION=4.19.5
+    ARG OPENSHIFT_PAYLOAD_ARCH=native
+    RUN dnf install -y unzip python3 python3-pip
+    RUN pip3 install --upgrade ansible
+    COPY _build/ee/install-openshift-tools.sh /tmp/install-openshift-tools.sh
+    RUN sh /tmp/install-openshift-tools.sh && rm /tmp/install-openshift-tools.sh
+
+  prepend_galaxy: |
+    COPY galaxy.yml README.md LICENSE /tmp/collection/
+    COPY meta/ /tmp/collection/meta/
+    COPY plugins/ /tmp/collection/plugins/
+    COPY roles/ /tmp/collection/roles/
