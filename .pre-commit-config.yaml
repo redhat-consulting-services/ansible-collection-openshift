@@ -1,0 +1,66 @@
+---
+fail_fast: true
+repos:
+  # Check for required Ansible collections before linting
+  - repo: local
+    hooks:
+      - id: check-ansible-collections
+        name: check ansible collections
+        entry: >
+          bash -c 'command -v ansible-lint >/dev/null ||
+          { echo -e "\033[91mERROR: ansible-lint is required for this pre-commit check.\033[0m"; exit 1; };
+          output=$(mktemp);
+          trap "rm -f \"$output\"" EXIT;
+          ansible-lint --offline --format json --nocolor -t syntax-check >"$output" 2>/dev/null || true;
+          if grep -Fq "\"check_name\": \"syntax-check[unknown-module]\"" "$output"; then
+          echo -e "\033[91mERROR: Required Ansible collections are missing:\033[0m";
+          echo "";
+          echo "Unresolved Ansible modules:";
+          grep -oE "couldn.t resolve module/action '\''[^'\'']+'\''" "$output" |
+          sort -u | sed -E "s/^.*module\\/action '\''([^'\'']+)'\''$/    \\1/";
+          echo "";
+          echo "Install required collections with:";
+          echo -e "    \033[92mansible-galaxy collection install -r ee-requirements.yml -p .ansible/collections\033[0m";
+          echo "";
+          exit 1;
+          fi'
+        language: system
+        stages: [pre-commit]
+        pass_filenames: false
+        always_run: true
+
+  # Lint YAML and Ansible playbooks
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v26.11.0
+    hooks:
+      - id: ansible-lint
+        pass_filenames: true
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: [--severity=warning]
+
+  # Trailing whitespace, newline, merge conflict, and executable checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+
+  # Enforce Signed-off-by in commit messages
+  - repo: local
+    hooks:
+      - id: require-signed-off-by
+        name: Require Signed-off-by
+        entry: bash -c 'grep -q "^Signed-off-by:" "$1" || { echo "Commit must include Signed-off-by trailer"; exit 1; }' --
+        language: system
+        stages: [commit-msg]
+        always_run: true
