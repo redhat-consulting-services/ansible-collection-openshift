@@ -22,3 +22,10 @@ python3 versions-extract.py .github/workflows/build-ee.yaml
 ### Execution
 
 This script is typically executed as part of a GitHub Actions workflow to keep the OpenShift version matrix up to date automatically. See the `.github/workflows/update-version-matrix.yaml` file for an example of how this script is integrated into a CI/CD pipeline.
+
+## test-install-openshift-tools.sh
+
+Run `sh scripts/test-install-openshift-tools.sh` from the repository root to test
+tool selection and check the download URLs for every version in
+`.github/openshift-versions.json`. The URL checks use HTTP HEAD requests and do
+not download the archives. The script requires `jq`, `curl`, and network access.
