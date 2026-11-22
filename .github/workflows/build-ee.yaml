@@ -85,6 +85,8 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
+      # Avoid overwhelming the OpenShift mirror with large concurrent downloads.
+      max-parallel: 6
       matrix: ${{ fromJson(needs.version-informations.outputs.openshift_versions) }}
     steps:
       - name: Debug output
@@ -180,7 +182,8 @@ jobs:
       - name: Build execution environment for testing
         if: ${{ !inputs.push }}
         run: |
-          tag="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-${{ needs.generate-timestamp.outputs.timestamp }}-${{ matrix.payload }}-${{ matrix.architecture }}"
+          # The platform is build-time state; published tags identify the installer payload.
+          tag="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-${{ needs.generate-timestamp.outputs.timestamp }}-${{ matrix.payload }}"
           docker buildx build \
             --platform linux/${{ matrix.architecture }} \
             --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_versions }} \

@@ -24,7 +24,12 @@ EOF
 cat > "$test_dir/bin/curl" <<'EOF'
 #!/bin/sh
 [ "${TEST_FAIL_DOWNLOAD:-0}" != 1 ] || exit 22
-printf '%s\n' "$4" >> "$TEST_URLS"
+# iterate: last argument value is the download URL
+url=
+for argument in "$@"; do
+    url=$argument
+done
+printf '%s\n' "$url" >> "$TEST_URLS"
 EOF
 cat > "$test_dir/bin/tar" <<'EOF'
 #!/bin/sh
