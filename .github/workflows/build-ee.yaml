@@ -72,10 +72,13 @@ jobs:
       - name: Get OpenShift versions
         id: get-versions
         run: |
+          # Build every version, payload, and host architecture combination.
           echo "openshift_versions=$(jq -c '. + {"architecture":["amd64","arm64"],"payload":["amd64","arm64","multi"]}' .github/openshift-versions.json)" >> "$GITHUB_OUTPUT"
+          # Publish one multi-platform manifest for each version and payload.
           echo "publish_matrix=$(jq -c '. + {"payload":["amd64","arm64","multi"]}' .github/openshift-versions.json)" >> "$GITHUB_OUTPUT"
 
   build:
+    # Build on a native runner for the image platform.
     runs-on: ${{ matrix.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     needs:
       - generate-timestamp
@@ -125,6 +128,7 @@ jobs:
       - name: Set image tag
         id: image_tag
         run: |
+          # Preserve the original unqualified tags for the amd64/amd64 case.
           prefix="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
           if [ "${{ matrix.architecture }}-${{ matrix.payload }}" = "amd64-amd64" ]; then
             echo "tag=${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}" >> "$GITHUB_OUTPUT"
@@ -163,6 +167,7 @@ jobs:
 
       - name: Generate execution environment build context
         run: |
+          # Generate one Dockerfile that is reused by the digest and validation builds.
           ansible-builder create --output-filename Dockerfile --context .
 
       # Push each platform without a tag; the publish job creates the tagged manifests.
@@ -185,6 +190,7 @@ jobs:
 
       - name: Upload platform image digest
         if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
+        # The publish job combines these per-platform digests into manifests.
         uses: actions/upload-artifact@v4
         with:
           name: digest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}
@@ -195,7 +201,7 @@ jobs:
       - name: Build and load execution environment for validation
         if: ${{ !inputs.push }}
         run: |
-          # The platform is build-time state; published tags identify the installer payload.
+          # Load this single-platform image locally and smoke-test it without publishing.
           tag="${{ steps.image_tag.outputs.tag }}"
           docker buildx build \
             --platform linux/${{ matrix.architecture }} \
@@ -268,6 +274,7 @@ jobs:
         if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
         run: |
           prefix="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
+          # Create a payload-specific manifest from both host-platform images.
           amd64=$(cat "digests/digest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-amd64/image-digest.txt")
           arm64=$(cat "digests/digest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-arm64/image-digest.txt")
           docker buildx imagetools create \
@@ -275,6 +282,7 @@ jobs:
             -t "${prefix}-${{ matrix.payload }}-latest" \
             "${{ env.IMAGE_NAME }}@$amd64" "${{ env.IMAGE_NAME }}@$arm64"
           if [ "${{ matrix.payload }}" = amd64 ]; then
+            # Keep the legacy tags native to each selected host architecture.
             native_arm64=$(cat "digests/digest-${{ matrix.openshift_versions }}-arm64-arm64/image-digest.txt")
             docker buildx imagetools create \
               -t "${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}" \
