@@ -165,7 +165,8 @@ jobs:
         run: |
           ansible-builder create --output-filename Dockerfile --context .
 
-      - name: Build and push image by digest
+      # Push each platform without a tag; the publish job creates the tagged manifests.
+      - name: Build and push platform image by digest
         if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
         run: |
           docker buildx build \
@@ -182,7 +183,7 @@ jobs:
           docker run --rm --entrypoint kubectl "$image" version --client
           docker run --rm --entrypoint oc-mirror "$image" --v2 version
 
-      - name: Upload image digest
+      - name: Upload platform image digest
         if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/upload-artifact@v4
         with:
@@ -191,7 +192,7 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-      - name: Build execution environment for testing
+      - name: Build and load execution environment for validation
         if: ${{ !inputs.push }}
         run: |
           # The platform is build-time state; published tags identify the installer payload.
@@ -229,7 +230,7 @@ jobs:
         if: ${{ !inputs.push }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.architecture == 'amd64' && matrix.payload == 'amd64' && format('ansible-execution-environment-{0}-ocp-{1}', inputs.version, matrix.openshift_versions) || format('ansible-execution-environment-{0}-ocp-{1}-{2}-{3}', inputs.version, matrix.openshift_versions, matrix.payload, matrix.architecture) }}
+          name: ${{ matrix.architecture == 'amd64' && matrix.payload == 'amd64' && format('ansible-execution-environment-{0}-ocp-{1}', inputs.version, matrix.openshift_versions) || format('ansible-execution-environment-{0}-ocp-{1}-payload-{2}-host-{3}', inputs.version, matrix.openshift_versions, matrix.payload, matrix.architecture) }}
           path: container-images/
           retention-days: 1
           if-no-files-found: error
@@ -263,7 +264,7 @@ jobs:
         if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
         uses: docker/setup-buildx-action@v3
 
-      - name: Publish multi-architecture image
+      - name: Publish multi-architecture tags
         if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
         run: |
           prefix="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
