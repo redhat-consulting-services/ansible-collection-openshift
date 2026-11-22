@@ -122,6 +122,18 @@ jobs:
         run: |
           pip install ansible-builder
 
+      - name: Set image tag
+        id: image_tag
+        run: |
+          prefix="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
+          if [ "${{ matrix.architecture }}-${{ matrix.payload }}" = "amd64-amd64" ]; then
+            echo "tag=${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}" >> "$GITHUB_OUTPUT"
+            echo "latest_tag=${prefix}-latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}-${{ matrix.payload }}" >> "$GITHUB_OUTPUT"
+            echo "latest_tag=${prefix}-${{ matrix.payload }}-latest" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -183,7 +195,7 @@ jobs:
         if: ${{ !inputs.push }}
         run: |
           # The platform is build-time state; published tags identify the installer payload.
-          tag="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-${{ needs.generate-timestamp.outputs.timestamp }}-${{ matrix.payload }}"
+          tag="${{ steps.image_tag.outputs.tag }}"
           docker buildx build \
             --platform linux/${{ matrix.architecture }} \
             --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_versions }} \
@@ -195,13 +207,23 @@ jobs:
           docker run --rm --entrypoint oc-mirror "$tag" --help > /dev/null
           mkdir container-images
           if [ "${{ matrix.architecture }}-${{ matrix.payload }}" = "amd64-amd64" ]; then
-            legacy="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
-            docker tag "$tag" "${legacy}-${{ needs.generate-timestamp.outputs.timestamp }}"
-            docker tag "$tag" "${legacy}-latest"
-            docker save -o container-images/container-images.tar "$tag" "${legacy}-${{ needs.generate-timestamp.outputs.timestamp }}" "${legacy}-latest"
+            docker tag "$tag" "${{ steps.image_tag.outputs.latest_tag }}"
+            docker save -o container-images/container-images.tar \
+              "$tag" "${{ steps.image_tag.outputs.latest_tag }}"
           else
             docker save -o container-images/container-images.tar "$tag"
           fi
+
+      # - name: Run Trivy vulnerability scanner
+      #   if: ${{ !inputs.push }}
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   with:
+      #     image-ref: '${{ steps.image_tag.outputs.tag }}'
+      #     format: 'table'
+      #     exit-code: '1'
+      #     ignore-unfixed: true
+      #     vuln-type: 'os,library'
+      #     severity: 'CRITICAL,HIGH'
 
       - name: Upload execution environment artifact
         if: ${{ !inputs.push }}
