@@ -180,7 +180,7 @@ jobs:
           docker run --rm --entrypoint openshift-install "$image" version
           docker run --rm --entrypoint oc "$image" version --client
           docker run --rm --entrypoint kubectl "$image" version --client
-          docker run --rm --entrypoint oc-mirror "$image" --help > /dev/null
+          docker run --rm --entrypoint oc-mirror "$image" --v2 version
 
       - name: Upload image digest
         if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
@@ -204,7 +204,7 @@ jobs:
           docker run --rm --entrypoint openshift-install "$tag" version
           docker run --rm --entrypoint oc "$tag" version --client
           docker run --rm --entrypoint kubectl "$tag" version --client
-          docker run --rm --entrypoint oc-mirror "$tag" --help > /dev/null
+          docker run --rm --entrypoint oc-mirror "$tag" --v2 version
           mkdir container-images
           if [ "${{ matrix.architecture }}-${{ matrix.payload }}" = "amd64-amd64" ]; then
             docker tag "$tag" "${{ steps.image_tag.outputs.latest_tag }}"
