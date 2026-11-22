@@ -50,7 +50,7 @@ export PATH="$test_dir/bin:$PATH" TEST_URLS="$test_dir/urls"
 script="$script_dir/install-openshift-tools.sh"
 mirror=https://mirror.openshift.com/pub/openshift-v4
 
-# require a nonempty matrix of version strings
+# convert versions from json to strings
 jq -er '
     .openshift_versions |
     if type != "array" or length == 0 then

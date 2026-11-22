@@ -1,5 +1,6 @@
 vim [platform:rpm]
 unzip [platform:rpm]
+gpgme [platform:rpm]
 jq [platform:rpm]
 yq [platform:rpm]
 python3-cairo [platform:rpm]
