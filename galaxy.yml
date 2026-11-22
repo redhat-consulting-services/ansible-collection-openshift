@@ -16,6 +16,7 @@ authors:
   - Leon Steinhäuser <lsteinha@redhat.com>
   - Oscar Lindholm <olindhol@redhat.com>
   - Suresh Vishnoi <svishnoi@redhat.com>
+  - Uco Mesdag <uco@redhat.com>
 
 description: Bootstrapping and manage OpenShift clusters on Red Hat OpenShift Container Platform (OCP) 4.x.
 

@@ -45,6 +45,8 @@ Assuming a release version of `v1.0.0`, OpenShift version `4.19.15`, and a build
 v1.0.0-ocp-4.19.15-202407221430
 ```
 
+Each tag is a multi-architecture image for AMD64 and ARM64 EE hosts. The unsuffixed tag contains an installer targeting the host architecture. To choose the installer payload independently, append `-amd64`, `-arm64`, or `-multi` to the timestamp tag, for example `v1.0.0-ocp-4.19.15-202407221430-arm64`. The corresponding latest tags are, for example, `v1.0.0-ocp-4.19.15-arm64-latest`.
+
 Right now, we build images for the last five minor OpenShift versions, each with the last five patch versions. For the list of supported OpenShift versions, refer to the `.github/openshift-versions.json` file.
 
 When a new release is created, we also create `latest` tags for the most recent patch version of each minor OpenShift version. Continuing the previous example, if `4.21.5` is the latest patch version for the `4.21` minor version, the following `latest` tag would also be created:
@@ -69,15 +71,30 @@ Each execution environment includes:
 - **Python Dependencies**: All required Python packages
 - **Ansible Collections**: `community.general`, `kubernetes.core`
 
-### Manual Build
+For OpenShift 5.x, the build uses the latest RHEL 9 AMD64 `oc-mirror` download rather than a version-pinned archive.
 
+### Manual Build
 To build the execution environment locally:
 
 ```bash
-ansible-builder build --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=4.19.15
+ansible-builder build -f execution-environment.local.yml --context . -t my-ee:latest --build-arg OPENSHIFT_VERSION=4.19.15
 ```
 
-For OpenShift 5.x, the build uses the latest RHEL 9 AMD64 `oc-mirror` download rather than a version-pinned archive.
+This installs the current checkout as a collection and selects a native installer
+by default. Add `--build-arg OPENSHIFT_PAYLOAD_ARCH=amd64`, `arm64`, or `multi`
+to select a different installer payload; the EE host architecture remains native
+to the build.
+
+### Architecture Support
+
+A multi-payload installer requires an explicit cluster `arch` in
+`bootstrap_cluster`. Disconnected registries must contain the selected release
+payload, including the multi-architecture release when using the multi installer.
+
+The roles do not yet generate boot images for mixed-architecture initial installs
+or secondary-architecture node joins: explicitly identified requests fail early. See
+the [bootstrap-cluster role](./roles/bootstrap_cluster/README.md) and
+[add-nodes role](./roles/add_nodes/README.md) for details.
 
 ### Usage
 
