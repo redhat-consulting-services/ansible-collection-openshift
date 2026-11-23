@@ -1,0 +1,18 @@
+mirror:
+  enabled: false
+
+  destination:
+    type: registry
+    tls_verify: false
+    registry: registry.local:5000
+
+  source:
+    type: registry
+    tls_verify: false
+
+image_sets:
+  - name: openshift-additional
+    enabled: true
+    destination: openshift
+    additional_images:
+      - name: registry.redhat.io/ubi9/ubi:latest

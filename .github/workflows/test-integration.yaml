@@ -1,0 +1,108 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/test-refinement"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  openshift-minor-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      openshift_versions: ${{ steps.get-versions.outputs.openshift_versions }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Get OpenShift versions
+        id: get-versions
+        run: |
+          echo "openshift_versions=$(jq '[.openshift_versions | group_by(split(".") | .[0:2]) | .[] | max_by(split(".") | map(tonumber))]' -c  .github/openshift-versions.json)" >> $GITHUB_OUTPUT
+
+  check-mirror-images:
+    uses: ./.github/workflows/check-changes.yaml
+    with:
+      path: "roles/mirror_images"
+
+  mirror-images:
+    runs-on: ubuntu-latest
+    if: needs.check-mirror-images.outputs.changed == 'true'
+    permissions:
+      contents: read
+    needs:
+      - openshift-minor-versions
+      - check-mirror-images
+    strategy:
+      fail-fast: false
+      matrix:
+        openshift_versions: ${{ fromJson(needs.openshift-minor-versions.outputs.openshift_versions) }}
+    env:
+      CREDENTIALS_FOLDER: credentials
+      OPENSHIFT_PULL_SECRET_NAME: openshift_pull_secret.json
+      DOCKER_LOCAL_PULL_SECRET_NAME: docker_local_pull_secret.json
+      WORKING_DIRECTORY: roles/mirror_images/_tests
+      REGISTRY_PORT: 5000
+      REGISTRY_CONTAINER_NAME: registry
+      CONTAINER_RUNTIME: podman
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.x'
+
+      - name: Identify machine IP
+        id: identify-machine-ip
+        run: |
+          echo "MACHINE_IP=$(hostname -I | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Map registry.local to localhost
+        run: |
+          echo "${{ steps.identify-machine-ip.outputs.MACHINE_IP }} registry.local" | sudo tee -a /etc/hosts
+
+      - name: Run mirror registry
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          make registry
+
+      - name: Set up Ansible and Ansible Navigator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible apache2-utils
+          pip3 install ansible-navigator
+
+      - name: Setup credentials file
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          mkdir -p ${{ env.CREDENTIALS_FOLDER }}
+          echo '${{ secrets.OPENSHIFT_IMAGE_PULL_SECRET }}' | jq > ${{ env.CREDENTIALS_FOLDER }}/${{ env.OPENSHIFT_PULL_SECRET_NAME }}
+          make registry-credential
+
+      - name: Run Ansible Navigator
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        env:
+          OPENSHIFT_VERSION: ${{ matrix.openshift_versions }}
+          CREDENTIALS_FOLDER: ${{ env.CREDENTIALS_FOLDER }}
+          DESTINATION_AUTH_CONFIG: ${{ env.DOCKER_LOCAL_PULL_SECRET_NAME }}
+          SOURCE_AUTH_CONFIG: ${{ env.OPENSHIFT_PULL_SECRET_NAME }}
+        run: |
+          make test
+
+      - name: Cleanup
+        if: always()
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          sudo sed -i '/host.docker.internal/d' /etc/hosts || true
+          rm -rf ${{ env.WORKING_DIRECTORY }}/${{ env.CREDENTIALS_FOLDER }}
+          rm -rf ${{ env.WORKING_DIRECTORY }}/mirror-registry
+          make registry-stop
+          make registry-clean
