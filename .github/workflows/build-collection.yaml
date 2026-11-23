@@ -5,6 +5,13 @@ on:
     branches:
       - "**"
     tags: [ v* ]
+  workflow_dispatch:
+    inputs:
+      full_matrix:
+        description: "Build the full OpenShift version matrix"
+        required: false
+        default: false
+        type: boolean
 
 env:
   ANSIBLE_COLLECTION_VERSION: ${{ github.ref_name }}
@@ -85,6 +92,7 @@ jobs:
     with:
       push: ${{ needs.tag-lookup.outputs.push == 'true' }}
       version: ${{ needs.tag-lookup.outputs.repo_tag }}
+      full_matrix: ${{ inputs.full_matrix }}
       ee_registry_url: quay.io
       ee_image_repo: ${{ vars.QUAY_IO_REPO }}
     secrets:
