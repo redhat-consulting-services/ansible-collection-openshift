@@ -33,15 +33,12 @@ on:
         description: "Password for the execution environment registry"
         required: true
     outputs:
-      combined:
-        description: "Combined output of all built image tags"
-        value: ${{ jobs.aggregate.outputs.combined }}
-      combined_tags:
-        description: "Combined output of all built image tags (without latest tags)"
-        value: ${{ jobs.aggregate.outputs.combined_tags }}
-      combined_latest_tags:
-        description: "Combined output of all built image latest tags"
-        value: ${{ jobs.aggregate.outputs.combined_latest_tags }}
+      timestamped_tags:
+        description: "All timestamped execution environment tags"
+        value: ${{ jobs.aggregate.outputs.timestamped_tags }}
+      latest_tags:
+        description: "All latest execution environment tags"
+        value: ${{ jobs.aggregate.outputs.latest_tags }}
 
 env:
   IMAGE_NAME: quay.io/${{ vars.QUAY_IO_REPO }}
@@ -325,29 +322,25 @@ jobs:
     permissions:
       contents: read
     outputs:
-      combined: ${{ steps.aggregate.outputs.combined }}
-      combined_tags: ${{ steps.aggregate.outputs.combined_tags }}
-      combined_latest_tags: ${{ steps.aggregate.outputs.combined_latest_tags }}
+      timestamped_tags: ${{ steps.aggregate.outputs.timestamped_tags }}
+      latest_tags: ${{ steps.aggregate.outputs.latest_tags }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
           pattern: outputs-*
 
-      - name: Aggregate outputs
+      - name: Aggregate published tags
         id: aggregate
         run: |
-          cat ./*/version-tag-*.txt > combined-tags.txt
+          cat ./*/version-tag-*.txt > combined-timestamped-tags.txt
           cat ./*/version-latest-*.txt > combined-latest-tags.txt
 
           {
-            echo "combined_tags<<EOF"
-            cat combined-tags.txt
+            echo "timestamped_tags<<EOF"
+            cat combined-timestamped-tags.txt
             echo "EOF"
-            echo "combined_latest_tags<<EOF"
+            echo "latest_tags<<EOF"
             cat combined-latest-tags.txt
-            echo "EOF"
-            echo "combined<<EOF"
-            cat combined-latest-tags.txt combined-tags.txt
             echo "EOF"
           } >> "$GITHUB_OUTPUT"

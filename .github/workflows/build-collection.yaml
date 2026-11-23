@@ -100,8 +100,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Output combined tags
+      - name: Output published execution environment tags
         run: |
-          echo "Combined tags: ${{ needs.build-execution-environment.outputs.combined }}"
-          echo "Combined tags (without latest): ${{ needs.build-execution-environment.outputs.combined_tags }}"
-          echo "Combined latest tags: ${{ needs.build-execution-environment.outputs.combined_latest_tags }}"
+          echo "Timestamped tags: ${{ needs.build-execution-environment.outputs.timestamped_tags }}"
+          echo "Latest tags: ${{ needs.build-execution-environment.outputs.latest_tags }}"
