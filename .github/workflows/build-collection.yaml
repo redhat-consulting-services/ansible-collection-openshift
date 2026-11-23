@@ -101,7 +101,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Output execution environment tags
+      - name: Output combined tags
         run: |
           echo "Timestamped tags:"
           echo "${{ needs.build-execution-environment.outputs.timestamped_tags }}"
