@@ -94,13 +94,16 @@ jobs:
       ee_registry_password: ${{ secrets.QUAY_IO_PASSWORD }}
 
   info:
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     needs:
       - build-execution-environment
     permissions:
       contents: read
     steps:
-      - name: Output published execution environment tags
+      - name: Output execution environment tags
         run: |
-          echo "Timestamped tags: ${{ needs.build-execution-environment.outputs.timestamped_tags }}"
-          echo "Latest tags: ${{ needs.build-execution-environment.outputs.latest_tags }}"
+          echo "Timestamped tags:"
+          echo "${{ needs.build-execution-environment.outputs.timestamped_tags }}"
+          echo "Latest tags:"
+          echo "${{ needs.build-execution-environment.outputs.latest_tags }}"

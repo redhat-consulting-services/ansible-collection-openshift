@@ -221,6 +221,9 @@ jobs:
           docker run --rm --entrypoint kubectl "$tag" version --client
           docker run --rm --entrypoint oc-mirror "$tag" --v2 version
           mkdir container-images
+          mkdir tag-output
+          printf '%s\n' "$tag" > "tag-output/version-tag-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}.txt"
+          printf '%s\n' "${{ steps.image_tag.outputs.latest_tag }}" > "tag-output/version-latest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}.txt"
           if [ "${{ matrix.architecture }}-${{ matrix.payload }}" = "amd64-amd64" ]; then
             docker tag "$tag" "${{ steps.image_tag.outputs.latest_tag }}"
             docker save -o container-images/container-images.tar \
@@ -246,6 +249,15 @@ jobs:
         with:
           name: ${{ matrix.architecture == 'amd64' && matrix.payload == 'amd64' && format('ansible-execution-environment-{0}-ocp-{1}', inputs.version, matrix.openshift_versions) || format('ansible-execution-environment-{0}-ocp-{1}-payload-{2}-host-{3}', inputs.version, matrix.openshift_versions, matrix.payload, matrix.architecture) }}
           path: container-images/
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Upload execution environment tag artifacts
+        if: ${{ !inputs.push }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}
+          path: tag-output/
           retention-days: 1
           if-no-files-found: error
 
@@ -329,26 +341,26 @@ jobs:
             version-latest-${{ matrix.openshift_versions }}-${{ matrix.payload }}.txt
 
   aggregate:
-    # Aggregate partial successes, but fail so retrying failed jobs can complete the outputs.
-    if: ${{ always() && (inputs.push || startsWith(github.ref, 'refs/tags/v')) }}
+    # Aggregate successful validation or publish tags.
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     needs: publish
     permissions:
       contents: read
     outputs:
-      timestamped_tags: ${{ steps.aggregate.outputs.timestamped_tags }}
-      latest_tags: ${{ steps.aggregate.outputs.latest_tags }}
+      timestamped_tags: ${{ steps.published_tags.outputs.timestamped_tags }}
+      latest_tags: ${{ steps.published_tags.outputs.latest_tags }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
           pattern: outputs-*
 
-      - name: Aggregate published tags
-        id: aggregate
+      - name: Published tags
+        id: published_tags
         run: |
-          cat ./*/version-tag-*.txt > combined-timestamped-tags.txt
-          cat ./*/version-latest-*.txt > combined-latest-tags.txt
+          cat ./*/version-tag-*.txt | sort -u > combined-timestamped-tags.txt
+          cat ./*/version-latest-*.txt | sort -u > combined-latest-tags.txt
 
           {
             echo "timestamped_tags<<EOF"
@@ -359,7 +371,8 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-          if [ "${{ needs.publish.result }}" != success ]; then
+          if [ "${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}" = true ] &&
+            [ "${{ needs.publish.result }}" != success ]; then
             echo "One or more platform manifests could not be published" >&2
             exit 1
           fi
