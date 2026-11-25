@@ -23,6 +23,13 @@
 - name: Assert defined properties
   ansible.builtin.include_tasks: assert.yaml
 
+- name: Remove possible old base_dir
+  ansible.builtin.file:
+    path: "{{ base_dir }}"
+    state: absent
+  failed_when: false
+  when: generate_iso | bool
+
 - name: Create output directory structure
   ansible.builtin.file:
     path: "{{ manifest_folder }}"
