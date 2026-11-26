@@ -29,11 +29,11 @@ additional_build_steps:
     RUN pip3 install --upgrade ansible
 
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-install-linux.tar.gz && \
-        tar -xzf openshift-install-linux.tar.gz --strip-components=0 -C /usr/local/bin openshift-install && \
+        tar --no-same-owner -xzf openshift-install-linux.tar.gz --strip-components=0 -C /usr/local/bin openshift-install && \
         chmod +x /usr/local/bin/openshift-install
 
     RUN curl -LO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/openshift-client-linux.tar.gz && \
-        tar -xzf openshift-client-linux.tar.gz --strip-components=0 -C /usr/local/bin oc kubectl && \
+        tar --no-same-owner -xzf openshift-client-linux.tar.gz --strip-components=0 -C /usr/local/bin oc kubectl && \
         chmod +x /usr/local/bin/oc /usr/local/bin/kubectl
 
     RUN case "${OPENSHIFT_VERSION}" in \
@@ -41,7 +41,7 @@ additional_build_steps:
           *) url="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/${OPENSHIFT_VERSION}/oc-mirror.tar.gz" ;; \
         esac && \
         curl -fL -o oc-mirror.tar.gz "${url}" && \
-        tar -xzf oc-mirror.tar.gz --strip-components=0 -C /usr/local/bin oc-mirror && \
+        tar --no-same-owner -xzf oc-mirror.tar.gz --strip-components=0 -C /usr/local/bin oc-mirror && \
         chmod +x /usr/local/bin/oc-mirror
 
     RUN rm -f *.tar.gz *.zip
