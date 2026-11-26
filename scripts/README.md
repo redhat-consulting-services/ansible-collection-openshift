@@ -26,6 +26,7 @@ This script is typically executed as part of a GitHub Actions workflow to keep t
 ## test-install-openshift-tools.sh
 
 Run `sh scripts/test-install-openshift-tools.sh` from the repository root to test
-tool selection and check the download URLs for every version in
-`.github/openshift-versions.json`. The URL checks use HTTP HEAD requests and do
-not download the archives. The script requires `jq`, `curl`, and network access.
+tool selection and extraction options, and check the download URLs for the
+versions in `.github/openshift-versions.json`. The URL checks
+use HTTP HEAD requests and do not download the archives. The script requires
+`jq`, `curl`, and network access.

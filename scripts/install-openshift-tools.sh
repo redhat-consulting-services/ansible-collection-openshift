@@ -48,13 +48,13 @@ trap 'rm -f "$tmp_dir/install.tar.gz" "$tmp_dir/client.tar.gz" "$tmp_dir/mirror.
 # install CLI tools (openshift-install, oc, kubectl and oc-mirror)
 curl --retry 5 --retry-all-errors --retry-delay 2 -fL \
     -o "$tmp_dir/install.tar.gz" "$installer_mirror/$installer_archive"
-tar -xzf "$tmp_dir/install.tar.gz" -C /usr/local/bin openshift-install
+tar --no-same-owner -xzf "$tmp_dir/install.tar.gz" -C /usr/local/bin openshift-install
 curl --retry 5 --retry-all-errors --retry-delay 2 -fL \
     -o "$tmp_dir/client.tar.gz" "$host_mirror/openshift-client-linux.tar.gz"
-tar -xzf "$tmp_dir/client.tar.gz" -C /usr/local/bin oc kubectl
+tar --no-same-owner -xzf "$tmp_dir/client.tar.gz" -C /usr/local/bin oc kubectl
 curl --retry 5 --retry-all-errors --retry-delay 2 -fL \
     -o "$tmp_dir/mirror.tar.gz" "$mirror_url"
-tar -xzf "$tmp_dir/mirror.tar.gz" -C /usr/local/bin oc-mirror
+tar --no-same-owner -xzf "$tmp_dir/mirror.tar.gz" -C /usr/local/bin oc-mirror
 chmod +x /usr/local/bin/openshift-install /usr/local/bin/oc /usr/local/bin/kubectl /usr/local/bin/oc-mirror
 
 # verify the installer contains the requested release payload
