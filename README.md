@@ -87,9 +87,11 @@ to the build.
 
 ### Architecture Support
 
-A multi-payload installer requires an explicit cluster `arch` in
-`bootstrap_cluster`. Disconnected registries must contain the selected release
-payload, including the multi-architecture release when using the multi installer.
+The `bootstrap_cluster` role currently uses `arch` only for artifact paths, not
+for the cluster architecture in install-config. Setting `arch` alone therefore
+does not configure a multi-payload installer for the requested architecture.
+Disconnected registries must contain the selected release payload, including
+the multi-architecture release when using the multi installer.
 
 The roles do not yet generate boot images for mixed-architecture initial installs
 or secondary-architecture node joins: explicitly identified requests fail early. See
