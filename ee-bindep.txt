@@ -1,5 +1,8 @@
 vim [platform:rpm]
 unzip [platform:rpm]
+# Fedora 44's gpgme package provides libgpgme.so.45, while oc-mirror needs .so.11.
+# gpgme [platform:rpm]
+compat-gpgme124 [platform:rpm]
 jq [platform:rpm]
 yq [platform:rpm]
 python3-cairo [platform:rpm]

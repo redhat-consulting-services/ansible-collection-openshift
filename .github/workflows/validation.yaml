@@ -8,6 +8,8 @@ on:
       - '**/*.yml'
       - '**/*.yaml'
       - '**.ansible-lint'
+      - '**/*.sh'
+      - '.github/openshift-versions.json'
   pull_request:
     branches:
       - main
@@ -15,6 +17,8 @@ on:
       - '**/*.yml'
       - '**/*.yaml'
       - '**.ansible-lint'
+      - '**/*.sh'
+      - '.github/openshift-versions.json'
 
 jobs:
   ansible-lint:
@@ -42,3 +46,6 @@ jobs:
 
       - name: Run add_nodes scenario tests
         run: roles/add_nodes/_tests/ci/run-tests.sh
+
+      - name: Test execution environment tool selection
+        run: sh scripts/test-install-openshift-tools.sh

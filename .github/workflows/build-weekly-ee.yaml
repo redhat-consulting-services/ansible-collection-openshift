@@ -53,8 +53,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Output combined tags
+      - name: Output published execution environment tags
         run: |
-          echo "Combined tags: ${{ needs.external-flow.outputs.combined }}"
-          echo "Combined tags (without latest): ${{ needs.external-flow.outputs.combined_tags }}"
-          echo "Combined latest tags: ${{ needs.external-flow.outputs.combined_latest_tags }}"
+          echo "Timestamped tags: ${{ needs.external-flow.outputs.timestamped_tags }}"
+          echo "Latest tags: ${{ needs.external-flow.outputs.latest_tags }}"

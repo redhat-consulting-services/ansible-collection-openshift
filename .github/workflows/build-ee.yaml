@@ -11,6 +11,11 @@ on:
         description: "Version of the collection. The galaxy.yml will be updated with this version. A commit is not created."
         required: true
         type: string
+      full_matrix:
+        description: "Build all OpenShift versions without publishing"
+        required: false
+        default: false
+        type: boolean
       ee_registry_url:
         description: "URL for the execution environment registry"
         required: true
@@ -33,15 +38,12 @@ on:
         description: "Password for the execution environment registry"
         required: true
     outputs:
-      combined:
-        description: "Combined output of all built image tags"
-        value: ${{ jobs.aggregate.outputs.combined }}
-      combined_tags:
-        description: "Combined output of all built image tags (without latest tags)"
-        value: ${{ jobs.aggregate.outputs.combined_tags }}
-      combined_latest_tags:
-        description: "Combined output of all built image latest tags"
-        value: ${{ jobs.aggregate.outputs.combined_latest_tags }}
+      timestamped_tags:
+        description: "All timestamped execution environment tags"
+        value: ${{ jobs.aggregate.outputs.timestamped_tags }}
+      latest_tags:
+        description: "All latest execution environment tags"
+        value: ${{ jobs.aggregate.outputs.latest_tags }}
 
 env:
   IMAGE_NAME: quay.io/${{ vars.QUAY_IO_REPO }}
@@ -56,7 +58,7 @@ jobs:
     steps:
       - name: Generate timestamp
         id: timestamp
-        run: echo "timestamp=$(date +%Y%m%d%H%M)" >> $GITHUB_OUTPUT
+        run: echo "timestamp=$(date +%Y%m%d%H%M)" >> "$GITHUB_OUTPUT"
 
   version-informations:
     runs-on: ubuntu-latest
@@ -64,17 +66,33 @@ jobs:
       contents: read
     outputs:
       openshift_versions: ${{ steps.get-versions.outputs.openshift_versions }}
+      publish_matrix: ${{ steps.get-versions.outputs.publish_matrix }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       - name: Get OpenShift versions
         id: get-versions
+        env:
+          # Release publishing or full_matrix=true builds all versions; normal validation builds only the newest.
+          FULL_MATRIX: ${{ inputs.full_matrix || inputs.push || startsWith(github.ref, 'refs/tags/v') }}
         run: |
-          echo "openshift_versions=$(jq -c . .github/openshift-versions.json)" >> $GITHUB_OUTPUT
+          if [ "$FULL_MATRIX" = true ]; then
+            selected_versions=$(jq -c . .github/openshift-versions.json)
+          else
+            # Validation builds only the newest version, but still tests every payload and host.
+            selected_versions=$(jq -c \
+              '.openshift_versions |= [max_by(split(".") | map(tonumber))]' \
+              .github/openshift-versions.json)
+          fi
+          # Build every selected version, payload, and host architecture combination.
+          echo "openshift_versions=$(jq -c '. + {"architecture":["amd64","arm64"],"payload":["amd64","arm64","multi"]}' <<< "$selected_versions")" >> "$GITHUB_OUTPUT"
+          # Publish one multi-platform manifest for each selected version and payload.
+          echo "publish_matrix=$(jq -c '. + {"payload":["amd64","arm64","multi"]}' <<< "$selected_versions")" >> "$GITHUB_OUTPUT"
 
   build:
-    runs-on: ubuntu-latest
+    # Build on a native runner for the image platform.
+    runs-on: ${{ matrix.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     needs:
       - generate-timestamp
       - version-informations
@@ -83,6 +101,8 @@ jobs:
       packages: write
     strategy:
       fail-fast: false
+      # Avoid overwhelming the OpenShift mirror with large concurrent downloads.
+      max-parallel: 6
       matrix: ${{ fromJson(needs.version-informations.outputs.openshift_versions) }}
     steps:
       - name: Debug output
@@ -110,7 +130,7 @@ jobs:
           password: ${{ secrets.registry_redhat_io_password }}
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -121,8 +141,18 @@ jobs:
       - name: Set image tag
         id: image_tag
         run: |
-          echo "tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-${{ needs.generate-timestamp.outputs.timestamp }}" >> $GITHUB_OUTPUT
-          echo "latest_tag=${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}-latest" >> $GITHUB_OUTPUT
+          # Preserve the original unqualified tags for the amd64/amd64 case.
+          prefix="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
+          if [ "${{ matrix.architecture }}-${{ matrix.payload }}" = "amd64-amd64" ]; then
+            echo "tag=${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}" >> "$GITHUB_OUTPUT"
+            echo "latest_tag=${prefix}-latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}-${{ matrix.payload }}" >> "$GITHUB_OUTPUT"
+            echo "latest_tag=${prefix}-${{ matrix.payload }}-latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Release Registry
         uses: docker/login-action@v3
@@ -148,32 +178,67 @@ jobs:
           cp ee-requirements.dev.yml ee-requirements.yml
           cp execution-environment.dev.yml execution-environment.yml
 
-      - name: Build execution environment
+      - name: Generate execution environment build context
         run: |
-          # Build the execution environment with OpenShift version as build arg
-          ansible-builder build \
-            --tag ${{ steps.image_tag.outputs.tag }} \
-            --tag ${{ steps.image_tag.outputs.latest_tag }} \
-            --container-runtime docker \
+          # Generate one Dockerfile that is reused by the digest and validation builds.
+          ansible-builder create --output-filename Dockerfile --context .
+
+      # Push each platform without a tag; the publish job creates the tagged manifests.
+      - name: Build and push platform image by digest
+        if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
+        run: |
+          docker buildx build \
+            --platform linux/${{ matrix.architecture }} \
             --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_versions }} \
-            --context .
+            --build-arg OPENSHIFT_PAYLOAD_ARCH=${{ matrix.payload }} \
+            --output type=image,name=${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true \
+            --metadata-file build-metadata.json .
+          jq -er '."containerimage.digest"' build-metadata.json > image-digest.txt
+          image="${{ env.IMAGE_NAME }}@$(cat image-digest.txt)"
+          docker pull "$image"
+          docker run --rm --entrypoint openshift-install "$image" version
+          docker run --rm --entrypoint oc "$image" version --client
+          docker run --rm --entrypoint kubectl "$image" version --client
+          docker run --rm --entrypoint oc-mirror "$image" --v2 version
 
-      - name: Dump execution environment image
-        if: ${{ !inputs.push }}
-        run: |
-          mkdir container-images
-          docker save -o container-images/container-images.tar ${{ steps.image_tag.outputs.tag }} ${{ steps.image_tag.outputs.latest_tag }}
-
-      - name: Upload Ansible Execution Environment to GitHub actions artifact
-        if: ${{ !inputs.push }}
+      - name: Upload platform image digest
+        if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
+        # The publish job combines these per-platform digests into manifests.
         uses: actions/upload-artifact@v4
         with:
-          name: ansible-execution-environment-${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}
-          path: container-images/
+          name: digest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}
+          path: image-digest.txt
           retention-days: 1
-          overwrite: true
+          if-no-files-found: error
+
+      - name: Build and load execution environment for validation
+        if: ${{ !inputs.push }}
+        run: |
+          # Load this single-platform image locally and smoke-test it without publishing.
+          tag="${{ steps.image_tag.outputs.tag }}"
+          docker buildx build \
+            --platform linux/${{ matrix.architecture }} \
+            --build-arg OPENSHIFT_VERSION=${{ matrix.openshift_versions }} \
+            --build-arg OPENSHIFT_PAYLOAD_ARCH=${{ matrix.payload }} \
+            --tag "$tag" --load .
+          docker run --rm --entrypoint openshift-install "$tag" version
+          docker run --rm --entrypoint oc "$tag" version --client
+          docker run --rm --entrypoint kubectl "$tag" version --client
+          docker run --rm --entrypoint oc-mirror "$tag" --v2 version
+          mkdir container-images
+          mkdir tag-output
+          printf '%s\n' "$tag" > "tag-output/version-tag-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}.txt"
+          printf '%s\n' "${{ steps.image_tag.outputs.latest_tag }}" > "tag-output/version-latest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}.txt"
+          if [ "${{ matrix.architecture }}-${{ matrix.payload }}" = "amd64-amd64" ]; then
+            docker tag "$tag" "${{ steps.image_tag.outputs.latest_tag }}"
+            docker save -o container-images/container-images.tar \
+              "$tag" "${{ steps.image_tag.outputs.latest_tag }}"
+          else
+            docker save -o container-images/container-images.tar "$tag"
+          fi
 
       # - name: Run Trivy vulnerability scanner
+      #   if: ${{ !inputs.push }}
       #   uses: aquasecurity/trivy-action@0.28.0
       #   with:
       #     image-ref: '${{ steps.image_tag.outputs.tag }}'
@@ -183,61 +248,136 @@ jobs:
       #     vuln-type: 'os,library'
       #     severity: 'CRITICAL,HIGH'
 
-      - name: Push image to registry
-        # only push if the ref is a tag, or the workflow_call is set to true
-        if: startsWith(github.ref, 'refs/tags/v') || inputs.push
-        run: |
-          docker push ${{ steps.image_tag.outputs.tag }}
-          docker push ${{ steps.image_tag.outputs.latest_tag }}
+      - name: Upload execution environment artifact
+        if: ${{ !inputs.push }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.architecture == 'amd64' && matrix.payload == 'amd64' && format('ansible-execution-environment-{0}-ocp-{1}', inputs.version, matrix.openshift_versions) || format('ansible-execution-environment-{0}-ocp-{1}-payload-{2}-host-{3}', inputs.version, matrix.openshift_versions, matrix.payload, matrix.architecture) }}
+          path: container-images/
+          retention-days: 1
+          if-no-files-found: error
 
-      - name: Output image details
+      - name: Upload execution environment tag artifacts
+        if: ${{ !inputs.push }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-${{ matrix.openshift_versions }}-${{ matrix.payload }}-${{ matrix.architecture }}
+          path: tag-output/
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    # Publish complete platform pairs even when an unrelated build failed.
+    if: ${{ always() && (inputs.push || startsWith(github.ref, 'refs/tags/v')) }}
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - generate-timestamp
+      - version-informations
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.version-informations.outputs.publish_matrix) }}
+    steps:
+      - name: Download image digests
+        if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
+        uses: actions/download-artifact@v5
+        with:
+          pattern: digest-${{ matrix.openshift_versions }}-*
+          path: digests
+
+      - name: Login to release registry
+        if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ inputs.ee_registry_url }}
+          username: ${{ secrets.ee_registry_username }}
+          password: ${{ secrets.ee_registry_password }}
+
+      - name: Set up Docker Buildx
+        if: ${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Publish multi-architecture tags
         run: |
-          echo "Built and pushed image: ${{ steps.image_tag.outputs.tag }}"
-          echo "Latest tag: ${{ steps.image_tag.outputs.latest_tag }}"
-          echo "Repository tag: ${{ inputs.version }}"
-          echo "Timestamp used: ${{ needs.generate-timestamp.outputs.timestamp }}"
-          docker images | grep ${{ env.IMAGE_NAME }} || true
+          prefix="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
+          amd64_file="digests/digest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-amd64/image-digest.txt"
+          arm64_file="digests/digest-${{ matrix.openshift_versions }}-${{ matrix.payload }}-arm64/image-digest.txt"
+          if [ ! -f "$amd64_file" ] || [ ! -f "$arm64_file" ]; then
+            echo "Cannot publish ${{ matrix.payload }} manifest: a platform digest is missing" >&2
+            exit 1
+          fi
+          # Create a payload-specific manifest from both host-platform images.
+          amd64=$(cat "$amd64_file")
+          arm64=$(cat "$arm64_file")
+          docker buildx imagetools create \
+            -t "${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}-${{ matrix.payload }}" \
+            -t "${prefix}-${{ matrix.payload }}-latest" \
+            "${{ env.IMAGE_NAME }}@$amd64" "${{ env.IMAGE_NAME }}@$arm64"
+          if [ "${{ matrix.payload }}" = amd64 ]; then
+            # Keep the legacy tags native to each selected host architecture.
+            native_arm64_file="digests/digest-${{ matrix.openshift_versions }}-arm64-arm64/image-digest.txt"
+            if [ ! -f "$native_arm64_file" ]; then
+              echo "Cannot publish legacy tags: the native ARM64 digest is missing" >&2
+              exit 1
+            fi
+            native_arm64=$(cat "$native_arm64_file")
+            docker buildx imagetools create \
+              -t "${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}" \
+              -t "${prefix}-latest" \
+              "${{ env.IMAGE_NAME }}@$amd64" "${{ env.IMAGE_NAME }}@$native_arm64"
+          fi
 
       - name: Create version files
         run: |
-          echo "${{ steps.image_tag.outputs.tag }}" > version-tag-${{ matrix.openshift_versions }}.txt
-          echo "${{ steps.image_tag.outputs.latest_tag }}" > version-latest-${{ matrix.openshift_versions }}.txt
+          prefix="${{ env.IMAGE_NAME }}:${{ inputs.version }}-ocp-${{ matrix.openshift_versions }}"
+          echo "${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}-${{ matrix.payload }}" > version-tag-${{ matrix.openshift_versions }}-${{ matrix.payload }}.txt
+          echo "${prefix}-${{ matrix.payload }}-latest" > version-latest-${{ matrix.openshift_versions }}-${{ matrix.payload }}.txt
+          if [ "${{ matrix.payload }}" = amd64 ]; then
+            echo "${prefix}-${{ needs.generate-timestamp.outputs.timestamp }}" >> version-tag-${{ matrix.openshift_versions }}-${{ matrix.payload }}.txt
+            echo "${prefix}-latest" >> version-latest-${{ matrix.openshift_versions }}-${{ matrix.payload }}.txt
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: outputs-${{ matrix.openshift_versions }}
+          name: outputs-${{ matrix.openshift_versions }}-${{ matrix.payload }}
           path: |
-            version-tag-${{ matrix.openshift_versions }}.txt
-            version-latest-${{ matrix.openshift_versions }}.txt
+            version-tag-${{ matrix.openshift_versions }}-${{ matrix.payload }}.txt
+            version-latest-${{ matrix.openshift_versions }}-${{ matrix.payload }}.txt
 
   aggregate:
+    # Aggregate successful validation or publish tags.
+    if: ${{ always() }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: publish
     permissions:
       contents: read
     outputs:
-      combined: ${{ steps.aggregate.outputs.combined }}
-      combined_tags: ${{ steps.aggregate.outputs.combined_tags }}
-      combined_latest_tags: ${{ steps.aggregate.outputs.combined_latest_tags }}
+      timestamped_tags: ${{ steps.aggregate.outputs.timestamped_tags }}
+      latest_tags: ${{ steps.aggregate.outputs.latest_tags }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v8
+        with:
+          pattern: outputs-*
 
       - name: Aggregate outputs
         id: aggregate
         run: |
-          cat */version-tag-*.txt > combined-tags.txt
-          cat */version-latest-*.txt > combined-latest-tags.txt
+          cat ./*/version-tag-*.txt | sort -u > combined-timestamped-tags.txt
+          cat ./*/version-latest-*.txt | sort -u > combined-latest-tags.txt
 
-          echo "combined_tags<<EOF" >> $GITHUB_OUTPUT
-          cat combined-tags.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "timestamped_tags<<EOF"
+            cat combined-timestamped-tags.txt
+            echo "EOF"
+            echo "latest_tags<<EOF"
+            cat combined-latest-tags.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
-          echo "combined_latest_tags<<EOF" >> $GITHUB_OUTPUT
-          cat combined-latest-tags.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-          echo "combined<<EOF" >> $GITHUB_OUTPUT
-          cat combined-latest-tags.txt combined-tags.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          if [ "${{ inputs.push || startsWith(github.ref, 'refs/tags/v') }}" = true ] &&
+            [ "${{ needs.publish.result }}" != success ]; then
+            echo "One or more platform manifests could not be published" >&2
+            exit 1
+          fi
