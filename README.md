@@ -93,8 +93,8 @@ does not configure a multi-payload installer for the requested architecture.
 Disconnected registries must contain the selected release payload, including
 the multi-architecture release when using the multi installer.
 
-The roles do not yet generate boot images for mixed-architecture initial installs
-or secondary-architecture node joins: explicitly identified requests fail early. See
+The roles have not yet been adapted for mixed-architecture initial installs
+ or secondary-architecture node joins, and do not reject such requests early. See
 the [bootstrap-cluster role](./roles/bootstrap_cluster/README.md) and
 [add-nodes role](./roles/add_nodes/README.md) for details.
 
